@@ -2,7 +2,7 @@ import React from 'react'
 
 const Navbar = () => {
   return (
-    <div className='fixed w-full z-50 flex justify-between items-center px-14 py-8'>
+    <div className='absolute w-full z-50 flex justify-between items-center px-14 py-8'>
       <button className='relative px-4 py-2 rounded-md text-3xl font-montserrat font-bold text-white'>
         <span className='relative z-10'>Rooms on Rent</span>
       </button>

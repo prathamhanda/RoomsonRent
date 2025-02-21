@@ -1,0 +1,82 @@
+.carousel-container {
+  position: relative;
+  width: 90%;
+  padding: 20px 0;
+  margin-top: -10px;
+}
+
+.carousel-items {
+  display: flex;
+  overflow-x: scroll;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  padding: 20px 10px;
+}
+
+.carousel-items::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-card {
+  flex: 0 0 calc(40% - 20px);
+  margin: 0 10px;
+  min-width: 250px;
+}
+
+.card-content {
+  background: white;
+  border: 1px solid #AE8549;
+  border-radius: 15px;
+  padding: 20px;
+  height: 200px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  color:black;
+}
+
+.card-content:hover {
+  transform: translateY(-5px);
+}
+
+.carousel-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.carousel-container:hover .carousel-button {
+  opacity: 1;
+}
+
+.carousel-button.left {
+  left: 10px;
+  color: black;
+  transition:  color 0.3s ease;
+}
+
+.carousel-button.right {
+  right: 10px;
+  color: black;
+  transition:  color 0.3s ease;
+}
+
+.carousel-button:hover {
+  background: gray;
+} 
+.carousel-button.left:hover{
+    color: white;
+}
+.carousel-button.right:hover{
+    color: white;
+}

@@ -1,0 +1,28 @@
+/* src/components/Gallery.css */
+@media (max-width: 768px) {
+    .gallery-container {
+      display: flex;
+      flex-direction: column; /* Stack items vertically */
+      align-items: center; /* Center items horizontally */
+    }
+  
+    .gallery-item {
+      width: 100%; /* Full width for each item */
+      margin: 0; /* Remove margin for better stacking */
+      margin-bottom: 1rem; /* Add some space between items */
+    }
+  }
+  
+  /* Additional styles for larger screens */
+  @media (min-width: 769px) {
+    .gallery-container {
+      display: flex;
+      flex-wrap: wrap; /* Allow wrapping for larger screens */
+      justify-content: space-around; /* Space items evenly */
+    }
+  
+    .gallery-item {
+      width: 16%; /* Adjust width for larger screens */
+      margin: 1rem; /* Add margin for spacing */
+    }
+  }
