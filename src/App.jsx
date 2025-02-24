@@ -10,6 +10,29 @@ import GallerySection from './components/GallerySection';
 import Footer from './components/Footer.jsx';
 
 // Add this sample data
+const areas = {
+  "South Delhi": [
+    "Malviya Nagar", "Saket", "Hauz Khas", "Kalkaji", "Greater Kailash",
+    "Lajpat Nagar", "Green Park", "Vasant Kunj", "Sheikh Sarai", "Satya Niketan",
+    "Chirag Delhi", "Bikaji Cama Place", "Munirka", "Safdarjung Enclave", "Mehrauli"
+  ],
+  "North Delhi": [
+    "Mukherjee Nagar", "Kamla Nagar", "Hudson Lane", "Model Town", "GTB Road",
+    "Old Rajinder Nagar", "Shakti Nagar", "Vijay Nagar", "Patel Nagar", "Karol Bagh",
+    "Outram Lines", "Roop Nagar", "Kingsway Camp"
+  ],
+  "East Delhi": [
+    "Laxmi Nagar", "Mayur Vihar (Phase I)", "Mayur Vihar (Phase II)", "Mayur Vihar (Phase III)",
+    "Preet Vihar", "Karkardooma", "Vasundhara Nagar", "IP Extension", "Shakarpur",
+    "Patparganj", "Pandav Nagar", "Anand Vihar", "Geeta Colony", "Ghaziabad"
+  ],
+  "West Delhi": [
+    "Janakpuri", "Uttam Nagar", "Rajouri Garden", "Vikaspuri", "Subhash Nagar",
+    "Tilak Nagar", "Paschim Vihar", "Dwarka Mor", "Naraina Vihar", "Tagore Garden",
+    "Moti Nagar", "Kirti Nagar"
+  ]
+};
+
 const carouselItems = [
   {
     title: "Card 1",
@@ -132,7 +155,7 @@ function App() {
     </div>
     {/* Add margin bottom to account for overlapping cards */}
     <div className="mb-20"></div>
-    <h1 className='text-black px-5 md:px-20 py-5 text-3xl md:text-4xl font-montserrat font-bold tracking-wide'>Your <span className='text-[#FE6F61]'>Perfect</span> Accomodation</h1>
+    <h1 className='text-black px-5 md:px-20 py-5 text-3xl md:text-4xl font-montserrat font-bold tracking-wide'>Your <span className='text-[#FE6F61]'>Perfect</span> Accommodation</h1>
     <Carousel items={carouselItems} />
     
     {/* New gradient div with carousel */}
@@ -201,7 +224,7 @@ function App() {
       </div>
     </div>
 
-    <h1 className='text-black px-5 md:px-20 py-1 text-3xl md:text-4xl font-montserrat font-bold tracking-wide'>Popular areas for<span className='text-[#FE6F61]'> students </span>in Delhi</h1>
+    <h1 className='text-black px-5 md:px-20 py-2 text-3xl md:text-4xl font-montserrat font-bold tracking-wide'>Popular areas for<span className='text-[#FE6F61]'> students </span>in Delhi</h1>
 
     <h1 className='text-[#979797] px-5 md:px-20 text-[16px] tracking-wide font-semibold font-montserrat'>Book student accommodations near universities around Delhi</h1>
 
@@ -209,6 +232,75 @@ function App() {
     <GallerySection title="North Campus" items={galleryItems} />
     <GallerySection title="South Campus" items={galleryItems} />
     <GallerySection title="Off Campus" items={galleryItems} />
+
+    <h1 className='text-black px-5 md:px-20 py-2 text-3xl md:text-4xl font-montserrat font-bold tracking-wide'>Book your favourite room in <span className='text-[#FE6F61]'>3 simple steps</span></h1>
+
+    <h1 className='text-[#979797] px-5 md:px-20 text-[16px] tracking-wide font-semibold font-montserrat'>What do our 10k+ Students have to say about their experience with ROR</h1>
+
+    {/* New Divs Section */}
+    <div className="py-6">
+      <div className="flex flex-col md:flex-row gap-32 px-20 mb-4 justify-between items-center ">
+        <div className="flex flex-col items-center text-center h-[142px] rounded-xl shadow-md border border-gray-300 ">
+          <h2 className="text-xl font-bold text-black">Discover & Choose</h2>
+          <p className="text-gray-600 text-left p-4">Choose and pick from a plethora of verified student Flats & PGs</p>
+        </div>
+        <div className="flex flex-col items-center text-center h-[142px] rounded-xl shadow-md border border-gray-300">
+          <h2 className="text-xl font-bold text-black">Fill in your details</h2>
+          <p className="text-gray-600">Fill in all your necessary personal details required for the booking.</p>
+        </div>
+        <div className="flex flex-col items-center text-center h-[142px] rounded-xl shadow-md border border-gray-300">
+          <h2 className="text-xl font-bold text-black">Accommodation Secured!</h2>
+          <p className="text-gray-600">Take it easy, pack up, and embark on a new chapter of life!</p>
+        </div>
+      </div>
+
+      <div className="text-center bg-gray-100 flex flex-wrap items-center font-montserrat py-10">
+        <div className='text-black flex flex-col p-5 px-20 w-full md:w-1/2 text-left'>
+          <h2 className='font-bold text-[36px] '>Need Assistance?</h2>
+          <p className='text-[16px] text-[#656565]'>Feel free to reach out with any questions.</p>
+        </div>
+        
+        <div className='icons flex flex-wrap gap-4 justify-center items-center font-extrabold w-full md:w-1/2'>
+          <a href="https://wa.me/916207409628" className='h-[125px] w-full max-w-[220px] bg-transparent border-2 border-gray-600 rounded-lg flex flex-col justify-center items-center text-center transition-transform transform hover:scale-105 hover:bg-gray-200'>
+            <img src="https://img.icons8.com/?size=100&id=16713&format=png&color=000000" alt="whatsapp logo" className='h-[38px]' />
+            <h1 className='text-[16px] font-montserrat text-black'>WhatsApp Chat</h1>
+          </a>
+          <a href="tel:+916207409628" className='icons h-[125px] w-full max-w-[220px] bg-transparent border-2 border-gray-600 rounded-lg flex flex-col justify-center items-center text-center transition-transform transform hover:scale-105 hover:bg-gray-200'>
+            <img src="https://img.icons8.com/?size=100&id=47813&format=png&color=000000" alt="call logo" className='h-[38px]' />
+            <h1 className='text-[16px] font-montserrat text-black'>+91 62074 09628</h1>
+          </a>
+          <a href="mailto:example@example.com" className='icons h-[125px] w-full max-w-[220px] bg-transparent border-2 border-gray-600 rounded-lg flex flex-col justify-center items-center text-center transition-transform transform hover:scale-105 hover:bg-gray-200'>
+            <img src="https://img.icons8.com/?size=100&id=mtfWz20b5AxB&format=png&color=000000" alt="email logo" className='h-[40px]' />
+            <h1 className='text-[16px] font-montserrat text-black'>Email us</h1>
+          </a>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .icons {
+            flex-direction: column;
+          }
+        }
+      `}</style>
+
+      <h1 className='text-black px-5 md:px-20 mt-2 text-3xl md:text-4xl font-montserrat font-bold tracking-wide'>Where we <span className='text-[#FE6F61]'>operate</span></h1>
+      <h1 className='text-[#979797] px-5 mb-4 mt-2 md:px-20 text-[16px] tracking-wide font-semibold font-montserrat'>Trusted student lodging near key universities and bustling zones in Delhi.</h1>
+
+      <div className="grid px-20 grid-cols-1 md:grid-cols-4 gap-4  text-gray-600">
+        {Object.entries(areas).map(([region, locations]) => (
+          <div key={region}>
+            <h3 className="font-bold text-[#FE6F61] mt-4 mb-4 text-[18px]">{region}</h3>
+            <ul>
+              {locations.map(location => (
+                <li key={location} className="mb-2 text-[16px]">{location}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+
 
     <Footer />
     </>
