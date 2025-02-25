@@ -102,6 +102,11 @@ function App() {
     // Add more features as needed
   ];
 
+  // Ensure that the carousel items are not empty
+  if (!carouselItems.length) {
+    console.error("Carousel items are empty");
+  }
+
   return (
     <>
     <Navbar />
