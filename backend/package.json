@@ -1,0 +1,39 @@
+{
+  "name": "roomsonrent-backend",
+  "version": "1.0.0",
+  "description": "Backend API for RoomsOnRent application",
+  "main": "server.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=development node server.js",
+    "dev": "cross-env NODE_ENV=development nodemon server.js",
+    "prod": "cross-env NODE_ENV=production node server.js",
+    "data:import": "node seeder -i",
+    "data:destroy": "node seeder -d"
+  },
+  "keywords": [
+    "rooms",
+    "rent",
+    "pg",
+    "accommodation"
+  ],
+  "author": "RoomsOnRent Team",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "colors": "^1.4.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-fileupload": "^1.4.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^6.10.0",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.9.1",
+    "slugify": "^1.6.6"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "nodemon": "^2.0.22"
+  }
+}

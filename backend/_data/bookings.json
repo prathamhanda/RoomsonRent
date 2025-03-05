@@ -1,0 +1,38 @@
+[
+  {
+    "_id": "63d0fe4f5311236168a109fa",
+    "user": "60d0fe4f5311236168a109cc",
+    "listing": "62d0fe4f5311236168a109ea",
+    "checkIn": "2023-07-01T00:00:00.000Z",
+    "checkOut": "2023-10-01T00:00:00.000Z",
+    "status": "confirmed",
+    "amount": 45000,
+    "duration": 92,
+    "message": "I am a student at nearby engineering college. Looking for a clean and quiet place to stay.",
+    "paymentStatus": "paid"
+  },
+  {
+    "_id": "63d0fe4f5311236168a109fb",
+    "user": "60d0fe4f5311236168a109cc",
+    "listing": "62d0fe4f5311236168a109eb",
+    "checkIn": "2023-06-15T00:00:00.000Z",
+    "checkOut": "2023-07-15T00:00:00.000Z",
+    "status": "completed",
+    "amount": 8000,
+    "duration": 30,
+    "message": "Short term stay required for an internship program.",
+    "paymentStatus": "paid"
+  },
+  {
+    "_id": "63d0fe4f5311236168a109fc",
+    "user": "60d0fe4f5311236168a109cc",
+    "listing": "62d0fe4f5311236168a109ec",
+    "checkIn": "2023-11-01T00:00:00.000Z",
+    "checkOut": "2024-03-01T00:00:00.000Z",
+    "status": "pending",
+    "amount": 72000,
+    "duration": 121,
+    "message": "I'm a working professional looking for a long-term stay. I have some questions about the amenities.",
+    "paymentStatus": "pending"
+  }
+] 

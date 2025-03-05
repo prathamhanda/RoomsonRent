@@ -1,0 +1,29 @@
+[
+  {
+    "_id": "60d0fe4f5311236168a109ca",
+    "name": "Admin User",
+    "email": "admin@roomsonrent.com",
+    "role": "admin",
+    "password": "123456",
+    "verified": true
+  },
+  {
+    "_id": "60d0fe4f5311236168a109cb",
+    "name": "Owner User",
+    "email": "owner@roomsonrent.com",
+    "role": "owner",
+    "password": "123456",
+    "phone": "9876543210",
+    "verified": true
+  },
+  {
+    "_id": "60d0fe4f5311236168a109cc",
+    "name": "Student User",
+    "email": "student@roomsonrent.com",
+    "role": "user",
+    "password": "123456",
+    "gender": "male",
+    "phone": "9988776655",
+    "verified": true
+  }
+] 

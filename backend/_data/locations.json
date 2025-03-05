@@ -1,0 +1,79 @@
+[
+  {
+    "_id": "61d0fe4f5311236168a109da",
+    "name": "Koramangala",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "pincode": "560034",
+    "coordinates": {
+      "lat": 12.9351,
+      "lng": 77.6294
+    }
+  },
+  {
+    "_id": "61d0fe4f5311236168a109db",
+    "name": "Indiranagar",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "pincode": "560038",
+    "coordinates": {
+      "lat": 12.9784,
+      "lng": 77.6408
+    }
+  },
+  {
+    "_id": "61d0fe4f5311236168a109dc",
+    "name": "HSR Layout",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "pincode": "560102",
+    "coordinates": {
+      "lat": 12.9081,
+      "lng": 77.6476
+    }
+  },
+  {
+    "_id": "61d0fe4f5311236168a109dd",
+    "name": "Whitefield",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "pincode": "560066",
+    "coordinates": {
+      "lat": 12.9698,
+      "lng": 77.7499
+    }
+  },
+  {
+    "_id": "61d0fe4f5311236168a109de",
+    "name": "Electronic City",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "pincode": "560100",
+    "coordinates": {
+      "lat": 12.8399,
+      "lng": 77.6770
+    }
+  },
+  {
+    "_id": "61d0fe4f5311236168a109df",
+    "name": "Bandra",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pincode": "400050",
+    "coordinates": {
+      "lat": 19.0596,
+      "lng": 72.8295
+    }
+  },
+  {
+    "_id": "61d0fe4f5311236168a109dg",
+    "name": "Andheri",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pincode": "400053",
+    "coordinates": {
+      "lat": 19.1136,
+      "lng": 72.8697
+    }
+  }
+] 
