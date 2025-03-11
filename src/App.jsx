@@ -11,6 +11,80 @@ import Footer from './components/Footer.jsx';
 import CreateListing from './components/CreateListing.jsx';
 
 // Add this sample data
+
+const colleges = [
+  "Zakir Husain College Delhi",
+  "Jesus and Mary College",
+  "Sri Guru Gobind Singh College of Commerce",
+  "Shri Ram College of Commerce",
+  "Sri Venkateswara College",
+  "Lady Shri Ram College for Women",
+  "Hindu College",
+  "Hansraj College",
+  "Gargi College",
+  "Daulat Ram College",
+  "Delhi College of Arts & Commerce",
+  "Deen Dayal Upadhyaya College",
+  "Indraprastha College for Women",
+  "Janki Devi Memorial College",
+  "Kamala Nehru College",
+  "Kirori Mal College",
+  "Lakshmibai College",
+  "Maitreyi College",
+  "Miranda House",
+  "Motilal Nehru College",
+  "PGDAV College",
+  "Ramjas College",
+  "Shaheed Bhagat Singh College",
+  "Shivaji College",
+  "Sri Aurobindo College",
+  "Sri Guru Tegh Bahadur Khalsa College",
+  "Vivekananda College",
+  "Atma Ram Sanatan Dharma College",
+  "Bhaskaracharya College of Applied Sciences",
+  "Deshbandhu College",
+  "Maharaja Agrasen College",
+  "Rajdhani College",
+  "Ramanujan College",
+  "Shaheed Rajguru College of Applied Sciences for Women",
+  "Swami Shraddhanand College",
+  "Acharya Narendra Dev College",
+  "Aditi Mahavidyalaya",
+  "Aryabhatta College",
+  "College of Vocational Studies",
+  "Dyal Singh College",
+  "Institute of Home Economics",
+  "Jawaharlal Nehru Rajkiya Mahavidyalaya",
+  "Kalindi College",
+  "Keshav Mahavidyalaya",
+  "Maharishi Valmiki College of Education",
+  "Moti Lal Nehru College (Evening)",
+  "PGDAV College (Evening)",
+  "Pannalal Girdharlal Dayanand Anglo Vedic College",
+  "Ram Lal Anand College",
+  "Satyawati College",
+  "Satyawati College (Evening)",
+  "Shaheed Sukhdev College of Business Studies",
+  "Shyam Lal College",
+  "Shyam Lal College (Evening)",
+  "Sri Guru Nanak Dev Khalsa College",
+  "Swami Vivekananda College",
+  "Bhagini Nivedita College",
+  "Delhi Pharmaceutical Sciences and Research University",
+  "Dr. Bhim Rao Ambedkar College",
+  "Ghalib Institute",
+  "Guru Gobind Singh Indraprastha University",
+  "Indian Institute of Technology Delhi",
+  "Indira Gandhi Delhi Technical University for Women",
+  "Jamia Hamdard",
+  "Jamia Millia Islamia",
+  "Lady Irwin College",
+  "Maharaja Surajmal Institute",
+  "Netaji Subhas University of Technology",
+  "School of Planning and Architecture, Delhi",
+  "University of Delhi"
+];
+
 const areas = {
   "South Delhi": [
     "Malviya Nagar", "Saket", "Hauz Khas", "Kalkaji", "Greater Kailash",
@@ -59,7 +133,37 @@ const carouselItems = [
 
 function App() {
   const location = useLocation();
-  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredColleges, setFilteredColleges] = useState([]);
+
+  const handleInputChange = (event) => {
+    const value = event.target.value;
+    setSearchTerm(value);
+    if (value) {
+      const filtered = colleges.filter(college =>
+        college.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredColleges(filtered);
+    } else {
+      setFilteredColleges([]);
+    }
+  };
+
+  const handleSuggestionClick = (college) => {
+    setSearchTerm(college);
+    setFilteredColleges([]);
+  };
+
+  const highlightMatch = (text) => {
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    const parts = text.split(regex);
+    return parts.map((part, index) => 
+      part.toLowerCase() === searchTerm.toLowerCase() ? 
+      <span key={index} style={{ color: 'black', fontWeight: 'bold' }}>{part}</span> : 
+      <span key={index} style={{ color: 'grey' }}>{part}</span>
+    );
+  };
+
   // Add new carousel data
   const bottomCarouselItems = [
     {
@@ -76,12 +180,28 @@ function App() {
     }
   ];
 
-  const galleryItems = [
-    { image: 'url_to_image_1', title: 'Kamal Nagar' },
-    { image: 'url_to_image_2', title: 'Kalyan Vihar' },
-    { image: 'url_to_image_3', title: 'Roop Nagar' },
-    { image: 'url_to_image_4', title: 'Ghanta Ghar' },
-    { image: 'url_to_image_5', title: 'Shakti Nagar' },
+  const galleryItemsNorth = [
+    { image: 'https://images.trvl-media.com/lodging/23000000/22410000/22408200/22408101/b1d9ae65.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill', title: 'Kamal Nagar' },
+    { image: 'https://img.staticmb.com/mbphoto/locality/cropped_images/2022/Jan/22/Photo_h470_w1080/80367_Triente-Suites1_470_1080.jpg', title: 'Kalyan Vihar' },
+    { image: 'https://img.staticmb.com/mbphoto/locality/cropped_images/2024/Jul/23/Photo_h470_w1080/53480_20230605_131543---arun-shrivastav_470_1080.jpg', title: 'Roop Nagar' },
+    { image: 'https://static.toiimg.com/thumb/msid-92217326,width-1280,height-720,resizemode-72/92217326.jpg', title: 'Ghanta Ghar' },
+    { image: 'https://static.squareyards.com/reviewrating/images/1718265003675.jpeg?aio=w-568;h-377;crop;', title: 'Shakti Nagar' },
+  ];
+
+  const galleryItemsSouth = [
+    { image: 'https://images.trvl-media.com/lodging/23000000/22410000/22408200/22408101/b1d9ae65.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill', title: 'Kamal Nagar' },
+    { image: 'https://img.staticmb.com/mbphoto/locality/cropped_images/2022/Jan/22/Photo_h470_w1080/80367_Triente-Suites1_470_1080.jpg', title: 'Kalyan Vihar' },
+    { image: 'https://img.staticmb.com/mbphoto/locality/cropped_images/2024/Jul/23/Photo_h470_w1080/53480_20230605_131543---arun-shrivastav_470_1080.jpg', title: 'Roop Nagar' },
+    { image: 'https://static.toiimg.com/thumb/msid-92217326,width-1280,height-720,resizemode-72/92217326.jpg', title: 'Ghanta Ghar' },
+    { image: 'https://static.squareyards.com/reviewrating/images/1718265003675.jpeg?aio=w-568;h-377;crop;', title: 'Shakti Nagar' },
+  ];
+
+  const galleryItemsOff = [
+    { image: 'https://images.trvl-media.com/lodging/23000000/22410000/22408200/22408101/b1d9ae65.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill', title: 'Kamal Nagar' },
+    { image: 'https://img.staticmb.com/mbphoto/locality/cropped_images/2022/Jan/22/Photo_h470_w1080/80367_Triente-Suites1_470_1080.jpg', title: 'Kalyan Vihar' },
+    { image: 'https://img.staticmb.com/mbphoto/locality/cropped_images/2024/Jul/23/Photo_h470_w1080/53480_20230605_131543---arun-shrivastav_470_1080.jpg', title: 'Roop Nagar' },
+    { image: 'https://static.toiimg.com/thumb/msid-92217326,width-1280,height-720,resizemode-72/92217326.jpg', title: 'Ghanta Ghar' },
+    { image: 'https://static.squareyards.com/reviewrating/images/1718265003675.jpeg?aio=w-568;h-377;crop;', title: 'Shakti Nagar' },
   ];
 
   const featureData = [
@@ -131,6 +251,8 @@ function App() {
             <div className="relative w-3/4 mx-auto mt-8">
               <input 
                 type="text"
+                value={searchTerm}
+                onChange={handleInputChange}
                 placeholder="Search for your desired college, location or PG"
                 className="w-full px-6 py-4 bg-white rounded-full text-gray-800 focus:outline-none font-montserrat"
               />
@@ -150,6 +272,21 @@ function App() {
                   />
                 </svg>
               </div>
+              {filteredColleges.length > 0 && (
+                <div className="absolute z-10 w-full bg-white border border-[#FE6F61] rounded-lg shadow-lg mt-1 suggestion-box">
+                  <div className="max-h-40 overflow-y-auto">
+                    {filteredColleges.slice(0, 3).map((college, index) => (
+                      <div 
+                        key={index} 
+                        className="p-2 hover:bg-gray-200 cursor-pointer"
+                        onClick={() => handleSuggestionClick(college)}
+                      >
+                        {highlightMatch(college)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           
@@ -238,9 +375,9 @@ function App() {
         <h1 className='text-[#979797] px-5 md:px-20 text-[16px] tracking-wide font-semibold font-montserrat'>Book student accommodations near universities around Delhi</h1>
 
         {/* Gallery Section */}
-        <GallerySection title="North Campus" items={galleryItems} />
-        <GallerySection title="South Campus" items={galleryItems} />
-        <GallerySection title="Off Campus" items={galleryItems} />
+        <GallerySection title="North Campus" items={galleryItemsNorth} />
+        <GallerySection title="South Campus" items={galleryItemsSouth} />
+        <GallerySection title="Off Campus" items={galleryItemsOff} />
 
         <h1 className='text-black px-5 md:px-20 py-2 text-3xl md:text-4xl font-montserrat font-bold tracking-wide'>Book your favourite room in <span className='text-[#FE6F61]'>3 simple steps</span></h1>
 
