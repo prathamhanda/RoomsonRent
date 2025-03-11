@@ -46,12 +46,27 @@
   padding: 10px;
   left: 0;
   border: 1px solid #FE6F61;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Hide scrollbar for WebKit browsers */
+.suggestion-box::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+/* Hide scrollbar for Firefox */
+.suggestion-box {
+  scrollbar-width: none;
 }
 
 .suggestion-box div {
   padding: 10px;
   transition: background-color 0.2s;
   text-align: left;
+  color: grey;
+  font-size: 16px;
 }
 
 .suggestion-box div:hover {

@@ -143,7 +143,18 @@ function App() {
       const filtered = colleges.filter(college =>
         college.toLowerCase().includes(value.toLowerCase())
       );
-      setFilteredColleges(filtered);
+
+      // Sort suggestions: first by those starting with the input, then by those containing it
+      const sortedFiltered = filtered.sort((a, b) => {
+        const aStartsWith = a.toLowerCase().startsWith(value.toLowerCase());
+        const bStartsWith = b.toLowerCase().startsWith(value.toLowerCase());
+
+        if (aStartsWith && !bStartsWith) return -1; // a comes first
+        if (!aStartsWith && bStartsWith) return 1;  // b comes first
+        return a.localeCompare(b); // alphabetical order
+      });
+
+      setFilteredColleges(sortedFiltered);
     } else {
       setFilteredColleges([]);
     }
@@ -159,8 +170,8 @@ function App() {
     const parts = text.split(regex);
     return parts.map((part, index) => 
       part.toLowerCase() === searchTerm.toLowerCase() ? 
-      <span key={index} style={{ color: 'black', fontWeight: 'bold' }}>{part}</span> : 
-      <span key={index} style={{ color: 'grey' }}>{part}</span>
+      <span key={index} style={{ color: 'black' }}>{part}</span> : 
+      <span key={index} style={{ color: 'black' }}>{part}</span>
     );
   };
 
@@ -236,7 +247,7 @@ function App() {
         <Navbar />
         <div className="relative">
           <img 
-            src="https://s3-alpha-sig.figma.com/img/56b0/ed61/47d156d39faad32eb98b6ce7f9110a0b?Expires=1740960000&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ss~IppWo~DZLW8EdD3mx4-yUDw-1wJEP6RchqXHas~A-kMS6~kQLzBplW1q59zJX~Gf5rKrwssnvbQCo~CjQ-6jUhqhBaR3rw2-Q1tYMltGGGEcSK4-0I0~toRvfSenyA~0J66Hmz86~kL3AGwD7SVilCJCK7vPXzG-5C7qAX9eMd79xXejj60gHXj9nbnK6G3-yOu9HP-~4lRybMv5wlRoiVSHp2JczrSml62rwlU21njI6UkB~vL6rHETZ3bfefdPM612B56bG-buY~o~ihcK-~~-JqR42ki~JyvMlJc-WvAKXzyAEivGONPxeHBSd~HVhKGT2Kpi0cHRceiakzQ__" 
+            src="https://amity.edu/images/university.jpg" 
             alt="homebg" 
             className='w-full h-[650px] object-cover'
           />   
@@ -275,7 +286,7 @@ function App() {
               {filteredColleges.length > 0 && (
                 <div className="absolute z-10 w-full bg-white border border-[#FE6F61] rounded-lg shadow-lg mt-1 suggestion-box">
                   <div className="max-h-40 overflow-y-auto">
-                    {filteredColleges.slice(0, 3).map((college, index) => (
+                    {filteredColleges.map((college, index) => (
                       <div 
                         key={index} 
                         className="p-2 hover:bg-gray-200 cursor-pointer"
