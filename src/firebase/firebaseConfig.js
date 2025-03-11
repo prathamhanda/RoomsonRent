@@ -3,12 +3,13 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyB2q5P_Motk9Q1jzOZe-TE6_Tr00Cnw6zM",
+  authDomain: "formify-33302.firebaseapp.com",
+  projectId: "formify-33302",
+  storageBucket: "formify-33302.appspot.com",
+  messagingSenderId: "1050174460465",
+  appId: "1:1050174460465:web:d4193f70b897f5af0ebb10",
+  measurementId: "G-QLXR67MT4K"
 };
 
 // Initialize Firebase

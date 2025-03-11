@@ -5,10 +5,14 @@ import Spinner from './components/common/Spinner';
 import PrivateRoute from './components/auth/PrivateRoute';
 import OwnerRoute from './components/auth/OwnerRoute';
 import PublicOnlyRoute from './components/auth/PublicOnlyRoute';
+// import dotenv from 'dotenv'; 
+
+// dotenv.config();
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
 import DashboardLayout from './layouts/DashboardLayout';
+import About from './pages/About';
 
 // Lazy-loaded pages for better performance
 const Home = lazy(() => import('./pages/Home'));
@@ -96,6 +100,7 @@ const App = () => {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/about" element={<About />} />
         <Route path="/listings/:id" element={<ListingDetails />} />
         <Route path="/not-found" element={<NotFound />} />
 

@@ -58,10 +58,12 @@ const Search = () => {
         page
       });
       
-      setListings(result.listings);
-      setTotalListings(result.total);
+      // Ensure result.listings is an array
+      setListings(Array.isArray(result.listings) ? result.listings : []);
+      setTotalListings(result.total || 0);
     } catch (err) {
       console.error('Search error:', err);
+      setListings([]); // Reset listings on error
     }
   };
   

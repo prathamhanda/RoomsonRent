@@ -16,4 +16,4 @@ router.post('/listing/:id', authorize('owner', 'admin'), uploadListingImage);
 router.post('/profile', uploadProfileImage);
 router.delete('/:id', deleteImage);
 
-module.exports = router; 
+module.exports = router;
