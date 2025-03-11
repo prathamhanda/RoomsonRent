@@ -236,7 +236,7 @@ function App() {
         <Navbar />
         <div className="relative">
           <img 
-            src="https://s3-alpha-sig.figma.com/img/56b0/ed61/47d156d39faad32eb98b6ce7f9110a0b?Expires=1740960000&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ss~IppWo~DZLW8EdD3mx4-yUDw-1wJEP6RchqXHas~A-kMS6~kQLzBplW1q59zJX~Gf5rKrwssnvbQCo~CjQ-6jUhqhBaR3rw2-Q1tYMltGGGEcSK4-0I0~toRvfSenyA~0J66Hmz86~kL3AGwD7SVilCJCK7vPXzG-5C7qAX9eMd79xXejj60gHXj9nbnK6G3-yOu9HP-~4lRybMv5wlRoiVSHp2JczrSml62rwlU21njI6UkB~vL6rHETZ3bfefdPM612B56bG-buY~o~ihcK-~~-JqR42ki~JyvMlJc-WvAKXzyAEivGONPxeHBSd~HVhKGT2Kpi0cHRceiakzQ__" 
+            src="https://amity.edu/images/university.jpg" 
             alt="homebg" 
             className='w-full h-[650px] object-cover'
           />   
