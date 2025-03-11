@@ -170,7 +170,7 @@ function App() {
     const parts = text.split(regex);
     return parts.map((part, index) => 
       part.toLowerCase() === searchTerm.toLowerCase() ? 
-      <span key={index} style={{ color: 'black' }}>{part}</span> : 
+      <span key={index} style={{ color: 'black', textAlign:'left' }}>{part}</span> : 
       <span key={index} style={{ color: 'black' }}>{part}</span>
     );
   };
@@ -259,7 +259,7 @@ function App() {
             <p className="text-white text-lg md:text-2xl">
               affordable & comfortable living, just steps away from campus!
             </p>
-            <div className="relative w-3/4 mx-auto mt-8">
+            <div className="relative w-1/2 mx-auto mt-8">
               <input 
                 type="text"
                 value={searchTerm}
@@ -417,7 +417,7 @@ function App() {
               <p className='text-[16px] text-[#656565]'>Feel free to reach out with any questions.</p>
             </div>
             
-            <div className='icons flex flex-wrap gap-4 justify-center items-center font-extrabold w-full md:w-1/2'>
+            <div className='icons flex flex-wrap gap-4 justify-center items-center font-extrabold w-full md:w-2/1'>
               <a href="https://wa.me/916207409628" className='h-[125px] w-full max-w-[220px] bg-transparent border-2 border-gray-600 rounded-lg flex flex-col justify-center items-center text-center transition-transform transform hover:scale-105 hover:bg-gray-200'>
                 <img src="https://img.icons8.com/?size=100&id=16713&format=png&color=000000" alt="whatsapp logo" className='h-[38px]' />
                 <h1 className='text-[16px] font-montserrat text-black'>WhatsApp Chat</h1>
