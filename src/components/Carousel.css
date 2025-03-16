@@ -1,8 +1,8 @@
 .carousel-container {
   position: relative;
-  width: 90%;
+  width: 100%;
   padding: 20px 0;
-  margin-top: -10px;
+  margin: 0;
 }
 
 .carousel-items {
@@ -11,7 +11,8 @@
   scroll-behavior: smooth;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  padding: 20px 10px;
+  padding: 10px 10px;
+  gap: 20px;
 }
 
 .carousel-items::-webkit-scrollbar {
@@ -19,24 +20,20 @@
 }
 
 .carousel-card {
-  flex: 0 0 calc(40% - 20px);
-  margin: 0 10px;
-  min-width: 250px;
+  flex: 0 0 calc(100% - 20px);
+  max-width: 480px;
+  margin: 0;
 }
 
-.card-content {
-  background: white;
-  border: 1px solid #AE8549;
-  border-radius: 15px;
-  padding: 20px;
-  height: 200px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.accommodation-card {
+  height: 100%;
   transition: transform 0.3s ease;
-  color:black;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
 }
 
-.card-content:hover {
-  transform: translateY(-5px);
+.accommodation-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
 
 .carousel-button {
@@ -62,21 +59,30 @@
 .carousel-button.left {
   left: 10px;
   color: black;
-  transition:  color 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .carousel-button.right {
   right: 10px;
   color: black;
-  transition:  color 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .carousel-button:hover {
   background: gray;
-} 
-.carousel-button.left:hover{
-    color: white;
+  color: white;
 }
-.carousel-button.right:hover{
-    color: white;
+
+@media (min-width: 768px) {
+  .carousel-card {
+    flex: 0 0 calc(50% - 20px);
+    max-width: 480px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .carousel-card {
+    flex: 0 0 calc(33.33% - 20px);
+    max-width: 480px;
+  }
 }
