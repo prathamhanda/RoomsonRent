@@ -110,24 +110,42 @@ const areas = {
 
 const carouselItems = [
   {
-    title: "Card 1",
-    description: "Description for card 1"
+    title: "Micheal Jackson 1st Floor R2",
+    location: "Vasant Vihar, South Delhi",
+    image: "https://images.trvl-media.com/lodging/23000000/22410000/22408200/22408101/b1d9ae65.jpg",
+    price: "7,000/-",
+    occupancy: "Single Occupancy",
+    amenities: [
+      { name: "A/C", color: "bg-green-500" },
+      { name: "WiFi", color: "bg-green-500" },
+      { name: "Single Occupancy", color: "bg-orange-400" }
+    ],
+    stayType: "Short Stay"
   },
   {
-    title: "Card 2",
-    description: "Description for card 2"
+    title: "Micheal Jackson 1st Floor R3",
+    location: "Vasant Vihar, South Delhi",
+    image: "https://images.trvl-media.com/lodging/23000000/22410000/22408200/22408101/b1d9ae65.jpg",
+    price: "8,000/-",
+    occupancy: "Triple Occupancy",
+    amenities: [
+      { name: "WiFi", color: "bg-green-500" },
+      { name: "Triple Occupancy", color: "bg-orange-400" }
+    ],
+    stayType: null
   },
   {
-    title: "Card 3",
-    description: "Description for card 3"
-  },
-  {
-    title: "Card 4",
-    description: "Description for card 4"
-  },
-  {
-    title: "Card 5",
-    description: "Description for card 5"
+    title: "Micheal Jackson 2nd Floor R1",
+    location: "Vasant Vihar, South Delhi",
+    image: "https://images.trvl-media.com/lodging/23000000/22410000/22408200/22408101/b1d9ae65.jpg",
+    price: "8,000/-",
+    occupancy: "Double Occupancy",
+    amenities: [
+      { name: "WiFi", color: "bg-green-500" },
+      { name: "A/C", color: "bg-green-500" },
+      { name: "Double Occupancy", color: "bg-orange-400" }
+    ],
+    stayType: null
   }
 ];
 
@@ -178,16 +196,44 @@ function App() {
   // Add new carousel data
   const bottomCarouselItems = [
     {
-      title: "Featured PG 1",
-      description: "Luxury PG accommodation near campus"
+      title: "Luxury PG Near North Campus",
+      location: "Kamla Nagar, North Delhi",
+      image: "https://images.trvl-media.com/lodging/23000000/22410000/22408200/22408101/b1d9ae65.jpg",
+      price: "9,500/-",
+      occupancy: "Single Occupancy",
+      amenities: [
+        { name: "A/C", color: "bg-green-500" },
+        { name: "WiFi", color: "bg-green-500" },
+        { name: "Meals", color: "bg-blue-500" },
+        { name: "Single Occupancy", color: "bg-orange-400" }
+      ],
+      stayType: "Short Stay"
     },
     {
-      title: "Featured PG 2",
-      description: "Budget-friendly student housing"
+      title: "Budget PG in South Campus",
+      location: "Satya Niketan, South Delhi",
+      image: "https://img.staticmb.com/mbphoto/locality/cropped_images/2022/Jan/22/Photo_h470_w1080/80367_Triente-Suites1_470_1080.jpg",
+      price: "6,000/-",
+      occupancy: "Triple Occupancy",
+      amenities: [
+        { name: "WiFi", color: "bg-green-500" },
+        { name: "Triple Occupancy", color: "bg-orange-400" }
+      ],
+      stayType: null
     },
     {
-      title: "Featured PG 3",
-      description: "Premium student apartments"
+      title: "Premium Flat for Students",
+      location: "Laxmi Nagar, East Delhi",
+      image: "https://img.staticmb.com/mbphoto/locality/cropped_images/2024/Jul/23/Photo_h470_w1080/53480_20230605_131543---arun-shrivastav_470_1080.jpg",
+      price: "12,000/-",
+      occupancy: "Double Occupancy",
+      amenities: [
+        { name: "WiFi", color: "bg-green-500" },
+        { name: "A/C", color: "bg-green-500" },
+        { name: "Gym", color: "bg-purple-500" },
+        { name: "Double Occupancy", color: "bg-orange-400" }
+      ],
+      stayType: null
     }
   ];
 
@@ -217,19 +263,19 @@ function App() {
 
   const featureData = [
     {
-      image: "https://amity.edu/images/university.jpg",
-      title: "Feature Title",
-      description: "Brief description of the feature goes here"
+      image: "https://alexandro.in/image/hyderabad/settl-bron/1.jpg",
+      title: "1 lakh+ Beds",
+      description: "Book the one perfect for you"
     },
     {
-      image: "https://amity.edu/images/university.jpg",
-      title: "Feature Title",
-      description: "Brief description of the feature goes here"
+      image: "https://images.shiksha.com/mediadata/images/articles/1662370481phpb8qpYu.jpeg",
+      title: "35+ DU Colleges",
+      description: "Search accomodation by your college"
     },
     {
-      image: "https://amity.edu/images/university.jpg",
-      title: "Feature Title",
-      description: "Brief description of the feature goes here"
+      image: "https://images.indianexpress.com/2023/12/feedback-7323668_1920.png?w=414",
+      title: "4.8+ Rating",
+      description: "What our students think about us"
     }
     // Add more features as needed
   ];
