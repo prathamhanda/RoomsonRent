@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link, Routes, Route, useLocation } from "react-router-dom";
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
@@ -153,6 +153,34 @@ function App() {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredColleges, setFilteredColleges] = useState([]);
+  const testimonialScrollRef = useRef(null);
+  const leftArrowRef = useRef(null);
+  const rightArrowRef = useRef(null);
+
+  // Add useEffect for testimonial carousel navigation
+  useEffect(() => {
+    const scrollContainer = testimonialScrollRef.current;
+    const leftArrow = leftArrowRef.current;
+    const rightArrow = rightArrowRef.current;
+    
+    if (scrollContainer && leftArrow && rightArrow) {
+      const handleLeftClick = () => {
+        scrollContainer.scrollBy({ left: -350, behavior: 'smooth' });
+      };
+      
+      const handleRightClick = () => {
+        scrollContainer.scrollBy({ left: 350, behavior: 'smooth' });
+      };
+      
+      leftArrow.addEventListener('click', handleLeftClick);
+      rightArrow.addEventListener('click', handleRightClick);
+      
+      return () => {
+        leftArrow.removeEventListener('click', handleLeftClick);
+        rightArrow.removeEventListener('click', handleRightClick);
+      };
+    }
+  }, []);
 
   const handleInputChange = (event) => {
     const value = event.target.value;
@@ -435,6 +463,174 @@ function App() {
         <GallerySection title="North Campus" items={galleryItemsNorth} />
         <GallerySection title="South Campus" items={galleryItemsSouth} />
         <GallerySection title="Off Campus" items={galleryItemsOff} />
+
+        {/* Testimonials Section */}
+        <div className="bg-white py-16 relative">
+          <div className="container mx-auto px-5 md:px-20">
+            <h1 className="text-black text-3xl md:text-4xl font-montserrat font-bold tracking-wide">
+              What do <span className="text-[#FE6F61]">students</span> say about us?
+            </h1>
+            <p className="text-[#979797] text-[16px] tracking-wide font-montserrat mt-2 mb-10">
+              What do our 10k+ Students have to say about their experience with ROR
+            </p>
+            
+            <div className="testimonial-container relative">
+              {/* Left Arrow */}
+              <button 
+                ref={leftArrowRef}
+                className="testimonial-arrow left-arrow absolute left-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full w-10 h-10 shadow-md flex items-center justify-center z-10 opacity-0 transition-opacity duration-300"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              {/* Testimonial Cards Carousel */}
+              <div 
+                ref={testimonialScrollRef}
+                className="testimonial-scroll flex gap-6 pb-8 overflow-x-auto scroll-smooth hide-scrollbar"
+              >
+                {/* Testimonial Card 1 */}
+                <div className="testimonial-card min-w-[300px] max-w-[350px] bg-white rounded-3xl border border-gray-200 shadow-sm p-6 flex-shrink-0 transition-all duration-300">
+                  <p className="text-gray-700 mb-6">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                  </p>
+                  <div className="flex items-center">
+                    <img 
+                      src="https://randomuser.me/api/portraits/men/32.jpg" 
+                      alt="Ram Kapoor" 
+                      className="w-12 h-12 rounded-full mr-4"
+                    />
+                    <div>
+                      <h3 className="font-bold text-gray-900">Ram Kapoor</h3>
+                      <p className="text-sm text-gray-500">St. Stephens College</p>
+                    </div>
+                    <div className="ml-auto flex items-center">
+                      <span className="font-bold mr-1">4</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Testimonial Card 2 */}
+                <div className="testimonial-card min-w-[300px] max-w-[350px] bg-white rounded-3xl border border-gray-200 shadow-sm p-6 flex-shrink-0 transition-all duration-300">
+                  <p className="text-gray-700 mb-6">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                  </p>
+                  <div className="flex items-center">
+                    <img 
+                      src="https://randomuser.me/api/portraits/men/33.jpg" 
+                      alt="Ram Kapoor" 
+                      className="w-12 h-12 rounded-full mr-4"
+                    />
+                    <div>
+                      <h3 className="font-bold text-gray-900">Ram Kapoor</h3>
+                      <p className="text-sm text-gray-500">St. Stephens College</p>
+                    </div>
+                    <div className="ml-auto flex items-center">
+                      <span className="font-bold mr-1">4</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Testimonial Card 3 */}
+                <div className="testimonial-card min-w-[300px] max-w-[350px] bg-white rounded-3xl border border-gray-200 shadow-sm p-6 flex-shrink-0 transition-all duration-300">
+                  <p className="text-gray-700 mb-6">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                  </p>
+                  <div className="flex items-center">
+                    <img 
+                      src="https://randomuser.me/api/portraits/men/34.jpg" 
+                      alt="Ram Kapoor" 
+                      className="w-12 h-12 rounded-full mr-4"
+                    />
+                    <div>
+                      <h3 className="font-bold text-gray-900">Ram Kapoor</h3>
+                      <p className="text-sm text-gray-500">St. Stephens College</p>
+                    </div>
+                    <div className="ml-auto flex items-center">
+                      <span className="font-bold mr-1">4</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Testimonial Card 4 */}
+                <div className="testimonial-card min-w-[300px] max-w-[350px] bg-white rounded-3xl border border-gray-200 shadow-sm p-6 flex-shrink-0 transition-all duration-300">
+                  <p className="text-gray-700 mb-6">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                  </p>
+                  <div className="flex items-center">
+                    <img 
+                      src="https://randomuser.me/api/portraits/men/35.jpg" 
+                      alt="Ram Kapoor" 
+                      className="w-12 h-12 rounded-full mr-4"
+                    />
+                    <div>
+                      <h3 className="font-bold text-gray-900">Ram Kapoor</h3>
+                      <p className="text-sm text-gray-500">St. Stephens College</p>
+                    </div>
+                    <div className="ml-auto flex items-center">
+                      <span className="font-bold mr-1">4</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Right Arrow */}
+              <button 
+                ref={rightArrowRef}
+                className="testimonial-arrow right-arrow absolute right-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full w-10 h-10 shadow-md flex items-center justify-center z-10 opacity-0 transition-opacity duration-300"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <style jsx>{`
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          
+          .testimonial-container:hover .testimonial-arrow {
+            opacity: 1;
+          }
+          
+          .testimonial-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+          }
+          
+          .testimonial-arrow {
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+          
+          .testimonial-arrow:hover {
+            background-color: #FE6F61;
+          }
+          
+          .testimonial-arrow:hover svg {
+            color: white;
+          }
+        `}</style>
 
         <div className="container mx-auto px-4 md:px-8 lg:px-16 py-12">
         <h1 className='text-[#2D2D2D] text-4xl md:text-5xl font-bold mb-3'>Book your favourite room in <span className='text-[#FF6B6B]'>3 simple steps</span></h1>
