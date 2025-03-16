@@ -14,7 +14,7 @@ const Carousel = ({ items }) => {
   };
 
   return (
-    <div className='flex items-center justify-center px-24'>
+    <div className='flex items-center justify-center px-20'>
       <div className="carousel-container">
         <button 
           className="carousel-button left" 
