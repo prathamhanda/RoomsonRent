@@ -436,26 +436,65 @@ function App() {
         <GallerySection title="South Campus" items={galleryItemsSouth} />
         <GallerySection title="Off Campus" items={galleryItemsOff} />
 
-        <h1 className='text-black px-5 md:px-20 py-2 text-3xl md:text-4xl font-montserrat font-bold tracking-wide'>Book your favourite room in <span className='text-[#FE6F61]'>3 simple steps</span></h1>
+        <div className="container mx-auto px-4 md:px-8 lg:px-16 py-12">
+        <h1 className='text-[#2D2D2D] text-4xl md:text-5xl font-bold mb-3'>Book your favourite room in <span className='text-[#FF6B6B]'>3 simple steps</span></h1>
+        <p className='text-[#979797] text-lg mb-12'>What do our 10k+ Students have to say about their experience with ROR</p>
 
-        <h1 className='text-[#979797] px-5 md:px-20 text-[16px] tracking-wide font-semibold font-montserrat'>What do our 10k+ Students have to say about their experience with ROR</h1>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 relative">
+          {/* Step 1 */}
+          <div className="w-full md:w-1/3 bg-white rounded-2xl p-8 shadow-md border border-gray-100">
+            <div className="mb-6">
+              <svg className="w-12 h-12 text-[#FF6B6B]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
+                <path d="M11 7V11L14 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-[#2D2D2D] mb-4">Discover & Choose</h2>
+            <p className="text-gray-600">Choose and pick from a plethora of verified student Flats & PGs</p>
+          </div>
+
+          {/* Arrow 1 */}
+          <div className="hidden md:block w-24">
+            <svg className="w-full text-gray-300" height="24" viewBox="0 0 100 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 12H95M95 12L85 2M95 12L85 22" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+          </div>
+
+          {/* Step 2 */}
+          <div className="w-full md:w-1/3 bg-white rounded-2xl p-8 shadow-md border border-gray-100">
+            <div className="mb-6">
+              <svg className="w-12 h-12 text-[#FF6B6B]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" stroke="currentColor" strokeWidth="2"/>
+                <path d="M7 7H17M7 12H17M7 17H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-[#2D2D2D] mb-4">Fill in your details</h2>
+            <p className="text-gray-600">Fill in all your necessary personal details required for the booking.</p>
+          </div>
+
+          {/* Arrow 2 */}
+          <div className="hidden md:block w-24">
+            <svg className="w-full text-gray-300" height="24" viewBox="0 0 100 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 12H95M95 12L85 2M95 12L85 22" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+          </div>
+
+          {/* Step 3 */}
+          <div className="w-full md:w-1/3 bg-white rounded-2xl p-8 shadow-md border border-gray-100">
+            <div className="mb-6">
+              <svg className="w-12 h-12 text-[#FF6B6B]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 12L5 10M5 10L12 3L19 10M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H6C5.44772 21 5 20.5523 5 20V10" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-[#2D2D2D] mb-4">Accommodation Secured!</h2>
+            <p className="text-gray-600">Take it easy, pack up, and embark on a new chapter of life!</p>
+          </div>
+        </div>
+      </div>
 
         {/* New Divs Section */}
         <div className="py-6">
-          <div className="flex flex-col md:flex-row gap-32 px-20 mb-4 justify-between items-center ">
-            <div className="flex flex-col items-center text-center h-[142px] rounded-xl shadow-md border border-gray-300 ">
-              <h2 className="text-xl font-bold text-black">Discover & Choose</h2>
-              <p className="text-gray-600 text-left p-4">Choose and pick from a plethora of verified student Flats & PGs</p>
-            </div>
-            <div className="flex flex-col items-center text-center h-[142px] rounded-xl shadow-md border border-gray-300">
-              <h2 className="text-xl font-bold text-black">Fill in your details</h2>
-              <p className="text-gray-600">Fill in all your necessary personal details required for the booking.</p>
-            </div>
-            <div className="flex flex-col items-center text-center h-[142px] rounded-xl shadow-md border border-gray-300">
-              <h2 className="text-xl font-bold text-black">Accommodation Secured!</h2>
-              <p className="text-gray-600">Take it easy, pack up, and embark on a new chapter of life!</p>
-            </div>
-          </div>
+         
 
           <div className="text-center bg-gray-100 flex flex-wrap items-center font-montserrat py-10">
             <div className='text-black flex flex-col p-5 px-20 w-full md:w-1/2 text-left'>
