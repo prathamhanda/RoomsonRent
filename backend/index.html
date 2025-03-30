@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="http://localhost:5000/temp?id=5" method="post">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        <br>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+    <script>
+        const postReq = () => {
+            var json = {
+                "id": 3,
+                "email": "pratham"
+            };
+    
+            fetch("http://localhost:5000/temp?id=5", {
+                method: "POST", // Specify the request method
+                headers: {
+                    "Content-Type": "application/json" // Set content type to JSON
+                },
+                body: JSON.stringify(json) // Convert JSON object to string
+            })
+            // .then(response => response.json()) // Parse JSON response
+            .then(data => console.log("Success:", data)) // Log success response
+            .catch(error => console.error("Error:", error)); // Handle errors
+        };
+    
+        postReq(); // Call the function to execute the request
+    </script>
+    
+</body>
+</html>

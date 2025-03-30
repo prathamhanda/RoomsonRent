@@ -1,13 +1,15 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const colors = require('colors');
+const bodyParser = require('body-parser')
 const cors = require('cors');
 const morgan = require('morgan');
 const fileUpload = require('express-fileupload');
 const path = require('path');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/error');
-const authRoutes = require('./routes/authRoutes');
+const cookieParser = require("cookie-parser");
+
 
 // Load environment variables
 dotenv.config({ path: './config/config.env' });
@@ -27,12 +29,16 @@ const uploads = require('./routes/uploads');
 const app = express();
 
 // Body parser
-app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
+app.use(cookieParser());
 
 // Enable CORS
 app.use(cors({
-  origin: ['http://localhost:3000'],
-  credentials: true
+  origin: ['http://localhost:3000', 'https://rooms-on-rent.vercel.app', 'http://localhost:5173', 'http://172.16.91.115:5173'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  optionsSuccessStatus: 200 // For legacy browser support
 }));
 
 // Dev logging middleware
@@ -56,13 +62,32 @@ app.use(fileUpload({
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Mount routers
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', auth);
 app.use('/api/users', users);
 app.use('/api/listings', listings);
 app.use('/api/bookings', bookings);
 app.use('/api/locations', locations);
 app.use('/api/reviews', reviews);
 app.use('/api/uploads', uploads);
+
+const midd = (req,res,next)=>{
+    if (req.query.id==5){
+      next();
+    }
+    else{
+      res.send('Not Allowed');
+    }
+}
+
+app.post('/temp',midd,(req, res)=>{
+    // console.log(req.params);
+    // console.log(req.params.room);
+    console.log(req.query);
+    res.send(req.body.email);
+    console.log(req.body);
+    
+    // res.send(`Hello ${parseInt(req.params.room) + parseInt(req.params.id)}`);
+})
 
 // Error handler middleware
 app.use(errorHandler);

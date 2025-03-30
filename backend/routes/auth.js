@@ -8,7 +8,9 @@ const {
   resetPassword, 
   updatePassword, 
   verifyEmail,
-  googleLogin
+  googleLogin,
+  verifyOTP,
+  checkLogin
 } = require('../controllers/auth');
 
 const router = express.Router();
@@ -16,7 +18,13 @@ const router = express.Router();
 const { protect } = require('../middleware/auth');
 
 router.post('/register', register);
+router.post('/verifyOTP', verifyOTP);
+router.get('/checkLogin', checkLogin);
+
+
+
 router.post('/login', login);
+
 router.get('/logout', logout);
 router.get('/profile', protect, getProfile);
 router.post('/forgot-password', forgotPassword);

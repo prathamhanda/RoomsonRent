@@ -3,79 +3,226 @@ const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const sendEmail = require('../utils/sendEmail');
 const User = require('../models/User');
+const axios = require('axios');
+const jwt = require('jsonwebtoken');
+
+exports.checkAuthMiddleWare = asyncHandler(async (req, res, next) => {
+
+    const token = req.cookies?.token;
+
+    if (!token) {
+        return res.status(401).json({  status: false, error: 'Not authorized, no token' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        res.status(401).json({  status: false, error:'Not authorized, token failed, ' + error });
+    }
+});
+
+
+exports.checkLogin = asyncHandler(async (req, res, next) => {
+  exports.checkAuthMiddleWare(req, res, () => {
+    console.log(req.user.id);
+    return res.status(200).json({  status: true, message: 'Authorized',user:req.user });
+  });
+});
+
+// GET Request for fetching
+// exports.TERA_ROUTE = asyncHandler(async (req, res, next) => {
+//   checkAuthMiddleWare(req, res, () => {
+//     // req.user.id
+
+//     // Listings.find({owner : req.user.id})
+
+//     // fetch properties listing of that user  <> 
+//     //and send in res.send()
+//   });
+// });
+
+
+//POST REQUEST TO UPDATE CREATE OR DELETE
+// exports.TERA_ROUTE = asyncHandler(async (req, res, next) => {
+//   checkAuthMiddleWare(req, res, () => {
+//     // req.user.id
+          // req.body
+
+          // const { name ,etc} = req.body; CREATE
+
+          //const {id} = req.body // id of listing 
+          //if user ki listing hai then Listings.delete({id});
+
+
+//     // Listings.create({owner : req.user.id , id ,name ,etc})
+
+//     //and send in res.send("added sucecessfukly")
+//   });
+// });
+
+// _> 1 Shayam Ghar  delbtn -> JSON.stringify({'id' : idListing})
+// _> 2 BBS
+// _> 3 Mats
+
+
+
+exports.logout = () =>  asyncHandler(async (req, res) => {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+    });
+    res.status(200).json({ status: true, message: "Logged out successfully" });
+});
 
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
-exports.register = asyncHandler(async (req, res, next) => {
-  const { name, email, password, role } = req.body;
 
-  // Create user
-  const user = await User.create({
-    name,
-    email,
-    password,
-    role: role || 'user'
-  });
+exports.login = asyncHandler(async (req, res, next) => {
+  const { phone } = req.body;
 
-  // Generate verification token
-  const verificationToken = user.generateVerificationToken();
-  await user.save({ validateBeforeSave: false });
+  if (!phone) {
+    return res.status(400).json({ status: false, error: "Phone number is required" });
+  }
 
-  // Create verification url
-  const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
-
-  const message = `
-    <h1>Email Verification</h1>
-    <p>Please click the link below to verify your email:</p>
-    <a href="${verificationUrl}" target="_blank">Verify Email</a>
-  `;
+  const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+  const otpGen = generateOTP();
 
   try {
-    await sendEmail({
-      email: user.email,
-      subject: 'Email Verification - RoomsOnRent',
-      message
-    });
+    let user = await User.findOne({ phone });
 
-    sendTokenResponse(user, 200, res);
-  } catch (err) {
-    console.log(err);
-    user.verificationToken = undefined;
-    user.verificationTokenExpire = undefined;
-    await user.save({ validateBeforeSave: false });
+    if (!user) {
+      return res.status(404).json({ status: false, error: "User not found. Please register first." });
+    }
 
-    return next(new ErrorResponse('Email could not be sent', 500));
+    // Update OTP for authentication
+    user.otp = otpGen;
+    await user.save();
+
+    // Send OTP via WhatsApp API
+    await axios.post(
+      `${process.env.WHATSAPP_ENDPOINT}/sendWa`,
+      {
+        phone,
+        msg: `Welcome to ROR! Your One-Time Password (OTP) is ${otpGen}. Use this to complete your verification. Do not share it with anyone.`,
+      },
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    res.json({ status: true, message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ status: false, error: "Server error. Please try again later." });
   }
+});
+
+exports.verifyOTP = asyncHandler(async (req, res, next) => {
+  const { phone, otp } = req.body;
+
+  if (!phone || !otp) {
+    return res.status(400).json({ msg: 'Phone and OTP are required' });
+  }
+
+  const user = await User.findOne({ phone });
+  if (!user) {
+    return res.status(404).json({ msg: 'User not found' });
+  }
+
+  if (user.otp !== otp) {
+    return res.status(400).json({ msg: 'Invalid OTP' });
+  }
+
+  user.verified = true;
+  user.otp = null;
+  await user.save();
+
+  sendTokenResponse(user, 200, res);
+});
+
+
+
+exports.register = asyncHandler(async (req, res, next) => {
+  const { name, email, phone, role } = req.body;
+
+  // if email or phone exists in database return error that user already exists
+
+  
+  if(role == 'admin'){
+   res.status(403).send(JSON.stringify({'status': false, 'error': 'You cannot register as an admin'}));
+  }
+  
+  const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  const otpGen = generateOTP();
+
+    try{
+      const user = await User.create({
+        name,
+        email,
+        phone,
+        role: role || 'user',
+        otp: otpGen
+      });
+    } catch (error) {
+      res.status(500).send(JSON.stringify({'status': false, 'error': error}));
+    }
+
+    const response = await axios.post(
+      process.env.WHATSAPP_ENDPOINT + '/sendWa',
+      {
+        'phone': phone,
+        'msg': `Welcome to ROR! Your One-Time Password (OTP) is ${otpGen}. Use this to complete your verification. Do not share it with anyone.`
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    res.send(JSON.stringify({'status': true, 'message': 'OTP sent successfully'}));
+
+  // Generate verification token
+  // const verificationToken = user.generateVerificationToken();
+  // await user.save({ validateBeforeSave: false });
+
+  // Create verification url
+  // const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+
+  // const message = `
+  //   <h1>Email Verification</h1>
+  //   <p>Please click the link below to verify your email:</p>
+  //   <a href="${verificationUrl}" target="_blank">Verify Email</a>
+  // `;
+
+  // try {
+  //   await sendEmail({
+  //     email: user.email,
+  //     subject: 'Email Verification - RoomsOnRent',
+  //     message
+  //   });
+
+
+//     sendTokenResponse(user, 200, res);
+//   } catch (err) {
+//     console.log(err);
+//     user.verificationToken = undefined;
+//     user.verificationTokenExpire = undefined;
+//     await user.save({ validateBeforeSave: false });
+
+//     return next(new ErrorResponse('Email could not be sent', 500));
+//   }
 });
 
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
-exports.login = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
-
-  // Validate email & password
-  if (!email || !password) {
-    return next(new ErrorResponse('Please provide an email and password', 400));
-  }
-
-  // Check for user
-  const user = await User.findOne({ email }).select('+password');
-
-  if (!user) {
-    return next(new ErrorResponse('Invalid credentials', 401));
-  }
-
-  // Check if password matches
-  const isMatch = await user.matchPassword(password);
-
-  if (!isMatch) {
-    return next(new ErrorResponse('Invalid credentials', 401));
-  }
-
-  sendTokenResponse(user, 200, res);
-});
 
 // @desc    Google login/register
 // @route   POST /api/auth/google-login
@@ -274,7 +421,7 @@ const sendTokenResponse = (user, statusCode, res) => {
     .status(statusCode)
     .cookie('token', token, options)
     .json({
-      success: true,
+      status: true,
       token,
       user: {
         id: user._id,

@@ -17,16 +17,19 @@ const UserSchema = new mongoose.Schema({
       'Please add a valid email',
     ],
   },
+  phone: {
+    type: String,
+    required: [true, 'Please add a phone number'],
+    unique: true,
+    match: [
+      /^\d{10}$/,
+      'Please add a valid 10-digit phone number',
+    ],
+  },
   role: {
     type: String,
-    enum: ['user', 'owner', 'admin'],
+    enum: ['user', 'landlord', 'admin'],
     default: 'user',
-  },
-  password: {
-    type: String,
-    required: [true, 'Please add a password'],
-    minlength: 6,
-    select: false,
   },
   verified: {
     type: Boolean,
@@ -36,6 +39,14 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  otp: {
+    type: String,
+    required: false,
+    match: [/^\d{6}$/, 'OTP must be a 6-digit number'],
+  },
+  // otpExpire: {
+  //   type: Date,
+  // },
   verificationToken: String,
   verificationTokenExpire: Date,
   resetPasswordToken: String,
@@ -101,5 +112,6 @@ UserSchema.methods.generateResetPasswordToken = function () {
 
   return resetToken;
 };
+
 
 module.exports = mongoose.model('User', UserSchema); 

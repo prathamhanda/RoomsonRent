@@ -11,76 +11,6 @@ export default function LandlordPage() {
   const [supportOpen, setSupportOpen] = useState(false);
   const [searchFocus, setSearchFocus] = useState(false);
 
-  // Mock data for listings
-  const regularRooms = [ 
-    {
-      id: 1,
-      name: "Micheal Jackson 1st Floor R2",
-      location: "Vasanat Vihar, South Delhi",
-      price: "7,000",
-      amenities: ["A/C", "WiFi", "Single Occupancy", "Short Stay"],
-      image: "/images/78c3c990590b6c112e5b5cb34f1fbfac.webp",
-    },
-    {
-      id: 2,
-      name: "Micheal Jackson 1st Floor R3",
-      location: "Vasanat Vihar, South Delhi",
-      price: "8,000",
-      amenities: ["WiFi", "Triple Occupancy"],
-      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
-    },
-    {
-      id: 3,
-      name: "Micheal Jackson 1st Floor R3",
-      location: "Vasanat Vihar, South Delhi",
-      price: "8,000",
-      amenities: ["WiFi", "Triple Occupancy"],
-      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
-    },
-    {
-      id: 4,
-      name: "Micheal Jackson 1st Floor R3",
-      location: "Vasanat Vihar, South Delhi",
-      price: "8,000",
-      amenities: ["WiFi", "Triple Occupancy"],
-      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
-    },
-  ];
-
-  const premiumRooms = [
-    {
-      id: 1,
-      name: "Micheal Jackson 1st Floor R2",
-      location: "Vasanat Vihar, South Delhi",
-      price: "7,000",
-      amenities: ["A/C", "WiFi", "Single Occupancy", "Short Stay"],
-      image: "/images/78c3c990590b6c112e5b5cb34f1fbfac.webp",
-    },
-    {
-      id: 2,
-      name: "Micheal Jackson 1st Floor R3",
-      location: "Vasanat Vihar, South Delhi",
-      price: "8,000",
-      amenities: ["WiFi", "Triple Occupancy"],
-      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
-    },
-    {
-      id: 3,
-      name: "Micheal Jackson 1st Floor R3",
-      location: "Vasanat Vihar, South Delhi",
-      price: "8,000",
-      amenities: ["WiFi", "Triple Occupancy"],
-      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
-    },
-    {
-      id: 4,
-      name: "Micheal Jackson 1st Floor R3",
-      location: "Vasanat Vihar, South Delhi",
-      price: "8,000",
-      amenities: ["WiFi", "Triple Occupancy"],
-      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
-    },
-  ];
 
   const testimonials = [
     {
@@ -116,155 +46,24 @@ export default function LandlordPage() {
   return (
     <div>
       {/* Hero Section with Background */}
-      <div className="relative">
+      { <div className="relative">
         <img
           src="https://media.istockphoto.com/id/1480610076/vector/real-estate-selling-concept-banner.jpg?s=612x612&w=0&k=20&c=Dx8KS_OQMBHgVAKQQmLYKiCRgRWDv_BSp4AoXZh6X9s="
           alt="home"
-          className="absolute brightness-50 -z-20 pointer-events-none select-none h-[650px] w-full object-cover"
+          className="absolute brightness-50 -z-20 pointer-events-none select-none h-[600px] w-full object-cover"
         />
 
-        {/* Header */}
-        <div className="w-full flex justify-between items-center text-white py-8 px-20">
-          <Link href="/" className="text-3xl font-bold">
-            Rooms On Rent
-          </Link>
-          <div className="flex gap-7">
-            <div className="relative">
-              <button
-                className="flex gap-3 items-center h-full"
-                onClick={() => setSupportOpen(!supportOpen)}
-              >
-                <img
-                  alt="support"
-                  src="/images/media/Headphones Round.45f0c3b8.svg"
-                  width="20"
-                  height="20"
-                />
-                Support
-              </button>
-              {supportOpen && (
-                <div className="absolute top-12 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <h3 className="text-sm font-semibold text-gray-700">
-                      Support Now
-                    </h3>
-                  </div>
-                  <div className="py-2">
-                    <a
-                      className="flex items-center px-4 py-2 hover:bg-gray-50"
-                      href="#"
-                    >
-                      <span className="w-8 h-8 flex items-center justify-center">
-                        💬
-                      </span>
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">
-                          Quick Chat
-                        </p>
-                        <span className="text-xs text-green-500">Online</span>
-                      </div>
-                    </a>
-                    <a
-                      className="flex items-center px-4 py-2 hover:bg-gray-50"
-                      href="#"
-                    >
-                      <span className="w-8 h-8 flex items-center justify-center">
-                        📱
-                      </span>
-                      <p className="text-sm font-medium text-gray-700">
-                        Whatsapp
-                      </p>
-                    </a>
-                    <a
-                      className="flex items-center px-4 py-2 hover:bg-gray-50"
-                      href="#"
-                    >
-                      <span className="w-8 h-8 flex items-center justify-center">
-                        📘
-                      </span>
-                      <p className="text-sm font-medium text-gray-700">
-                        Facebook Messenger
-                      </p>
-                    </a>
-                    <a
-                      className="flex items-center px-4 py-2 hover:bg-gray-50"
-                      href="tel:+916207409628"
-                    >
-                      <span className="w-8 h-8 flex items-center justify-center">
-                        📞
-                      </span>
-                      <p className="text-sm font-medium text-gray-700">
-                        +91 6207409628
-                      </p>
-                    </a>
-                    <a
-                      className="flex items-center px-4 py-2 hover:bg-gray-50"
-                      href="mailto:officialroomsonrent@gmail.com"
-                    >
-                      <span className="w-8 h-8 flex items-center justify-center">
-                        ✉️
-                      </span>
-                      <p className="text-sm font-medium text-gray-700">
-                        officialroomsonrent@gmail.com
-                      </p>
-                    </a>
-                  </div>
-                  <div className="px-4 py-2 border-t border-gray-100">
-                    <h3 className="text-sm font-semibold text-gray-700">
-                      Quick Links
-                    </h3>
-                    <a
-                      className="flex items-center px-4 py-2 hover:bg-gray-50"
-                      href="#"
-                    >
-                      <span className="w-8 h-8 flex items-center justify-center">
-                        ❓
-                      </span>
-                      <p className="text-sm font-medium text-gray-700">
-                        Help Center
-                      </p>
-                    </a>
-                    <a
-                      className="flex items-center px-4 py-2 hover:bg-gray-50"
-                      href="#"
-                    >
-                      <span className="w-8 h-8 flex items-center justify-center">
-                        ℹ️
-                      </span>
-                      <p className="text-sm font-medium text-gray-700">
-                        How It Works
-                      </p>
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
-            <a className="flex gap-3 items-center" href="/wishlist">
-              <img
-                alt="wishlist"
-                src="/images/media/Heart.7e108041.svg"
-                width="20"
-                height="20"
-              />
-              Wishlist
-            </a>
-            <Button className="bg-[#FE6F61] text-white rounded-full font-semibold">
-              Login/ Sign Up
-            </Button>
-          </div>
-        </div>
+        
 
         {/* Hero Content */}
-        <div
-          className="text-white flex flex-col gap-4 items-center h-24"
-          style={{ marginTop: "128px" }}
-        >
-          <span className="text-5xl font-bold tracking-wider">
-            Landlord Management Portal
-          </span>
-          <span className="text-2xl tracking-wider">
-            your one stop solution for managing your properties!
-          </span>
+        <div className="text-white flex flex-col gap-4 items-center pt-32 px-4 text-center">
+          <h1 className="text-3xl md:text-4xl mt-10 lg:text-5xl font-bold tracking-wider">
+          Landlord Management Portal
+          </h1>
+          <p className="text-xl md:text-2xl tracking-wider">
+          your one stop solution for managing your properties!
+          </p>
+          
         </div>
 
         {/* Search Bar */}
@@ -326,7 +125,7 @@ export default function LandlordPage() {
             </div>
           </form>
         </div>
-      </div>
+      </div> }
 
       {/* Feature Cards */}
       <div className="px-20" style={{ marginTop: "138px" }}>
@@ -373,29 +172,7 @@ export default function LandlordPage() {
         </div>
       </div>
 
-      {/* Regular Accommodation Listings */}
-      <div className="bg-[#F9FAFB] px-20 py-10">
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-3">
-            <p className="font-bold text-4xl">
-              <span className="text-[#fe6f61]">Financial</span> Overview
-            </p>
-          </div>
-
-          <div className="flex items-center relative group mx-30">
-            
-
-            <div className="flex gap-6 p-4  w-full">
-            
-            <FinancialCard emoji="💰" title="Today's Collection" value="₹ 1,23,456" />
-            <FinancialCard emoji="📅" title="Month Collection" value="₹ 12,34,567" />
-            <FinancialCard emoji="📉" title="Month Expense" value="₹ 5,67,890" />
-            <FinancialCard emoji="🔮" title="Potential Collection" value="₹ 15,00,000" />
-            </div>
-            
-          </div>
-        </div>
-      </div>
+  
 
       {/* Tenant Management */}
       <div className="bg-[#F9FAFB] px-20 py-10">
@@ -613,9 +390,9 @@ Let us handle all aspects of property management, including tenant onboarding, r
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#FE6F61] group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-        </div>
+            </div>
             <span className="text-[#FE6F61] font-medium text-lg">Dashboard</span>
-      </div>
+          </div>
 
           <Link 
             to="/add-listing" 
@@ -658,22 +435,22 @@ Let us handle all aspects of property management, including tenant onboarding, r
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#25D366] text-white text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap">
                 2 Mins Reply
               </div>
-            <a
-              href="https://chat.whatsapp.com/D8XEoda1w2GBAeO2gtMT0b"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center border rounded-xl p-4 px-12 flex-col gap-4"
-            >
-              <img
-                alt="icon"
-                src="/images/media/whatsapp.webp"
-                width="48"
-                height="48"
-              />
-              <div className="flex flex-col gap-2">
-                <span className="text-lg font-bold">WhatsApp us</span>
-              </div>
-            </a>
+              <a
+                href="https://chat.whatsapp.com/D8XEoda1w2GBAeO2gtMT0b"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center border rounded-xl p-4 px-12 flex-col gap-4"
+              >
+                <img
+                  alt="icon"
+                  src="/images/media/whatsapp.webp"
+                  width="48"
+                  height="48"
+                />
+                <div className="flex flex-col gap-2">
+                  <span className="text-lg font-bold">WhatsApp us</span>
+                </div>
+              </a>
             </div>
             <a
               href="tel:+916207409628"
