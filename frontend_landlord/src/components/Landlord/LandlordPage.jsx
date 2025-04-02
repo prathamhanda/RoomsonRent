@@ -6,11 +6,48 @@ import {Button, ButtonGroup} from "@heroui/button";
 import FinancialCard from "./FinancialCard";
 import {Card} from "@heroui/react";
 import TenantCarousel from "./TenantCarousel";
+import { TentTree } from "lucide-react";
+import ListingCard from "./ListingCard";
+import useFetch from "../../hooks/useFetch";
 
 export default function LandlordPage() {
   const [supportOpen, setSupportOpen] = useState(false);
   const [searchFocus, setSearchFocus] = useState(false);
 
+  const premiumRooms = [
+    {
+      id: 1,
+      name: "Micheal Jackson 1st Floor R2",
+      location: "Vasanat Vihar, South Delhi",
+      price: "7,000",
+      amenities: ["A/C", "WiFi", "Single Occupancy", "Short Stay"],
+      image: "/images/78c3c990590b6c112e5b5cb34f1fbfac.webp",
+    },
+    {
+      id: 2,
+      name: "Micheal Jackson 1st Floor R3",
+      location: "Vasanat Vihar, South Delhi",
+      price: "8,000",
+      amenities: ["WiFi", "Triple Occupancy"],
+      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
+    },
+    {
+      id: 3,
+      name: "Micheal Jackson 1st Floor R3",
+      location: "Vasanat Vihar, South Delhi",
+      price: "8,000",
+      amenities: ["WiFi", "Triple Occupancy"],
+      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
+    },
+    {
+      id: 4,
+      name: "Micheal Jackson 1st Floor R3",
+      location: "Vasanat Vihar, South Delhi",
+      price: "8,000",
+      amenities: ["WiFi", "Triple Occupancy"],
+      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
+    },
+  ];
 
   const testimonials = [
     {
@@ -42,6 +79,11 @@ export default function LandlordPage() {
       rating: 4,
     },
   ];
+
+  const { data: myListings, loading: listingsLoading, error: listingsError } = useFetch('/api/listings/owner', {
+    credentials: 'include'
+  });
+
 
   return (
     <div>
@@ -200,10 +242,70 @@ export default function LandlordPage() {
         </div>
       </div>
 
+      <div className="bg-[#F9FAFB] px-20 py-10">
+        <div className="flex flex-col gap-5">
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col gap-3">
+              <p className="font-bold text-4xl">
+                My <span className="text-[#fe6f61]">Properties</span>
+              </p>
+              <p className="text-[#979797]">Manage and monitor all your listed properties</p>
+            </div>
+            <Link 
+              to="/add-listing"
+              className="px-6 py-3 bg-[#fe6f61] text-white rounded-lg hover:bg-[#fe6f61]/90 transition-colors"
+            >
+              + Add New Property
+            </Link>
+          </div>
+
+          {listingsLoading ? (
+            <div className="flex justify-center items-center min-h-[200px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#fe6f61]"></div>
+            </div>
+          ) : listingsError ? (
+            <div className="text-center text-red-500 py-8">
+              Failed to load properties. Please try again later.
+            </div>
+          ) : myListings?.data?.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">You haven't listed any properties yet.</p>
+              <Link 
+                to="/add-listing"
+                className="text-[#fe6f61] hover:underline mt-2 inline-block"
+              >
+                Add your first property
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+              {myListings?.data?.map((listing) => (
+                <ListingCard key={listing._id} listing={listing} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+
+      <div className="bg-[#F9FAFB] px-20 py-10">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
+            <p className="font-bold text-4xl">
+              <span className="text-[#fe6f61]">Current</span> Tenants
+            </p>
+          </div>
+
+          <TenantCarousel />
+
+        </div>
+      </div>
+
+
       {/* Premium Accommodation Section */}
       <div className="px-20">
         <div className="flex flex-col gap-5 bg-[#F8F3EF] border-[#C59856] border-2 rounded-3xl pl-6 pt-6 relative">
-          <div className="absolute w-[200px] right-0 top-0 h-full rounded-r-[22px] bg-gradient-to-r from-[#C59856]/0 via-[#C59856]/30 via-48% to-[#C59856]/50"></div>
+          <div className="absolute w-[200px] right  -0 top-0 h-full rounded-r-[22px] bg-gradient-to-r from-[#C59856]/0 via-[#C59856]/30 via-48% to-[#C59856]/50"></div>
           <p className="font-bold text-4xl text-[#AE8549] flex gap-5">
             <img
               alt="star"
@@ -211,13 +313,15 @@ export default function LandlordPage() {
               width="32"
               height="31"
             />
-            Current / Vacating Tenants
+            Vacating Tenants
           </p>
 
           <TenantCarousel />
 
         </div>
       </div>
+
+      
 
       <div className="bg-[#F9FAFB] px-20 py-10">
         <div className="flex flex-col gap-5">

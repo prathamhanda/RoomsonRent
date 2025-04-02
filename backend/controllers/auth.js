@@ -16,7 +16,9 @@ exports.checkAuthMiddleWare = asyncHandler(async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
+        //get user from db
+        const user = await User.findById(decoded.id);
+        req.user = user;
         next();
     } catch (error) {
         res.status(401).json({  status: false, error:'Not authorized, token failed, ' + error });
@@ -68,14 +70,21 @@ exports.checkLogin = asyncHandler(async (req, res, next) => {
 
 
 
-exports.logout = () =>  asyncHandler(async (req, res) => {
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
+exports.logout = () => asyncHandler(async (req, res) => {
+    // Loop through all cookies and set them to an empty value with an expired date
+    Object.keys(req.cookies).forEach(cookie => {
+        res.cookie(cookie, "", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Strict",
+            expires: new Date(0) // Expire the cookie immediately
+        });
     });
-    res.status(200).json({ status: true, message: "Logged out successfully" });
+
+    res.status(200).json({ status: true, message: "Logged out successfully, all cookies expired" });
 });
+
+
 
 // @desc    Register user
 // @route   POST /api/auth/register

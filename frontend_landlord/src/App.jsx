@@ -37,9 +37,9 @@ function App() {
             <HomePage/>
             } />
           <Route path="/dashboard" element={
-            // <ProtectedRoute>
+            <ProtectedRoute>
             <LandlordPage/>
-            // </ProtectedRoute>
+            </ProtectedRoute>
             } />
           <Route path="/login" element={<LoginPage/>} />
           <Route path="/register" element={<RegisterPage/>} />

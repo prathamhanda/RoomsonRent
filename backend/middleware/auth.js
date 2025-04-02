@@ -31,12 +31,14 @@ exports.protect = asyncHandler(async (req, res, next) => {
     res.status(403).send('Kya krra hai bhai tu??!')
   }
 });
+// DONT USE THIS PROTECT
 
 // Grant access to specific roles
 exports.authorize = (...roles) => {
   return (req, res, next) => {
+    console.log(req.user);
     if (!roles.includes(req.user.role)) {
-      res.status(403).send('Kya krra hai bhai tu??!')
+      res.status(403).send('Kya krra hai bhai tu <> ??!')
     }
     next();
   };

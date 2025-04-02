@@ -14,6 +14,7 @@ const {
 const router = express.Router();
 
 const { protect, authorize } = require('../middleware/auth');
+const { checkAuthMiddleWare } = require('../controllers/auth');
 
 router.get('/featured', getFeaturedListings);
 router.get('/favorites', protect, getUserFavorites);
@@ -21,14 +22,14 @@ router.post('/:id/favorite', protect, toggleFavorite);
 
 router.route('/')
   .get(getListings)
-  .post(protect, authorize('owner', 'admin'), createListing);
+  .post(checkAuthMiddleWare, authorize('landlord', 'admin'), createListing);
 
 router.route('/owner')
-  .get(protect, authorize('owner', 'admin'), getOwnerListings);
+  .get(checkAuthMiddleWare, authorize('landlord', 'admin'), getOwnerListings);
 
 router.route('/:id')
   .get(getListing)
-  .put(protect, authorize('owner', 'admin'), updateListing)
-  .delete(protect, authorize('owner', 'admin'), deleteListing);
+  .put(protect, authorize('landlord', 'admin'), updateListing)
+  .delete(protect, authorize('landlord', 'admin'), deleteListing);
 
-module.exports = router; 
+module.exports = router;

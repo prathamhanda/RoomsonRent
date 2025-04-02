@@ -1,74 +1,93 @@
 [
   {
-    "_id": "62d0fe4f5311236168a109ea",
-    "title": "Luxury PG in Koramangala with AC",
-    "description": "Fully furnished PG accommodation with all modern amenities. Located in the heart of Koramangala, close to all tech parks and restaurants. Spacious rooms with attached bathrooms and air conditioning. We provide 3 times meals, housekeeping, laundry, and high-speed internet.",
-    "type": "male",
-    "roomType": "single",
-    "price": 15000,
-    "securityDeposit": 15000,
-    "location": "61d0fe4f5311236168a109da",
-    "address": "18, 6th Block, Koramangala",
-    "amenities": ["wifi", "ac", "tv", "laundry", "food", "housekeeping", "parking", "gym", "powerBackup"],
-    "houseRules": ["noSmoking", "noPets", "noParties", "noOutsiders"],
-    "images": [
-      "/uploads/listings/pg1_1.jpg",
-      "/uploads/listings/pg1_2.jpg",
-      "/uploads/listings/pg1_3.jpg"
+    "_id": "5d725a4a7b292f5f8ceff789",
+    "title": "Shyam Residency - Premium Boys PG",
+    "name": "Shyam Residency",
+    "description": "Modern PG accommodation with all amenities for working professionals and students",
+    "address": "123 Main Street, Manikonda",
+    "landmark": "Near Google Office",
+    "location": {
+      "type": "Point",
+      "coordinates": [78.3419, 17.4065],
+      "city": "Hyderabad",
+      "state": "Telangana",
+      "country": "India"
+    },
+    "price": 12000,
+    "propertyType": "Boys PG",
+    "numberOfFloors": 3,
+    "floors": [
+      {
+        "numberOfRooms": 8,
+        "sharingOptions": ["Single", "Double", "Triple"],
+        "targetTenants": "Working Professionals"
+      },
+      {
+        "numberOfRooms": 10,
+        "sharingOptions": ["Double", "Triple"],
+        "targetTenants": "Students"
+      },
+      {
+        "numberOfRooms": 6,
+        "sharingOptions": ["Single", "Double"],
+        "targetTenants": "Working Professionals"
+      }
     ],
-    "mainImage": "/uploads/listings/pg1_1.jpg",
-    "owner": "60d0fe4f5311236168a109cb",
-    "active": true,
+    "amenities": [
+      "Wi-Fi",
+      "Air Conditioning",
+      "Power Backup",
+      "Washing Machine",
+      "TV",
+      "CCTV",
+      "Security",
+      "Parking"
+    ],
+    "furnishingStatus": "Furnished",
     "featured": true,
-    "occupancyType": "sharing",
-    "maxOccupancy": 1
+    "verified": true,
+    "available": true,
+    "owner": "5d7a514b5d2c12c7449be042"
   },
   {
-    "_id": "62d0fe4f5311236168a109eb",
-    "title": "Budget-Friendly PG in HSR Layout",
-    "description": "Affordable PG accommodation in HSR Layout with basic amenities. Close to tech parks and public transport. Rooms are well-maintained with regular housekeeping. We provide 2 times meals and shared bathrooms. Ideal for students and working professionals.",
-    "type": "female",
-    "roomType": "shared",
-    "price": 8000,
-    "securityDeposit": 8000,
-    "location": "61d0fe4f5311236168a109dc",
-    "address": "45, Sector 2, HSR Layout",
-    "amenities": ["wifi", "food", "housekeeping", "powerBackup"],
-    "houseRules": ["noSmoking", "noParties", "noOutsiders"],
-    "images": [
-      "/uploads/listings/pg2_1.jpg",
-      "/uploads/listings/pg2_2.jpg"
+    "_id": "5d725c84c4ded7bcb480eaa0",
+    "title": "Green Valley Apartments - 3BHK",
+    "name": "Green Valley Apartments",
+    "description": "Spacious 3BHK apartment in a gated community with modern amenities",
+    "address": "456 Park Avenue, Gachibowli",
+    "landmark": "Near DLF Cybercity",
+    "location": {
+      "type": "Point",
+      "coordinates": [78.3510, 17.4400],
+      "city": "Hyderabad",
+      "state": "Telangana",
+      "country": "India"
+    },
+    "price": 35000,
+    "propertyType": "Flat",
+    "numberOfFloors": 1,
+    "floors": [
+      {
+        "numberOfRooms": 3,
+        "sharingOptions": ["Single", "Double"],
+        "targetTenants": "Family"
+      }
     ],
-    "mainImage": "/uploads/listings/pg2_1.jpg",
-    "owner": "60d0fe4f5311236168a109cb",
-    "active": true,
-    "featured": false,
-    "occupancyType": "sharing",
-    "maxOccupancy": 3
-  },
-  {
-    "_id": "62d0fe4f5311236168a109ec",
-    "title": "Premium Co-living Space in Indiranagar",
-    "description": "Modern co-living space with premium amenities. Located in the vibrant neighborhood of Indiranagar, walking distance from metro station. We offer fully furnished private rooms with attached bathrooms, a community kitchen, coworking space, and recreational areas. Perfect for young professionals.",
-    "type": "coed",
-    "roomType": "single",
-    "price": 18000,
-    "securityDeposit": 20000,
-    "location": "61d0fe4f5311236168a109db",
-    "address": "12, 12th Main, Indiranagar",
-    "amenities": ["wifi", "ac", "tv", "laundry", "food", "housekeeping", "parking", "gym", "powerBackup", "gaming", "coworking"],
-    "houseRules": ["noSmoking", "noPets", "guestAllowed"],
-    "images": [
-      "/uploads/listings/pg3_1.jpg",
-      "/uploads/listings/pg3_2.jpg",
-      "/uploads/listings/pg3_3.jpg",
-      "/uploads/listings/pg3_4.jpg"
+    "amenities": [
+      "Wi-Fi",
+      "Air Conditioning",
+      "Power Backup",
+      "Lift",
+      "Swimming Pool",
+      "Gym",
+      "Security",
+      "Parking",
+      "CCTV"
     ],
-    "mainImage": "/uploads/listings/pg3_1.jpg",
-    "owner": "60d0fe4f5311236168a109cb",
-    "active": true,
+    "furnishingStatus": "Semi-Furnished",
     "featured": true,
-    "occupancyType": "private",
-    "maxOccupancy": 1
+    "verified": true,
+    "available": true,
+    "owner": "5d7a514b5d2c12c7449be043"
   }
-] 
+]

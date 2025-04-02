@@ -22,13 +22,8 @@ export const AuthProvider = ({ children }) => {
     checkLogin();
   }, []);
 
-  const logout = async () => {
-    await fetch(backendURL + "/api/auth/logout", { method: "POST", credentials: "include" });
-    setIsAuthenticated(false);
-  };
-
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, loading, checkLogin }}>
       {children}
     </AuthContext.Provider>
   );

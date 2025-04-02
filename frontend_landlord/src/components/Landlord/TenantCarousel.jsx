@@ -158,14 +158,8 @@ const TenantCarousel = () => {
 
   return (
     <div className="space-y-8 pb-6">
+      
       <TenantSection 
-        title="Vacating Tenants" 
-        tenants={vacatingTenants}
-        statusColor="text-orange-600"
-        statusBgColor="bg-orange-100"
-      />
-      <TenantSection 
-        title="Current Tenants" 
         tenants={currentTenants}
         statusColor="text-green-600"
         statusBgColor="bg-green-100"

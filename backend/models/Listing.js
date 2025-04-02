@@ -1,6 +1,23 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
+const FloorSchema = new mongoose.Schema({
+  numberOfRooms: {
+    type: Number,
+    required: [true, 'Please add number of rooms']
+  },
+  sharingOptions: {
+    type: [String],
+    required: [true, 'Please add sharing options'],
+    enum: ['Single', 'Double', 'Triple', '4 Sharing']
+  },
+  targetTenants: {
+    type: String,
+    required: [true, 'Please specify target tenants'],
+    enum: ['Students', 'Working Professionals', 'Family', 'Any']
+  }
+});
+
 const ListingSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -14,18 +31,27 @@ const ListingSchema = new mongoose.Schema({
     required: [true, 'Please add a description'],
     maxlength: [2000, 'Description cannot be more than 2000 characters']
   },
+  name: {
+    type: String,
+    required: [true, 'Please add a property name'],
+    trim: true
+  },
   address: {
     type: String,
     required: [true, 'Please add an address']
   },
+  landmark: {
+    type: String
+  },
   location: {
-    // GeoJSON Point
     type: {
       type: String,
-      enum: ['Point']
+      enum: ['Point'],
+      required: true
     },
     coordinates: {
       type: [Number],
+      required: true,
       index: '2dsphere'
     },
     city: String,
@@ -35,7 +61,7 @@ const ListingSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
-    required: [true, 'Please add a price']
+    // required: [true, 'Please add a price']
   },
   discountedPrice: {
     type: Number
@@ -45,26 +71,21 @@ const ListingSchema = new mongoose.Schema({
     required: [true, 'Please add a property type'],
     enum: [
       'PG',
-      'Hostel',
-      'Apartment',
-      'Room',
       'Flat',
-      'Villa',
+      'Boys PG',
+      'Girls PG',
       'Other'
     ]
   },
+  numberOfFloors: {
+    type: Number,
+    required: [true, 'Please add number of floors']
+  },
+  floors: [FloorSchema],
   furnishingStatus: {
     type: String,
     enum: ['Furnished', 'Semi-Furnished', 'Unfurnished'],
     default: 'Unfurnished'
-  },
-  bedrooms: {
-    type: Number,
-    required: [true, 'Please add number of bedrooms']
-  },
-  bathrooms: {
-    type: Number,
-    required: [true, 'Please add number of bathrooms']
   },
   amenities: {
     type: [String],
@@ -95,6 +116,10 @@ const ListingSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  favorites: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'User'
+  }],
   ratings: {
     type: Number,
     min: [1, 'Rating must be at least 1'],
@@ -141,4 +166,4 @@ ListingSchema.virtual('bookings', {
   justOne: false
 });
 
-module.exports = mongoose.model('Listing', ListingSchema); 
+module.exports = mongoose.model('Listing', ListingSchema);

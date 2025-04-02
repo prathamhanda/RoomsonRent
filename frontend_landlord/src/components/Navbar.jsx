@@ -8,16 +8,19 @@ import {
   Button,
 } from "@heroui/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
+import backendURL from "@/config/config";
+import { deleteAllCookies } from "@/utils";
 
 const NavbarMain = () => {
+  const { isAuthenticated, loading } = useAuth();
 
-  
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState({});
   const [scrolled, setScrolled] = useState(false);
 
-  const routes = [
+  const initialRoutes = [
     {
       label: "Support",
       icon: "/images/media/Headphones Round.45f0c3b8.svg",
@@ -40,22 +43,65 @@ const NavbarMain = () => {
       icon: "/images/media/Heart.7e108041.svg",
       url: "/wishlist",
     },
-    {
-      // Dynamic label based on current location
-      label: location.pathname === "/login" ? "Home" : "Login/Sign Up",
-      action: () => {
-        if (location.pathname === "/login") {
-          window.location.href = "/";
-        } else {
-          window.location.href = "/login";
-        }
-      },
-    },
   ];
 
-  
+  useEffect(() => {
+    if (isAuthenticated) {
+      setroutes([
+        ...initialRoutes,
+        {
+          label: "Tenants",
+          icon: "/images/media/Group 2.svg",
+          url: "/tenants",
+        },
+        {
+          label: "Logout",
+          // icon: "/images/media/logout.svg",
+          // url: "/logout",
+          action: () => {
+            fetch(backendURL + "/api/auth/logout", {
+              credentials: "include",
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error("Logout failed");
+                }
+                return response.json();
+              })
+              .then((data) => {
+                // deleteAllCookies();
+                window.location.href = "/login";
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+          },
+        },
+      ]);
+    } else {
+      setroutes([
+        ...initialRoutes,
+        {
+          label: location.pathname === "/login" ? "Home" : "Login/Sign Up",
+          action: () => {
+            if (location.pathname === "/login") {
+              window.location.href = "/";
+            } else {
+              window.location.href = "/login";
+            }
+          },
+        },
+      ]);
+    }
+  }, [isAuthenticated]);
+
+  const [routes, setroutes] = useState(initialRoutes);
+
   // Check if current page is home
-  const isHomePage = location.pathname === "/" || location.pathname === "/home" || location.pathname === "/dashboard";
+  const isHomePage =
+    location.pathname === "/" ||
+    location.pathname === "/home" ||
+    location.pathname === "/dashboard";
 
   // Handle scroll effect for navbar transparency
   useEffect(() => {
@@ -75,14 +121,14 @@ const NavbarMain = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest('.dropdown-container')) {
+      if (!event.target.closest(".dropdown-container")) {
         setDropdownOpen({});
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -95,7 +141,7 @@ const NavbarMain = () => {
     setDropdownOpen((prev) => {
       const newState = { ...prev };
       // Close all other dropdowns
-      Object.keys(newState).forEach(key => {
+      Object.keys(newState).forEach((key) => {
         if (key !== label) newState[key] = false;
       });
       // Toggle the current dropdown
@@ -104,75 +150,73 @@ const NavbarMain = () => {
     });
   };
 
-
-
   // Animation variants
   const navbarVariants = {
-    initial: { 
+    initial: {
       backgroundColor: "rgba(0, 0, 0, 0)",
       backdropFilter: "blur(0px)",
-      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0)"
+      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0)",
     },
-    scrolled: { 
+    scrolled: {
       backgroundColor: "rgba(255, 255, 255, 0.8)",
       backdropFilter: "blur(10px)",
-      boxShadow: "0 4px 12px -1px rgba(0, 0, 0, 0.1)"
-    }
+      boxShadow: "0 4px 12px -1px rgba(0, 0, 0, 0.1)",
+    },
   };
 
   const dropdownVariants = {
     hidden: { opacity: 0, y: -10, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
+    visible: {
+      opacity: 1,
+      y: 0,
       scale: 1,
-      transition: { 
-        type: "spring", 
-        stiffness: 300, 
-        damping: 20 
-      }
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20,
+      },
     },
-    exit: { 
-      opacity: 0, 
-      y: -10, 
+    exit: {
+      opacity: 0,
+      y: -10,
       scale: 0.95,
-      transition: { 
-        duration: 0.2 
-      }
-    }
+      transition: {
+        duration: 0.2,
+      },
+    },
   };
 
   const menuVariants = {
     hidden: { opacity: 0, height: 0 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       height: "auto",
       transition: {
         duration: 0.3,
         staggerChildren: 0.05,
-      }
+      },
     },
-    exit: { 
-      opacity: 0, 
+    exit: {
+      opacity: 0,
       height: 0,
-      transition: { 
+      transition: {
         duration: 0.3,
-      }
-    }
+      },
+    },
   };
 
   const menuItemVariants = {
     hidden: { opacity: 0, x: -20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
       transition: {
         type: "spring",
         stiffness: 300,
-        damping: 24
-      }
+        damping: 24,
+      },
     },
-    exit: { opacity: 0, x: -20 }
+    exit: { opacity: 0, x: -20 },
   };
 
   // Decide text color based on scroll state AND current page
@@ -190,9 +234,7 @@ const NavbarMain = () => {
   const getButtonColorClass = () => {
     if (isHomePage) {
       // On homepage, white button initially, red when scrolled
-      return scrolled 
-        ? "bg-[#FE6F61] text-white" 
-        : "bg-white text-[#FE6F61]";
+      return scrolled ? "bg-[#FE6F61] text-white" : "bg-white text-[#FE6F61]";
     } else {
       // On other pages, always red button
       return "bg-[#FE6F61] text-white";
@@ -252,13 +294,20 @@ const NavbarMain = () => {
                           />
                           <span>{route.label}</span>
                           <svg
-                            className={`w-4 h-4 ml-1 transform transition-transform duration-200 ${dropdownOpen[route.label] ? 'rotate-180' : ''}`}
+                            className={`w-4 h-4 ml-1 transform transition-transform duration-200 ${
+                              dropdownOpen[route.label] ? "rotate-180" : ""
+                            }`}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg"
                           >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M19 9l-7 7-7-7"
+                            ></path>
                           </svg>
                         </Button>
                       </motion.div>
@@ -276,13 +325,15 @@ const NavbarMain = () => {
                                 key={index}
                                 href={sub.url}
                                 className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 text-gray-700 group"
-                                whileHover={{ 
+                                whileHover={{
                                   backgroundColor: "rgba(243, 244, 246, 0.8)",
                                   x: 5,
-                                  transition: { duration: 0.2 }
+                                  transition: { duration: 0.2 },
                                 }}
                               >
-                                <span className="text-lg group-hover:scale-110 transition-transform duration-200">{sub.icon}</span>
+                                <span className="text-lg group-hover:scale-110 transition-transform duration-200">
+                                  {sub.icon}
+                                </span>
                                 <span className="text-sm font-medium">
                                   {sub.label}
                                 </span>
@@ -325,7 +376,11 @@ const NavbarMain = () => {
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 17,
+                      }}
                     >
                       <Button
                         className={`${buttonColorClass} rounded-full font-semibold px-6 py-2`}
@@ -349,7 +404,9 @@ const NavbarMain = () => {
           >
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={`p-2 focus:outline-none ${isMenuOpen ? 'text-gray-800 ' : textColorClass || ""}`}
+              className={`p-2 focus:outline-none ${
+                isMenuOpen ? "text-gray-800 " : textColorClass || ""
+              }`}
               aria-label="Toggle menu"
             >
               <svg
@@ -391,11 +448,17 @@ const NavbarMain = () => {
               style={{ backdropFilter: "blur(10px)" }}
             >
               <div className="container mx-auto">
-                <motion.ul variants={menuVariants} className="space-y-4 bg-white px-4 py-4">
+                <motion.ul
+                  variants={menuVariants}
+                  className="space-y-4 bg-white px-4 py-4"
+                >
                   {routes.map((route) => {
                     if (route.subRoutes) {
                       return (
-                        <motion.li key={route.label} variants={menuItemVariants}>
+                        <motion.li
+                          key={route.label}
+                          variants={menuItemVariants}
+                        >
                           <div className="relative">
                             <button
                               className="flex w-full items-center justify-between py-3 text-gray-800 font-medium border-b border-gray-100"
@@ -412,13 +475,20 @@ const NavbarMain = () => {
                                 <span>{route.label}</span>
                               </div>
                               <svg
-                                className={`w-4 h-4 transition-transform duration-200 ${dropdownOpen[route.label] ? 'rotate-180' : ''}`}
+                                className={`w-4 h-4 transition-transform duration-200 ${
+                                  dropdownOpen[route.label] ? "rotate-180" : ""
+                                }`}
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M19 9l-7 7-7-7"
+                                ></path>
                               </svg>
                             </button>
                             <AnimatePresence>
@@ -437,12 +507,14 @@ const NavbarMain = () => {
                                       className="flex items-center space-x-3 px-3 py-3 hover:bg-gray-50 text-gray-700 rounded-lg"
                                       initial={{ x: -10, opacity: 0 }}
                                       animate={{ x: 0, opacity: 1 }}
-                                      transition={{ 
+                                      transition={{
                                         delay: index * 0.05,
-                                        duration: 0.2
+                                        duration: 0.2,
                                       }}
                                     >
-                                      <span className="text-lg">{sub.icon}</span>
+                                      <span className="text-lg">
+                                        {sub.icon}
+                                      </span>
                                       <span className="text-sm font-medium">
                                         {sub.label}
                                       </span>
@@ -456,7 +528,10 @@ const NavbarMain = () => {
                       );
                     } else if (route.url) {
                       return (
-                        <motion.li key={route.label} variants={menuItemVariants}>
+                        <motion.li
+                          key={route.label}
+                          variants={menuItemVariants}
+                        >
                           <Link
                             to={route.url}
                             className="flex items-center space-x-3 py-3 text-gray-800 font-medium border-b border-gray-100"
@@ -476,7 +551,11 @@ const NavbarMain = () => {
                       );
                     } else if (route.action) {
                       return (
-                        <motion.li key={route.label} variants={menuItemVariants} className="mt-6">
+                        <motion.li
+                          key={route.label}
+                          variants={menuItemVariants}
+                          className="mt-6"
+                        >
                           <motion.button
                             whileHover={{ scale: 1.03 }}
                             whileTap={{ scale: 0.97 }}

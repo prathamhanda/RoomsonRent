@@ -3,6 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { Search, MapPin, Navigation } from "lucide-react";
 import LocationPicker from "./LocationPicker";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import backendURL from "@/config/config";
+
 
 const LandlordPortalForm = () => {
   // Form state management
@@ -141,9 +145,21 @@ const amenitiesList = [
       updatedProperties[propertyIndex] = {};
     }
 
+    // Extract city and state from address if possible
+    let city = '';
+    let state = '';
+    const addressComponents = address.split(',').map(component => component.trim());
+    if (addressComponents.length >= 3) {
+      city = addressComponents[addressComponents.length - 3];
+      state = addressComponents[addressComponents.length - 2];
+    }
+
+    // Update property with location data
     updatedProperties[propertyIndex].latitude = lat;
     updatedProperties[propertyIndex].longitude = lng;
     updatedProperties[propertyIndex].location = address;
+    updatedProperties[propertyIndex].city = city;
+    updatedProperties[propertyIndex].state = state;
 
     setFormData({ ...formData, properties: updatedProperties });
 
@@ -282,12 +298,72 @@ const amenitiesList = [
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateStep(step)) {
-      console.log("Form submitted:", JSON.stringify(formData, null, 2));
-      // Here you would typically send the data to your backend
-      alert("Properties submitted successfully!");
+    const { isValid, errors: validationErrors } = validateStep(step);
+    
+    if (!isValid) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    try {
+      // Transform the form data to match backend schema
+      const transformedProperties = formData.properties.map(property => ({
+        title: property.name,
+        description: `${property.name} - ${property.propertyType}`,
+        name: property.name,
+        propertyType: property.propertyType,
+        address: property.location,
+        landmark: property.landmark,
+        location: {
+          type: 'Point',
+          coordinates: [parseFloat(property.longitude), parseFloat(property.latitude)],
+          city: property.city || '',
+          state: property.state || '',
+          country: 'India'
+        },
+        numberOfFloors: parseInt(property.numberOfFloors),
+        floors: property.floors?.map(floor => ({
+          numberOfRooms: parseInt(floor.numberOfRooms),
+          sharingOptions: floor.sharingOptions,
+          targetTenants: floor.targetTenants
+        })),
+        amenities: property.amenities || [],
+        active: true
+      }));
+
+      // Submit each property
+      for (const propertyData of transformedProperties) {
+        const response = await axios.post(
+          backendURL + `/api/listings`,
+          propertyData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true, // Corrected this line
+          }
+        );
+        
+
+        if (!response.data.success) {
+          throw new Error(response.data.message || 'Failed to create listing');
+        }
+      }
+
+      // Show success message
+      alert('Properties submitted successfully!');
+      // Reset form or redirect
+      setFormData({
+        numberOfProperties: '',
+        properties: []
+      });
+      setStep(1);
+      
+    } catch (error) {
+      console.error('Error submitting properties:', error);
+      alert(error.response?.data?.message || 'Error submitting properties. Please try again.');
     }
   };
 
@@ -920,7 +996,7 @@ const amenitiesList = [
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* <form onSubmit={handleSubmit} className="space-y-6"> */}
           <AnimatePresence mode="wait">
             {renderStep()}
           </AnimatePresence>
@@ -963,7 +1039,7 @@ const amenitiesList = [
               </motion.button>
             )}
           </motion.div>
-        </form>
+        {/* </form> */}
       </div>
     </div>
   );

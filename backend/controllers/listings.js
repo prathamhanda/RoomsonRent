@@ -127,6 +127,32 @@ exports.createListing = asyncHandler(async (req, res, next) => {
   // Add owner to req.body
   req.body.owner = req.user.id;
 
+  // Generate title if not provided
+  if (!req.body.title) {
+    req.body.title = `${req.body.name} - ${req.body.propertyType}`;
+  }
+
+  // Format location data
+  if (req.body.latitude && req.body.longitude) {
+    req.body.location = {
+      type: 'Point',
+      coordinates: [parseFloat(req.body.longitude), parseFloat(req.body.latitude)],
+      city: req.body.city,
+      state: req.body.state,
+      country: 'India' // Default country
+    };
+  }
+
+  // Format floors data
+  if (req.body.floors) {
+    // Ensure floors is properly structured
+    req.body.floors = req.body.floors.map(floor => ({
+      numberOfRooms: floor.numberOfRooms,
+      sharingOptions: floor.sharingOptions,
+      targetTenants: floor.targetTenants
+    }));
+  }
+
   const listing = await Listing.create(req.body);
 
   res.status(201).json({
@@ -157,6 +183,27 @@ exports.updateListing = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // Format location data if provided
+  if (req.body.latitude && req.body.longitude) {
+    req.body.location = {
+      type: 'Point',
+      coordinates: [parseFloat(req.body.longitude), parseFloat(req.body.latitude)],
+      city: req.body.city || listing.location.city,
+      state: req.body.state || listing.location.state,
+      country: 'India'
+    };
+  }
+
+  // Format floors data if provided
+  if (req.body.floors) {
+    req.body.floors = req.body.floors.map(floor => ({
+      numberOfRooms: floor.numberOfRooms,
+      sharingOptions: floor.sharingOptions,
+      targetTenants: floor.targetTenants
+    }));
+  }
+
+  // Update listing
   listing = await Listing.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true
@@ -287,4 +334,4 @@ exports.getUserFavorites = asyncHandler(async (req, res, next) => {
     count: listings.length,
     data: listings
   });
-}); 
+});

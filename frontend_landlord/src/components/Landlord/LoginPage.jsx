@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@heroui/button';
 import { useNavigate } from 'react-router-dom';
 import backendURL from '@/config/config';
+import { useAuth } from '@/context/AuthContext';
 
   
 
 const LoginPage = () => {
+    const { isAuthenticated, loading,checkLogin } = useAuth();
     
     const [isOtpSent, setIsOtpSent] = useState(false);
     const [isVerified, setIsVerified] = useState(false);
@@ -13,6 +15,15 @@ const LoginPage = () => {
     const [phone, setphone] = useState('');
     const [otp, setOtp] = useState('');
     const navigate = useNavigate();
+
+
+    useEffect(() => {
+      if (isAuthenticated) {
+        navigate('/dashboard');
+      }
+    }, [isAuthenticated, navigate]);
+
+
     const loginUser = async () => {
         try {
           const response = await fetch(`${backendURL}/api/auth/login`, {
@@ -48,6 +59,7 @@ const LoginPage = () => {
     
           alert('Verification successful! Redirecting...');
           setIsVerified(true);
+          await checkLogin();
           navigate('/dashboard');
         } catch (error) {
           console.error('OTP verification failed:', error);
@@ -55,7 +67,7 @@ const LoginPage = () => {
         }
       };
 
-  return (
+  return isAuthenticated ? null : (
     <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="bg-white border-2 border-[#FE6F61] p-8 rounded-lg shadow-lg w-96">
             <h2 className="text-2xl font-bold text-[#FE6F61] text-center mb-6">Login</h2>
