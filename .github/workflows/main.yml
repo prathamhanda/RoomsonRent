@@ -1,0 +1,37 @@
+name: GitHub Workflow for Backend of ROR
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIV_KEY_VM }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+          ssh-keyscan -H 80.225.208.243 >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Copy Backend Code to Server
+        run: |
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./backend/ ubuntu@80.225.208.243:/home/ubuntu/ROR/backend
+
+      - name: Restart Backend Services
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@80.225.208.243 << 'EOF'
+            cd /home/ubuntu/ROR/backend
+            docker compose down
+            docker compose up --build -d
+          EOF
