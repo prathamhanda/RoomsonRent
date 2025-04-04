@@ -1,4 +1,4 @@
-name: GitHub Workflow for Backend of ROR
+name: GitHub Workflow for ROR Backend + Frontend
 
 on:
   push:
@@ -11,8 +11,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Check out code
         uses: actions/checkout@v2
+
+      - name: Set up Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Build Frontend (frontend_main)
+        run: |
+          cd frontend_main
+          npm install
+          npm run build
+
+      - name: Build Frontend (frontend_landlord)
+        run: |
+          cd frontend_landlord
+          npm install
+          npm run build
 
       - name: Set up SSH
         run: |
@@ -26,7 +43,22 @@ jobs:
 
       - name: Copy Backend Code to Server
         run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./backend/ ubuntu@80.225.208.243:/home/ubuntu/ROR/backend
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./backend/ \
+            ubuntu@80.225.208.243:/home/ubuntu/ROR/backend
+
+      - name: Copy Frontend_main Build to Server
+        run: |
+          # Sync the production build output (dist folder) from frontend_main
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+            ./frontend_main/dist/ \
+            ubuntu@80.225.208.243:/home/ubuntu/ROR/frontend_main
+
+      - name: Copy Frontend_landlord Build to Server
+        run: |
+          # Sync the production build output (dist folder) from frontend_landlord
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+            ./frontend_landlord/dist/ \
+            ubuntu@80.225.208.243:/home/ubuntu/ROR/frontend_landlord
 
       - name: Restart Backend Services
         run: |
