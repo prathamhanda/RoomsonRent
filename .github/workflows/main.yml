@@ -48,13 +48,13 @@ jobs:
 
       - name: Copy Frontend_main Build to Server
         run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" \
             ./frontend_main/dist/ \
             ubuntu@80.225.208.243:/home/ubuntu/ROR/frontend_main
 
       - name: Copy Frontend_landlord Build to Server
         run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" \
             ./frontend_landlord/dist/ \
             ubuntu@80.225.208.243:/home/ubuntu/ROR/frontend_landlord
 

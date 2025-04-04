@@ -35,7 +35,7 @@ app.use(cookieParser());
 
 // Enable CORS
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://rooms-on-rent.vercel.app', 'http://localhost:5173', 'http://172.16.91.115:5173'],
+  origin: ['http://localhost:3000', 'https://rooms-on-rent.vercel.app', 'http://localhost:5173', 'http://172.16.91.115:5173','https://www.roomsonrent.in','https://roomsonrent.in','https://landlord.roomsonrent.in'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
   optionsSuccessStatus: 200 // For legacy browser support
