@@ -3,107 +3,163 @@ import { Button } from '@heroui/button';
 import { useNavigate } from 'react-router-dom';
 import backendURL from '@/config/config';
 import { useAuth } from '@/context/AuthContext';
-
-  
+import { toast, Toaster } from 'react-hot-toast';
 
 const LoginPage = () => {
-    const { isAuthenticated, loading,checkLogin } = useAuth();
-    
-    const [isOtpSent, setIsOtpSent] = useState(false);
-    const [isVerified, setIsVerified] = useState(false);
+  const { isAuthenticated, checkLogin } = useAuth();
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-    const [phone, setphone] = useState('');
-    const [otp, setOtp] = useState('');
-    const navigate = useNavigate();
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
+  const loginUser = async () => {
+    if (!phone || phone.length < 10) {
+      toast.error('Please enter a valid phone number');
+      return;
+    }
 
-    useEffect(() => {
-      if (isAuthenticated) {
-        navigate('/dashboard');
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${backendURL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await response.json();
+
+      if (!data.status) {
+        throw new Error(data.error || 'Login failed');
       }
-    }, [isAuthenticated, navigate]);
+      
+      toast.success('OTP sent to your WhatsApp!', {
+        icon: '📱',
+        duration: 4000
+      });
+      setIsOtpSent(true);
+    } catch (error) {
+      console.error('Error logging in', error);
+      toast.error(error.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  const verifyOtp = async () => {
+    if (!otp || otp.length < 4) {
+      toast.error('Please enter a valid OTP');
+      return;
+    }
 
-    const loginUser = async () => {
-        try {
-          const response = await fetch(`${backendURL}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone }),
-          });
-          const data = await response.json();
-    
-          if (!data.status) {
-            throw new Error(data.error || 'Login failed');
-          }
-          alert('OTP sent to your WhatsApp!');
-          setIsOtpSent(true);
-        } catch (error) {
-          console.error('Error logging in', error);
-          alert(error.message);
-        }
-      };
-    const verifyOtp = async () => {
-        try {
-          const response = await fetch(`${backendURL}/api/auth/verifyOTP`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone, otp }),
-          });
-          const data = await response.json();
-          
-          if (data.msg === 'Invalid OTP') {
-            throw new Error('Incorrect OTP, please try again.');
-          }
-    
-          alert('Verification successful! Redirecting...');
-          setIsVerified(true);
-          await checkLogin();
-          navigate('/dashboard');
-        } catch (error) {
-          console.error('OTP verification failed:', error);
-          alert(error.message);
-        }
-      };
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${backendURL}/api/auth/verifyOTP`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, otp }),
+      });
+      const data = await response.json();
+      
+      if (data.msg === 'Invalid OTP') {
+        throw new Error('Incorrect OTP, please try again.');
+      }
+
+      toast.success('Login successful! Redirecting...', {
+        icon: '✅',
+        duration: 3000
+      });
+      
+      await checkLogin();
+      setTimeout(() => navigate('/dashboard'), 1000);
+    } catch (error) {
+      console.error('OTP verification failed:', error);
+      toast.error(error.message || 'Verification failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return isAuthenticated ? null : (
-    <div className="flex items-center justify-center min-h-screen bg-white">
-        <div className="bg-white border-2 border-[#FE6F61] p-8 rounded-lg shadow-lg w-96">
-            <h2 className="text-2xl font-bold text-[#FE6F61] text-center mb-6">Login</h2>
-                {!isOtpSent ? (
-                <>
-                <input
-                    type="phone"
-                    placeholder="Phone Number"
-                    value={phone}
-                    onChange={(e) => setphone(e.target.value)}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#FE6F61] transition duration-200"
-                    required
-                />
-                <Button onClick={loginUser} className="bg-[#FE6F61] w-full text-white rounded-lg p-2 font-semibold mt-4">
-                    Login
-                </Button>
-                </>
-                ):(
-                <div>
-                    <label className="block text-gray-700">OTP</label>
-                    <input 
-                        type="text" 
-                        className="mt-1 block w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#FE6F61] transition duration-200" 
-                        placeholder="Enter OTP sent to your phone" 
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                    />
-                    <Button onClick={verifyOtp} className="bg-[#FE6F61] w-full text-white rounded-lg p-2 font-semibold">Verify OTP</Button>
-                </div>
-                )}
-            <p className="mt-4 text-center text-gray-600">
-                Don't have an account? <a href="/register" className="text-[#FE6F61] font-semibold">Sign Up</a>
-            </p>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <Toaster position="top-center" reverseOrder={false} />
+      
+      <div className="bg-white border border-gray-200 p-8 rounded-xl shadow-lg w-96 transition-all duration-300 hover:shadow-xl">
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold text-[#FE6F61]">Welcome Back</h2>
+          <p className="text-gray-500 mt-2">Sign in to continue to your account</p>
         </div>
+        
+        {!isOtpSent ? (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+              <input
+                type="tel"
+                placeholder="Enter your phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE6F61] focus:border-transparent transition-all"
+                required
+              />
+            </div>
+            
+            <Button 
+              onClick={loginUser} 
+              disabled={isLoading}
+              className="w-full py-3 bg-[#FE6F61] hover:bg-[#e5635b] text-white rounded-lg font-semibold transition-all duration-300 flex items-center justify-center"
+            >
+              {isLoading ? 'Sending OTP...' : 'Send OTP'}
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Verification Code</label>
+              <input 
+                type="text" 
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FE6F61] focus:border-transparent transition-all" 
+                placeholder="Enter OTP sent to your WhatsApp"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+              />
+              <p className="text-xs text-gray-500 mt-1">OTP sent to: {phone}</p>
+            </div>
+            
+            <Button 
+              onClick={verifyOtp} 
+              disabled={isLoading}
+              className="w-full py-3 bg-[#FE6F61] hover:bg-[#e5635b] text-white rounded-lg font-semibold transition-all duration-300 flex items-center justify-center"
+            >
+              {isLoading ? 'Verifying...' : 'Verify OTP'}
+            </Button>
+            
+            <button 
+              onClick={() => setIsOtpSent(false)} 
+              className="w-full text-sm text-gray-500 hover:text-[#FE6F61] transition-colors"
+            >
+              Use a different phone number
+            </button>
+          </div>
+        )}
+        
+        <div className="mt-6 pt-4 border-t border-gray-100 text-center">
+          <p className="text-gray-600">
+            Don't have an account?{' '}
+            <a href="/register" className="text-[#FE6F61] font-semibold hover:underline transition-all">
+              Sign Up
+            </a>
+          </p>
+        </div>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default LoginPage;

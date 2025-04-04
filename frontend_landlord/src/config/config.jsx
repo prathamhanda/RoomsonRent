@@ -5,7 +5,7 @@ const backendURL = (() => {
     if (url.protocol === 'http:') {
         return `http://${url.hostname}:5000`;
     } else if (url.protocol === 'https:') {
-        return 'https://secure-backend.example.com';
+        return 'https://backend.roomsonrent.in';
     }
 })();
 

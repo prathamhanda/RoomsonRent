@@ -10,6 +10,7 @@ import backendURL from "@/config/config";
 
 const LandlordPortalForm = () => {
   // Form state management
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     numberOfProperties: "",
@@ -352,8 +353,8 @@ const amenitiesList = [
         }
       }
 
-      // Show success message
       alert('Properties submitted successfully!');
+      navigate('/dashboard'); // Redirect to dashboard
       // Reset form or redirect
       setFormData({
         numberOfProperties: '',
