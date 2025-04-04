@@ -17,7 +17,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: lts/*
 
       - name: Build Frontend (frontend_main)
         run: |
@@ -48,14 +48,12 @@ jobs:
 
       - name: Copy Frontend_main Build to Server
         run: |
-          # Sync the production build output (dist folder) from frontend_main
           rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
             ./frontend_main/dist/ \
             ubuntu@80.225.208.243:/home/ubuntu/ROR/frontend_main
 
       - name: Copy Frontend_landlord Build to Server
         run: |
-          # Sync the production build output (dist folder) from frontend_landlord
           rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
             ./frontend_landlord/dist/ \
             ubuntu@80.225.208.243:/home/ubuntu/ROR/frontend_landlord
