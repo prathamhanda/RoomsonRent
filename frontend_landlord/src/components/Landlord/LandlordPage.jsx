@@ -1,839 +1,657 @@
 import React, { useState } from "react";
-
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import {Button, ButtonGroup} from "@heroui/button";
-import FinancialCard from "./FinancialCard";
-import {Card} from "@heroui/react";
-import TenantCarousel from "./TenantCarousel";
-import { TentTree } from "lucide-react";
-import ListingCard from "./ListingCard";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { Card } from "@heroui/react"; // Assuming this is the correct Card import
+import FinancialCard from "./FinancialCard"; // Assuming this component exists and is styled
+import TenantCarousel from "./TenantCarousel"; // Assuming this component exists and handles its data/animations
+import ListingCard from "./ListingCard"; // Assuming this component exists and is styled
 import useFetch from "../../hooks/useFetch";
+import { Search, Home, Plus, User, Phone, Mail, MapPin } from 'lucide-react'; // Using lucide-react for icons
+
+// Animation Variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1, // Stagger effect for child elements
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 12,
+    },
+  },
+};
+
+const sectionVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut"
+    },
+  },
+};
+
 
 export default function LandlordPage() {
-  const [supportOpen, setSupportOpen] = useState(false);
   const [searchFocus, setSearchFocus] = useState(false);
-
-  const premiumRooms = [
-    {
-      id: 1,
-      name: "Micheal Jackson 1st Floor R2",
-      location: "Vasanat Vihar, South Delhi",
-      price: "7,000",
-      amenities: ["A/C", "WiFi", "Single Occupancy", "Short Stay"],
-      image: "/images/78c3c990590b6c112e5b5cb34f1fbfac.webp",
-    },
-    {
-      id: 2,
-      name: "Micheal Jackson 1st Floor R3",
-      location: "Vasanat Vihar, South Delhi",
-      price: "8,000",
-      amenities: ["WiFi", "Triple Occupancy"],
-      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
-    },
-    {
-      id: 3,
-      name: "Micheal Jackson 1st Floor R3",
-      location: "Vasanat Vihar, South Delhi",
-      price: "8,000",
-      amenities: ["WiFi", "Triple Occupancy"],
-      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
-    },
-    {
-      id: 4,
-      name: "Micheal Jackson 1st Floor R3",
-      location: "Vasanat Vihar, South Delhi",
-      price: "8,000",
-      amenities: ["WiFi", "Triple Occupancy"],
-      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
-    },
-  ];
-
-  const testimonials = [
-    {
-      id: 1,
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-      name: "Ram Kapoor",
-      college: "St. Stephens College",
-      rating: 4,
-    },
-    {
-      id: 2,
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-      name: "Ram Kapoor",
-      college: "St. Stephens College",
-      rating: 4,
-    },
-    {
-      id: 3,
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-      name: "Ram Kapoor",
-      college: "St. Stephens College",
-      rating: 4,
-    },
-    {
-      id: 4,
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-      name: "Ram Kapoor",
-      college: "St. Stephens College",
-      rating: 4,
-    },
-  ];
 
   const { data: myListings, loading: listingsLoading, error: listingsError } = useFetch('/api/listings/owner', {
     credentials: 'include'
   });
 
-
+  const { scrollYProgress } = useScroll();
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
   return (
-    <div>
-      {/* Hero Section with Background */}
-      { <div className="relative">
+    <div className="flex flex-col min-h-screen bg-gray-50">
+
+<motion.section
+      className="relative h-[350px] md:h-[400px] flex flex-col justify-center text-left overflow-hidden bg-gray-800" // Base background color in case image fails/is slow
+    >
+      <div className="absolute inset-0 -z-10">
         <img
-          src="https://media.istockphoto.com/id/1480610076/vector/real-estate-selling-concept-banner.jpg?s=612x612&w=0&k=20&c=Dx8KS_OQMBHgVAKQQmLYKiCRgRWDv_BSp4AoXZh6X9s="
-          alt="home"
-          className="absolute brightness-50 -z-20 pointer-events-none select-none h-[600px] w-full object-cover"
+          src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" // Example different, potentially more subtle bg
+          alt="Abstract architecture or subtle background"
+          className="w-full h-full object-cover"
         />
-
-        
-
-        {/* Hero Content */}
-        <div className="text-white flex flex-col gap-4 items-center pt-32 px-4 text-center">
-          <h1 className="text-3xl md:text-4xl mt-10 lg:text-5xl font-bold tracking-wider">
-          Landlord Management Portal
-          </h1>
-          <p className="text-xl md:text-2xl tracking-wider">
-          your one stop solution for managing your properties!
-          </p>
-          
-        </div>
-
-        {/* Search Bar */}
-        <div className="flex justify-center">
-          <form className="flex gap-2 w-1/2" style={{ marginTop: "56px" }}>
-            <div className="flex lg:w-full md:w-[85vw] flex-col">
-              {/* <div className="relative w-full">
-        
-                <input 
-                  className="h-16 rounded-full px-8 w-full outline-none" 
-                  placeholder="Search for your desired college, location or PG"
-                />
-                <button className="w-[48px] h-[48px] rounded-full p-0 m-0 absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#fe6f61]" type="button">
-                  <img alt="search" src="/images/media/Magnifer.2001df6c.svg" width="24" height="24" />
-                </button>
-              </div> */}
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.6 }}
-                className="w-full max-w-3xl px-4"
-              >
-                <motion.div
-                  className="bg-white rounded-full p-2 flex items-center shadow-lg"
-                  whileHover={{ boxShadow: "0px 8px 20px rgba(0,0,0,0.15)" }}
-                  animate={searchFocus ? { scale: 1.02 } : { scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                >
-                  <input
-                    type="text"
-                    placeholder="Search for your desired properties, tenants, etc."
-                    className="w-full px-4 py-2 rounded-full focus:outline-none"
-                    onFocus={() => setSearchFocus(true)}
-                    onBlur={() => setSearchFocus(false)}
-                  />
-                  <motion.button
-                    className="p-2 rounded-full text-white"
-                    style={{ backgroundColor: "#fe6f61" }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                  </motion.button>
-                </motion.div>
-              </motion.div>
-            </div>
-          </form>
-        </div>
-      </div> }
-
-      {/* Feature Cards */}
-      <div className="px-20" style={{ marginTop: "138px" }}>
-        <div className="flex gap-20 justify-between ">
-          <Card className="h-32 w-full rounded-3xl p-3 bg-white">
-            <div className="w-full h-full border-1 border-[#D8D8D8] rounded-2xl flex">
-              <img alt="home" className="rounded-l-2xl" src="https://thumbs.dreamstime.com/b/close-up-real-estate-agent-holding-keys-his-hand-focus-high-quality-photo-316366166.jpg" width="116" height="116" />
-              <div className="w-6"></div>
-              <div className="flex flex-col justify-center">
-                <p className="text-xl font-semibold">1 lakh+ Landlords</p>
-                <p className="text-[#979797]">Find the perfect client, hassle-free.</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="h-32 w-full rounded-3xl p-3 bg-white">
-            <div className="w-full h-full border-1 border-[#D8D8D8] rounded-2xl flex">
-              <img className="rounded-l-2xl"
-                alt="home"
-                src="https://images.jdmagicbox.com/comp/bangalore/k7/080pxx80.xx80.140720093203.n1k7/catalogue/padma-luxury-pg-bangalore-1bk7s0s3cc.jpg"
-                width="116"
-                height="116"
-              />
-              <div className="w-6"></div>
-              <div className="flex flex-col justify-center">
-                <p className="text-xl font-semibold">Exclusive Properties</p>
-                <p className="text-[#979797]">
-                Ideal for College Students & Working Professionals.
-                </p>
-              </div>
-            </div>
-          </Card>
-          <Card className="h-32 w-full rounded-3xl p-3 bg-white">
-            <div className="w-full h-full border-1 border-[#D8D8D8] rounded-2xl flex">
-              <img alt="home" src="images/star.webp" width="116" height="116" />
-              <div className="w-6"></div>
-              <div className="flex flex-col justify-center">
-                <p className="text-xl font-semibold">4.8+ Rating</p>
-                <p className="text-[#979797]">
-                See why tenants love staying with us.
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/70 to-black/50"></div>
       </div>
 
-  
+      <motion.div
+        className="relative z-10 text-white w-full max-w-7xl mx-auto px-4 sm:px-10 lg:px-8 sm:pt-20"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.h1
+          className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 drop-shadow-md"
+          variants={itemVariants}
+        >
+          Welcome, {  }
+        </motion.h1>
 
-      {/* Tenant Management */}
-      <div className="bg-[#F9FAFB] px-20 py-10">
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-3">
-            <p className="font-bold text-4xl">
-              <span className="text-[#fe6f61]">Accommodation
-              </span> Statistics
-            </p>
-          </div>
+        <motion.p
+          className="text-base md:text-lg lg:text-xl text-gray-300 mb-8 max-w-3xl drop-shadow-sm" // Max-width for readability
+          variants={itemVariants}
+        >
+          🙏 Namaste! Manage your properties, tenants, and financials efficiently.
+        </motion.p>
 
-          <div className="flex items-center relative group mx-30">
-           
-
-            <div className="flex  gap-6 p-4  w-full ">
-            
-            <FinancialCard emoji="🏠" title="Total Tenants (Current)" value="85" />
-            <FinancialCard emoji="🏢" title="Total Capacity (Maximum)" value="120" />
-            <FinancialCard emoji="📊" title="Floor Mapping (Tenants)" value="5 Floors, 17 Rooms" />
-            <FinancialCard emoji="🌟" title="Potential Floor Mapping" value="6 Floors, 20 Rooms" />
-
-            </div>
-            
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-[#F9FAFB] px-20 py-10">
-        <div className="flex flex-col gap-5">
-          <div className="flex justify-between items-center">
-            <div className="flex flex-col gap-3">
-              <p className="font-bold text-4xl">
-                My <span className="text-[#fe6f61]">Properties</span>
-              </p>
-              <p className="text-[#979797]">Manage and monitor all your listed properties</p>
-            </div>
-            <Link 
-              to="/add-listing"
-              className="px-6 py-3 bg-[#fe6f61] text-white rounded-lg hover:bg-[#fe6f61]/90 transition-colors"
+        <motion.form
+          className="w-full max-w-xl" // Reduced max-width, no mx-auto needed as parent is text-left
+          variants={itemVariants}
+          onSubmit={(e) => e.preventDefault()}
+        >
+          <motion.div
+            className={`bg-white/95 rounded-full p-2 flex items-center shadow-md transition-all duration-300 ease-in-out ${
+              searchFocus ? 'ring-2 ring-[#fe6f61]/70 scale-[1.01]' : 'ring-0' // Subtle scale
+            }`}
+            whileHover={{ boxShadow: '0px 8px 25px rgba(0,0,0,0.15)' }} // Slightly adjusted hover shadow
+          >
+            <input
+              type="text"
+              placeholder="Search properties, tenants, financials..."
+              className="w-full px-5 py-2.5 rounded-full text-gray-800 placeholder-gray-500 focus:outline-none bg-transparent text-sm md:text-base" // Slightly smaller text/padding
+              onFocus={() => setSearchFocus(true)}
+              onBlur={() => setSearchFocus(false)}
+              aria-label="Search dashboard"
+            />
+            <motion.button
+              type="submit"
+              className="p-2.5 md:p-3 rounded-full text-white bg-[#fe6f61] flex items-center justify-center flex-shrink-0 ml-1" // Slightly smaller padding
+              whileHover={{ scale: 1.05, backgroundColor: '#e56053', boxShadow: "0px 4px 12px rgba(254, 111, 97, 0.4)" }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+              aria-label="Submit Search"
             >
-              + Add New Property
-            </Link>
-          </div>
+              <Search size={18} strokeWidth={2.5} />
+            </motion.button>
+          </motion.div>
+        </motion.form>
+      </motion.div>
+    </motion.section>
+
+      <motion.section
+        className="py-16 lg:py-20 px-4 sm:px-6 lg:px-8 xl:px-16 bg-white"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto"
+          variants={containerVariants} // Use container variants for staggering
+        >
+          <motion.div variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+            <Card className="h-full rounded-2xl p-3 shadow-md border border-gray-200 overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-center h-full border border-gray-100 rounded-xl">
+                <img alt="Landlords" className="w-full sm:w-32 h-32 sm:h-full object-cover rounded-t-xl sm:rounded-l-xl sm:rounded-tr-none" src="https://thumbs.dreamstime.com/b/close-up-real-estate-agent-holding-keys-his-hand-focus-high-quality-photo-316366166.jpg" />
+                <div className="p-4 text-center sm:text-left">
+                  <p className="text-lg font-semibold text-gray-800">1 Lakh+ Landlords</p>
+                  <p className="text-sm text-gray-600 mt-1">Find the perfect tenant, hassle-free.</p>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+            <Card className="h-full rounded-2xl p-3 shadow-md border border-gray-200 overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-center h-full border border-gray-100 rounded-xl">
+                <img alt="Properties" className="w-full sm:w-32 h-32 sm:h-full object-cover rounded-t-xl sm:rounded-l-xl sm:rounded-tr-none" src="https://images.jdmagicbox.com/comp/bangalore/k7/080pxx80.xx80.140720093203.n1k7/catalogue/padma-luxury-pg-bangalore-1bk7s0s3cc.jpg" />
+                <div className="p-4 text-center sm:text-left">
+                  <p className="text-lg font-semibold text-gray-800">Exclusive Properties</p>
+                  <p className="text-sm text-gray-600 mt-1">Ideal for students & professionals.</p>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+            <Card className="h-full rounded-2xl p-3 shadow-md border border-gray-200 overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-center h-full border border-gray-100 rounded-xl">
+                <div className="w-full sm:w-32 h-32 sm:h-full bg-[#fe6f61]/10 flex items-center justify-center rounded-t-xl sm:rounded-l-xl sm:rounded-tr-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-[#fe6f61]" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                </div>
+                <div className="p-4 text-center sm:text-left">
+                  <p className="text-lg font-semibold text-gray-800">4.8+ Rating</p>
+                  <p className="text-sm text-gray-600 mt-1">See why tenants love staying with us.</p>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        </motion.div>
+      </motion.section>
+
+      <motion.section
+        className="bg-gray-100 py-16 lg:py-20 px-4 sm:px-6 lg:px-8 xl:px-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <div className="max-w-7xl mx-auto">
+          <motion.h2
+            className="text-3xl md:text-4xl font-bold text-center mb-12"
+            variants={itemVariants}
+          >
+            Accommodation <span className="text-[#fe6f61]">Statistics</span>
+          </motion.h2>
+
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
+            variants={containerVariants}
+          >
+            <motion.div variants={itemVariants}>
+              <FinancialCard emoji="🏠" title="Total Tenants (Current)" value="85" />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <FinancialCard emoji="🏢" title="Total Capacity (Maximum)" value="120" />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <FinancialCard emoji="📊" title="Floor Mapping (Tenants)" value="5 Floors, 17 Rooms" />
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <FinancialCard emoji="🌟" title="Potential Floor Mapping" value="6 Floors, 20 Rooms" />
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      <motion.section
+        className="bg-white py-16 lg:py-20 px-4 sm:px-6 lg:px-8 xl:px-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4"
+            variants={containerVariants}
+          >
+            <motion.div variants={itemVariants}>
+              <h2 className="text-3xl md:text-4xl font-bold">
+                My <span className="text-[#fe6f61]">Properties</span>
+              </h2>
+              <p className="text-gray-600 mt-2">Manage and monitor all your listed properties.</p>
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <Link to="/add-listing">
+                <motion.button
+                  className="flex items-center gap-2 px-6 py-3 bg-[#fe6f61] text-white rounded-lg shadow-md font-medium whitespace-nowrap"
+                  whileHover={{ scale: 1.05, backgroundColor: "#e05a4f", boxShadow: "0px 8px 15px rgba(0,0,0,0.1)" }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Plus size={20} /> Add New Property
+                </motion.button>
+              </Link>
+            </motion.div>
+          </motion.div>
 
           {listingsLoading ? (
             <div className="flex justify-center items-center min-h-[200px]">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#fe6f61]"></div>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-12 h-12 border-t-4 border-b-4 border-[#fe6f61] rounded-full"
+              />
             </div>
           ) : listingsError ? (
-            <div className="text-center text-red-500 py-8">
-              Failed to load properties. Please try again later.
-            </div>
-          ) : myListings?.data?.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">You haven't listed any properties yet.</p>
-              <Link 
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center text-red-600 py-10 px-6 bg-red-50 rounded-lg border border-red-200"
+            >
+              <p className="font-semibold">Oops! Failed to load properties.</p>
+              <p className="text-sm">Please check your connection and try again later.</p>
+            </motion.div>
+          ) : !myListings?.data || myListings.data.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-12 px-6 bg-gray-100 rounded-lg border border-gray-200"
+            >
+              <Home size={48} className="mx-auto text-gray-400 mb-4" />
+              <p className="text-lg text-gray-600 mb-3">You haven't listed any properties yet.</p>
+              <Link
                 to="/add-listing"
-                className="text-[#fe6f61] hover:underline mt-2 inline-block"
+                className="text-[#fe6f61] hover:underline font-medium transition-colors"
               >
-                Add your first property
+                Add your first property now!
               </Link>
-            </div>
+            </motion.div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-              {myListings?.data?.map((listing) => (
-                <ListingCard key={listing._id} listing={listing} />
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible" // Animate immediately when data is ready
+            >
+              {myListings.data.map((listing) => (
+                // Wrap ListingCard for individual animation and hover effect
+                <motion.div key={listing._id} variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+                  <ListingCard listing={listing} />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
-      </div>
+      </motion.section>
 
-
-      <div className="bg-[#F9FAFB] px-20 py-10">
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-3">
-            <p className="font-bold text-4xl">
-              <span className="text-[#fe6f61]">Current</span> Tenants
-            </p>
-          </div>
-
-          <TenantCarousel />
-
+      {/* Current Tenants Section */}
+      <motion.section
+        className="bg-gray-100 py-16 lg:py-20 px-4 sm:px-6 lg:px-8 xl:px-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <div className="max-w-7xl mx-auto">
+          <motion.h2 className="text-3xl md:text-4xl font-bold text-center mb-10" variants={itemVariants}>
+            <span className="text-[#fe6f61]">Current</span> Tenants
+          </motion.h2>
+          {/* Assuming TenantCarousel handles its own internal animations and responsiveness */}
+          <TenantCarousel tenantType="current" />
         </div>
-      </div>
+      </motion.section>
 
 
-      {/* Premium Accommodation Section */}
-      <div className="px-20">
-        <div className="flex flex-col gap-5 bg-[#F8F3EF] border-[#C59856] border-2 rounded-3xl pl-6 pt-6 relative">
-          <div className="absolute w-[200px] right  -0 top-0 h-full rounded-r-[22px] bg-gradient-to-r from-[#C59856]/0 via-[#C59856]/30 via-48% to-[#C59856]/50"></div>
-          <p className="font-bold text-4xl text-[#AE8549] flex gap-5">
+      {/* Vacating Tenants Section */}
+      <motion.section
+        className="py-16 lg:py-20 px-4 sm:px-6 lg:px-8 xl:px-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <div className="max-w-7xl mx-auto bg-[#F8F3EF] border-2 border-[#C59856] rounded-3xl p-6 lg:p-10 relative overflow-hidden">
+          <div className="absolute w-[150px] md:w-[250px] right-0 top-0 h-full rounded-r-[22px] bg-gradient-to-r from-[#C59856]/0 via-[#C59856]/20 to-[#C59856]/40 pointer-events-none"></div>
+          <motion.h2
+            className="font-bold text-3xl md:text-4xl text-[#AE8549] flex items-center gap-3 mb-8 relative z-10"
+            variants={itemVariants}
+          >
             <img
-              alt="star"
-              src="/images/media/Star 1.992519b2.svg"
+              alt="star icon"
+              src="/images/media/Star 1.992519b2.svg" // Ensure this path is correct
               width="32"
               height="31"
+              className="flex-shrink-0"
             />
             Vacating Tenants
-          </p>
-
-          <TenantCarousel />
-
+          </motion.h2>
+          {/* Assuming TenantCarousel handles its own internal animations and responsiveness */}
+          <div className="relative z-10">
+            <TenantCarousel tenantType="vacating" />
+          </div>
         </div>
-      </div>
+      </motion.section>
 
-      
-
-      <div className="bg-[#F9FAFB] px-20 py-10">
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-3">
-            <p className="font-bold text-4xl">
-            How to fill the <span className="text-[#fe6f61]">Maximum
-              </span> Tenants ?
-            </p>
-          </div>
-          <div className="bg-[#F9FAFB] px-20 py-4">
-        <div className="bg-landingPage-gray-light4 flex gap-10 justify-between">
-          <Card className="flex-1 bg-white rounded-xl shadow-xl border border-gray-300 text-center w-full sm:w-1/5">
-            <div className="flex items-center flex-col gap-6 py-4 self-center">
-              <img
-                alt="icon"
-                src="/images/media/c1.webp"
-                width="48"
-                height="48"
-              />
-              <div className="flex text-center flex-col gap-4 p-4">
-                <span className="text-xl font-bold">Update Everything Daily</span>
-                <span>                
-                Keep your listings fresh and updated every day to ensure potential tenants find accurate and appealing information about your accommodation.
-                </span>
-              </div>
-            </div>
-          </Card>
-          <Card className="flex-1 bg-white rounded-xl shadow-xl border border-gray-300 text-center w-full sm:w-1/5">
-            <div className="flex items-center flex-col gap-6 py-4 self-center">
-              <img
-                alt="icon"
-                src="/images/media/c2.webp"
-                width="48"
-                height="48"
-              />
-              <div className="flex text-center flex-col gap-4 p-4">
-                <span className="text-xl font-bold">Boost Your Seat at Just ₹99 Per Bed</span>
-                <span>
-                
-                Offer competitive rates starting at ₹99 per bed to attract more tenants and maximize occupancy quickly.
-                </span>
-              </div>
-            </div>
-          </Card>
-          </div>
-          </div>
-
-          
+      {/* How to Maximize Tenants Section */}
+      <motion.section
+        className="bg-gray-100 py-16 lg:py-20 px-4 sm:px-6 lg:px-8 xl:px-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <div className="max-w-7xl mx-auto">
+          <motion.h2 className="text-3xl md:text-4xl font-bold text-center mb-12" variants={itemVariants}>
+            Maximize <span className="text-[#fe6f61]">Occupancy</span>
+          </motion.h2>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12"
+            variants={containerVariants}
+          >
+            {/* Card 1 */}
+            <motion.div variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+              <Card className="h-full bg-white rounded-xl shadow-lg border border-gray-200 text-center p-6">
+                <div className="flex flex-col items-center gap-5">
+                  <img alt="Update icon" src="/images/media/c1.webp" width="48" height="48" className="text-[#fe6f61]" />
+                  <h3 className="text-xl font-semibold text-gray-800">Update Everything Daily</h3>
+                  <p className="text-gray-600 text-sm">
+                    Keep listings fresh and accurate daily to attract potential tenants with the latest information.
+                  </p>
+                </div>
+              </Card>
+            </motion.div>
+            {/* Card 2 */}
+            <motion.div variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+              <Card className="h-full bg-white rounded-xl shadow-lg border border-gray-200 text-center p-6">
+                <div className="flex flex-col items-center gap-5">
+                  <img alt="Boost icon" src="/images/media/c2.webp" width="48" height="48" className="text-[#fe6f61]" />
+                  <h3 className="text-xl font-semibold text-gray-800">Boost Your Seat at Just ₹99/Bed</h3>
+                  <p className="text-gray-600 text-sm">
+                    Offer competitive rates starting at ₹99 per bed to attract more tenants and maximize occupancy quickly.
+                  </p>
+                </div>
+              </Card>
+            </motion.div>
+          </motion.div>
         </div>
-      </div>
-      <div className="bg-[#F9FAFB] px-20 py-4">
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-3">
-            <p className="font-bold text-4xl">
-            How to generate Maximum <span className="text-[#fe6f61]">Rentals
-              </span>  ?
-            </p>
-          </div>
-          <div className="bg-[#F9FAFB] px-20 py-4">
-        <div className="bg-landingPage-gray-light4 flex gap-10 justify-between">
-          <Card className="flex-1 bg-white rounded-xl shadow-xl border border-gray-300 text-center w-full sm:w-1/5">
-            <div className="flex items-center flex-col gap-6 py-4 self-center">
-              <img
-                alt="icon"
-                src="/images/media/c3.webp"
-                width="48"
-                height="48"
-              />
-              <div className="flex text-center flex-col gap-4 p-4">
-                <span className="text-xl font-bold">Offer Flexible Short Stays</span>
-                <span>                
-                Keep your listings fresh and updated every day to ensure potential tenants find accurate and appealing information about your accommodation.
-                </span>
-              </div>
-            </div>
-          </Card>
-          <Card className="flex-1 bg-white rounded-xl shadow-xl border border-gray-300 text-center w-full sm:w-1/5">
-            <div className="flex items-center flex-col gap-6 py-4 self-center">
-              <img
-                alt="icon"
-                src="/images/media/c4.webp"
-                width="48"
-                height="48"
-              />
-              <div className="flex text-center flex-col gap-4 p-4">
-                <span className="text-xl font-bold">Maximize Earnings with Seasonal Offers</span>
-                <span>
-                
-Introduce seasonal discounts or packages tailored for peak times, such as exam seasons or holidays, to boost demand and generate consistent rental income.
-                </span>
-              </div>
-            </div>
-          </Card>
+      </motion.section>
+
+      {/* How to Maximize Rentals Section */}
+      <motion.section
+        className="bg-white py-16 lg:py-20 px-4 sm:px-6 lg:px-8 xl:px-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <div className="max-w-7xl mx-auto">
+          <motion.h2 className="text-3xl md:text-4xl font-bold text-center mb-12" variants={itemVariants}>
+            Maximize <span className="text-[#fe6f61]">Rentals</span>
+          </motion.h2>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12"
+            variants={containerVariants}
+          >
+            {/* Card 1 */}
+            <motion.div variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+              <Card className="h-full bg-white rounded-xl shadow-lg border border-gray-200 text-center p-6">
+                <div className="flex flex-col items-center gap-5">
+                  <img alt="Short stay icon" src="/images/media/c3.webp" width="48" height="48" className="text-[#fe6f61]" />
+                  <h3 className="text-xl font-semibold text-gray-800">Offer Flexible Short Stays</h3>
+                  <p className="text-gray-600 text-sm">
+                    Cater to short-term needs to fill occupancy gaps and appeal to a wider range of tenants.
+                  </p>
+                </div>
+              </Card>
+            </motion.div>
+            {/* Card 2 */}
+            <motion.div variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+              <Card className="h-full bg-white rounded-xl shadow-lg border border-gray-200 text-center p-6">
+                <div className="flex flex-col items-center gap-5">
+                  <img alt="Seasonal offers icon" src="/images/media/c4.webp" width="48" height="48" className="text-[#fe6f61]" />
+                  <h3 className="text-xl font-semibold text-gray-800">Maximize with Seasonal Offers</h3>
+                  <p className="text-gray-600 text-sm">
+                    Introduce discounts or packages during peak times (exams, holidays) to boost demand and income.
+                  </p>
+                </div>
+              </Card>
+            </motion.div>
+          </motion.div>
         </div>
-      </div>
-
-          <div className="flex items-center relative group mx-30">
-           
-
-            <div className="flex  gap-6  w-full ">
-            
+      </motion.section>
 
 
+      {/* Managed Property Section */}
+      <motion.section
+        className="bg-gray-100 py-16 lg:py-20 px-4 sm:px-6 lg:px-8 xl:px-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <div className="max-w-7xl mx-auto">
+          <motion.h2 className="text-3xl md:text-4xl font-bold text-center mb-12" variants={itemVariants}>
+            Want Us to <span className="text-[#fe6f61]">Manage</span> Your Property?
+          </motion.h2>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12"
+            variants={containerVariants}
+          >
+            {/* Card 1 */}
+            <motion.div variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+              <Card className="h-full bg-white rounded-xl shadow-lg border border-gray-200 text-center p-6">
+                <div className="flex flex-col items-center gap-5">
+                  <img alt="Advice icon" src="/images/media/c1.webp" width="48" height="48" className="text-[#fe6f61]" />
+                  <h3 className="text-xl font-semibold text-gray-800">Get Free Personalized Advice</h3>
+                  <p className="text-gray-600 text-sm">
+                    Receive expert guidance on maximizing rental income with tailored, actionable market strategies.
+                  </p>
                 </div>
-            
+              </Card>
+            </motion.div>
+            {/* Card 2 */}
+            <motion.div variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+              <Card className="h-full bg-white rounded-xl shadow-lg border border-gray-200 text-center p-6">
+                <div className="flex flex-col items-center gap-5">
+                  <img alt="Management icon" src="/images/media/c2.webp" width="48" height="48" className="text-[#fe6f61]" />
+                  <h3 className="text-xl font-semibold text-gray-800">Stress-Free Management Services</h3>
+                  <p className="text-gray-600 text-sm">
+                    Let us handle tenant onboarding, rent collection, maintenance, and marketing for hassle-free ownership.
+                  </p>
                 </div>
-                </div>
-                </div>
-      <div className="bg-[#F9FAFB] px-20 py-10">
-        <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-3">
-          <p className="font-bold text-4xl">
-            Want us to <span className="text-[#fe6f61]">Manage
-              </span> your Property ?
-          </p>
+              </Card>
+            </motion.div>
+          </motion.div>
         </div>
-          <div className="bg-[#F9FAFB] px-20 py-10">
-        <div className="bg-landingPage-gray-light4 flex gap-10 justify-between">
-          <Card className="flex-1 bg-white rounded-xl shadow-xl border border-gray-300 text-center w-full sm:w-1/5">
-            <div className="flex items-center flex-col gap-6 py-4 self-center">
-              <img
-                alt="icon"
-                src="/images/media/c1.webp"
-                width="48"
-                height="48"
-              />
-              <div className="flex text-center flex-col gap-4 p-4">
-                <span className="text-xl font-bold">Get Free Personalized Advice</span>
-                <span>                
-                
-Receive expert guidance on maximizing your rental income with no added cost. Our team analyzes market trends and provides actionable strategies tailored to your property.
-                </span>
-              </div>
-            </div>
-          </Card>
-          <Card className="flex-1 bg-white rounded-xl shadow-xl border border-gray-300 text-center w-full sm:w-1/5">
-            <div className="flex items-center flex-col gap-6 py-4 self-center">
-              <img
-                alt="icon"
-                src="/images/media/c2.webp"
-                width="48"
-                height="48"
-              />
-              <div className="flex text-center flex-col gap-4 p-4">
-                <span className="text-xl font-bold">Stress-Free Property Management Services</span>
-                <span>
-                
-Let us handle all aspects of property management, including tenant onboarding, rent collection, maintenance, and marketing. Enjoy hassle-free ownership while increasing profitability.
-                </span>
-              </div>
-            </div>
-          </Card>
-          </div>
-              </div>
+      </motion.section>
 
-         
-            </div>
-          </div>
 
-    
-
-      {/* Navigation Options Section */}
-      <div className="bg-[#F9FAFB] px-20 py-10">
-        <div className="flex justify-between items-center gap-8">
-          <div 
+      <motion.section
+        className="bg-white py-6 lg:py-6 px-4 sm:px-6 lg:px-8 xl:px-16 sticky bottom-0 z-40 shadow-top"
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.5 }}
+      >
+        <div className="max-w-lg mx-auto flex justify-around items-center gap-4 sm:gap-8">
+          <motion.div
+            whileHover={{ y: -3 }} whileTap={{ scale: 0.95 }}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex flex-col items-center gap-2 cursor-pointer group"
+            className="flex flex-col items-center gap-1 cursor-pointer group text-center"
           >
-            <div className="w-16 h-16 border-2 border-[#FE6F61] rounded-xl flex items-center justify-center bg-white group-hover:bg-[#FE6F61] group-hover:text-white transition-all duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#FE6F61] group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
+            <div className="w-14 h-14 border-2 border-[#FE6F61] rounded-full flex items-center justify-center bg-white group-hover:bg-[#FE6F61]/10 transition-all duration-300">
+              <Home className="h-6 w-6 text-[#FE6F61]" />
             </div>
-            <span className="text-[#FE6F61] font-medium text-lg">Dashboard</span>
-          </div>
+            <span className="text-[#FE6F61] font-medium text-xs sm:text-sm">Dashboard</span>
+          </motion.div>
 
-          <Link 
-            to="/add-listing" 
-            className="flex flex-col items-center gap-2 group"
-          >
-            <div className="w-16 h-16 border-2 border-[#FE6F61] rounded-xl flex items-center justify-center bg-white group-hover:bg-[#FE6F61] group-hover:text-white transition-all duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 group-hover:text-white w-8 text-[#FE6F61]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </div>
-            <span className="text-[#FE6F61] font-medium text-lg">Add Property</span>
-          </Link>
+          {/* Add Property Link */}
+          <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              to="/add-listing"
+              className="flex flex-col items-center gap-1 group text-center"
+            >
+              <div className="w-14 h-14 border-2 border-[#FE6F61] rounded-full flex items-center justify-center bg-white group-hover:bg-[#FE6F61]/10 transition-all duration-300">
+                <Plus className="h-6 w-6 text-[#FE6F61]" />
+              </div>
+              <span className="text-[#FE6F61] font-medium text-xs sm:text-sm whitespace-nowrap">Add Property</span>
+            </Link>
+          </motion.div>
 
-          <Link 
-            to="/profile" 
-            className="flex flex-col items-center gap-2 group"
-          >
-            <div className="w-16 h-16 border-2 border-[#FE6F61] rounded-xl flex items-center justify-center bg-white group-hover:bg-[#FE6F61] group-hover:text-white transition-all duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 group-hover:text-white w-8 text-[#FE6F61]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <span className="text-[#FE6F61] font-medium text-lg">Profile</span>
-          </Link>
+          {/* Profile Link */}
+          <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              to="/profile" // Update this route as needed
+              className="flex flex-col items-center gap-1 group text-center"
+            >
+              <div className="w-14 h-14 border-2 border-[#FE6F61] rounded-full flex items-center justify-center bg-white group-hover:bg-[#FE6F61]/10 transition-all duration-300">
+                <User className="h-6 w-6 text-[#FE6F61]" />
+              </div>
+              <span className="text-[#FE6F61] font-medium text-xs sm:text-sm">Profile</span>
+            </Link>
+          </motion.div>
         </div>
-      </div>
-      <div className="bg-red-400 w-full h-0.25"></div>
+      </motion.section>
 
       {/* Need Assistance Section */}
-      <div className="bg-[#ffffff] px-20 py-10">
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col gap-3">
-            <p className="font-bold text-4xl">Need Assistance?</p>
-            <p className="text-[#979797] font-medium">
-              Feel free to reach out with any questions.
-            </p>
-          </div>
-          <div className="flex gap-12">
-            <div className="relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#25D366] text-white text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap">
-                2 Mins Reply
+      <motion.section
+        className="bg-white py-16 lg:py-20 px-4 sm:px-6 lg:px-8 xl:px-16 border-t border-gray-200"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={sectionVariants}
+      >
+        <div className="max-w-6xl mx-auto">
+          <motion.div className="text-center mb-12" variants={itemVariants}>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800">Need Assistance?</h2>
+            <p className="text-gray-600 mt-2">We're here to help! Reach out via your preferred method.</p>
+          </motion.div>
+
+          <motion.div
+            className="flex flex-wrap justify-center gap-6 lg:gap-10"
+            variants={containerVariants}
+          >
+            <motion.a
+              href="https://wa.me/916207409628" // Use wa.me link for direct chat
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block relative"
+              variants={itemVariants}
+              whileHover={{ y: -5, boxShadow: "0px 10px 20px rgba(37, 211, 102, 0.2)" }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#25D366] text-white text-xs px-3 py-1 rounded-full font-medium shadow-md whitespace-nowrap z-10">
+                Fast Reply
               </div>
-              <a
-                href="https://chat.whatsapp.com/D8XEoda1w2GBAeO2gtMT0b"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center border rounded-xl p-4 px-12 flex-col gap-4"
-              >
-                <img
-                  alt="icon"
-                  src="/images/media/whatsapp.webp"
-                  width="48"
-                  height="48"
-                />
-                <div className="flex flex-col gap-2">
-                  <span className="text-lg font-bold">WhatsApp us</span>
-                </div>
-              </a>
-            </div>
-            <a
+              <Card className="flex flex-col items-center border border-gray-200 rounded-xl p-6 pt-8 w-60 text-center bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg">
+                <img alt="WhatsApp icon" src="/images/media/whatsapp.webp" width="48" height="48" className="mb-4" />
+                <span className="text-lg font-semibold text-gray-800">WhatsApp Us</span>
+                <span className="text-sm text-gray-500 mt-1">(+91 6207...)</span>
+              </Card>
+            </motion.a>
+
+            <motion.a
               href="tel:+916207409628"
               target="_self"
-              className="flex items-center border rounded-xl p-4 px-12 flex-col gap-4"
+              className="block"
+              variants={itemVariants}
+              whileHover={{ y: -5, boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.08)" }}
+              whileTap={{ scale: 0.98 }}
             >
-              <img
-                alt="icon"
-                src="/images/media/Phone Calling Rounded.webp"
-                width="48"
-                height="48"
-              />
-              <div className="flex flex-col gap-2">
-                <span className="text-lg font-bold">+91 62074 09628</span>
-              </div>
-            </a>
-            <a
+              <Card className="flex flex-col items-center border border-gray-200 rounded-xl p-6 w-60 text-center bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg">
+                <Phone size={48} className="mb-4 text-blue-500" />
+                <span className="text-lg font-semibold text-gray-800">Call Us</span>
+                <span className="text-sm text-gray-500 mt-1">+91 62074 09628</span>
+              </Card>
+            </motion.a>
+
+            <motion.a
               href="mailto:officialroomsonrent@gmail.com"
               target="_self"
-              className="flex items-center border rounded-xl p-4 px-12 flex-col gap-4"
+              className="block"
+              variants={itemVariants}
+              whileHover={{ y: -5, boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.08)" }}
+              whileTap={{ scale: 0.98 }}
             >
-              <img
-                alt="icon"
-                src="/images/media/Letter.webp"
-                width="48"
-                height="48"
-              />
-              <div className="flex flex-col gap-2">
-                <span className="text-lg font-bold">Email us</span>
-              </div>
-            </a>
-          </div>
+              <Card className="flex flex-col items-center border border-gray-200 rounded-xl p-6 w-60 text-center bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg">
+                <Mail size={48} className="mb-4 text-red-500" />
+                <span className="text-lg font-semibold text-gray-800">Email Us</span>
+                <span className="text-sm text-gray-500 mt-1 truncate w-full px-2">officialroomsonrent@...</span>
+              </Card>
+            </motion.a>
+          </motion.div>
         </div>
-      </div>
-  <div className="bg-red-400 w-full h-0.5"></div>
-      {/* Where We Operate Section */}
-      <div className="px-20 my-10">
-        <div className="flex flex-col gap-12">
-          <div className="flex flex-col gap-3">
-            <p className="font-bold text-4xl">
-              Where we <span className="text-[#fe6f61]">operate</span>
-            </p>
-            <p className="text-[#979797] font-medium">
-              Trusted student lodging near key universities and bustling zones
-              in Delhi.
-            </p>
-          </div>
-          <div className="flex gap-5">
-            <div className="flex flex-col flex-1 gap-3">
-              <p className="text-[#FE6F61] font-bold text-lg mb-1">
-                South Delhi
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Malviya Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Saket</p>
-              <p className="text-sm text-[#666666] font-semibold">Hauz Khas</p>
-              <p className="text-sm text-[#666666] font-semibold">Kalkaji</p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Greater Kailash
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Lajpat Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Green Park</p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Vasant Kunj
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Sheikh Sarai
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Satya Niketan
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Chirag Delhi
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Bikaji Cama Place
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Munirka</p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Safdarjung Enclave
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Mehrauli</p>
-            </div>
-            <div className="flex flex-col flex-1 gap-3">
-              <p className="text-[#FE6F61] font-bold text-lg mb-1">
-                North Delhi
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Mukherjee Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Kamla Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Hudson Lane
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Model Town</p>
-              <p className="text-sm text-[#666666] font-semibold">GTB Road</p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Old Rajinder Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Shakti Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Vijay Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Patel Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Karol Bagh</p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Outram Lines
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Roop Nagar</p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Kingsway Camp
-              </p>
-            </div>
-            <div className="flex flex-col flex-1 gap-3">
-              <p className="text-[#FE6F61] font-bold text-lg mb-1">
-                East Delhi
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Laxmi Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Mayur Vihar (Phase I)
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Mayur Vihar (Phase II)
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Mayur Vihar (Phase III)
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Preet Vihar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Karkardooma
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Vasundhara Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                IP Extension
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Shakarpur</p>
-              <p className="text-sm text-[#666666] font-semibold">Patparganj</p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Pandav Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Anand Vihar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Geeta Colony
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Ghaziabad</p>
-            </div>
-            <div className="flex flex-col flex-1 gap-3">
-              <p className="text-[#FE6F61] font-bold text-lg mb-1">
-                West Delhi
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Janakpuri</p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Uttam Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Rajouri Garden
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Vikaspuri</p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Subhash Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Tilak Nagar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Paschim Vihar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Dwarka Mor</p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Naraina Vihar
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Tagore Garden
-              </p>
-              <p className="text-sm text-[#666666] font-semibold">Moti Nagar</p>
-              <p className="text-sm text-[#666666] font-semibold">
-                Kirti Nagar
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      </motion.section>
 
-      {/* Footer */}
-      <div className="bg-[#FE6F61] h-[250px] flex items-center py-10 text-white">
-        <Link
-          href="/"
-          className="flex-1 h-full flex items-center justify-center text-6xl font-bold"
-        >
-          ROR
-        </Link>
-        <div className="h-full w-[1px] bg-[#CCCCCC]"></div>
-        <div className="flex-1 h-full flex justify-center items-center flex-col gap-5">
-          <p className="text-2xl font-semibold">CONTACT US!</p>
-          <div className="text-lg">
-            <a href="tel:+916207409628" className="block text-center">
-              +91 62074 09628
-            </a>
-            <a href="mailto:officialroomsonrent@gmail.com" className="block">
-              officialroomsonrent@gmail.com
-            </a>
-          </div>
+
+      <motion.section
+        className="bg-gray-100 py-16 lg:py-20 px-4 sm:px-6 lg:px-8 xl:px-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }} // Trigger slightly earlier
+        variants={sectionVariants}
+      >
+        <div className="max-w-7xl mx-auto">
+          <motion.div className="text-center mb-12" variants={itemVariants}>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
+              Where We <span className="text-[#fe6f61]">Operate</span>
+            </h2>
+            <p className="text-gray-600 mt-2 max-w-2xl mx-auto">
+              Trusted student lodging and professional housing near key universities and bustling zones across Delhi.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10"
+            variants={containerVariants}
+          >
+            <motion.div variants={itemVariants} className="space-y-2">
+              <h3 className="text-lg font-semibold text-[#FE6F61] mb-3 border-b border-[#fe6f61]/30 pb-1 flex items-center gap-2">
+                <MapPin size={18} /> South Delhi
+              </h3>
+              {['Malviya Nagar', 'Saket', 'Hauz Khas', 'Kalkaji', 'Greater Kailash', 'Lajpat Nagar', 'Green Park', 'Vasant Kunj', 'Sheikh Sarai', 'Satya Niketan', 'Chirag Delhi', 'Bikaji Cama Place', 'Munirka', 'Safdarjung Enclave', 'Mehrauli'].map(loc => (
+                <p key={loc} className="text-sm text-gray-700 hover:text-gray-900">{loc}</p>
+              ))}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="space-y-2">
+              <h3 className="text-lg font-semibold text-[#FE6F61] mb-3 border-b border-[#fe6f61]/30 pb-1 flex items-center gap-2">
+                <MapPin size={18} /> North Delhi
+              </h3>
+              {['Mukherjee Nagar', 'Kamla Nagar', 'Hudson Lane', 'Model Town', 'GTB Road', 'Old Rajinder Nagar', 'Shakti Nagar', 'Vijay Nagar', 'Patel Nagar', 'Karol Bagh', 'Outram Lines', 'Roop Nagar', 'Kingsway Camp'].map(loc => (
+                <p key={loc} className="text-sm text-gray-700 hover:text-gray-900">{loc}</p>
+              ))}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="space-y-2">
+              <h3 className="text-lg font-semibold text-[#FE6F61] mb-3 border-b border-[#fe6f61]/30 pb-1 flex items-center gap-2">
+                <MapPin size={18} /> East Delhi
+              </h3>
+              {['Laxmi Nagar', 'Mayur Vihar (I)', 'Mayur Vihar (II)', 'Mayur Vihar (III)', 'Preet Vihar', 'Karkardooma', 'Vasundhara Nagar', 'IP Extension', 'Shakarpur', 'Patparganj', 'Pandav Nagar', 'Anand Vihar', 'Geeta Colony', 'Ghaziabad'].map(loc => (
+                <p key={loc} className="text-sm text-gray-700 hover:text-gray-900">{loc}</p>
+              ))}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="space-y-2">
+              <h3 className="text-lg font-semibold text-[#FE6F61] mb-3 border-b border-[#fe6f61]/30 pb-1 flex items-center gap-2">
+                <MapPin size={18} /> West Delhi
+              </h3>
+              {['Janakpuri', 'Uttam Nagar', 'Rajouri Garden', 'Vikaspuri', 'Subhash Nagar', 'Tilak Nagar', 'Paschim Vihar', 'Dwarka Mor', 'Naraina Vihar', 'Tagore Garden', 'Moti Nagar', 'Kirti Nagar'].map(loc => (
+                <p key={loc} className="text-sm text-gray-700 hover:text-gray-900">{loc}</p>
+              ))}
+            </motion.div>
+          </motion.div>
         </div>
-        <div className="h-full w-[1px] bg-[#CCCCCC]"></div>
-        <div className="flex-1 h-full flex flex-col justify-center items-center gap-5">
-          <p className="text-2xl font-semibold">FOLLOW US!</p>
-          <div className="flex gap-3">
-            <a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Twitter"
-            >
-              <img
-                alt="twitter"
-                src="/images/media/icons8-twitter-bird.ebc67185.svg"
-                width="50"
-                height="50"
-              />
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
-            >
-              <img
-                alt="linkedin"
-                src="/images/media/icons8-linkedin.4a98e29e.svg"
-                width="50"
-                height="50"
-              />
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-            >
-              <img
-                alt="instagram"
-                src="/images/media/icons8-instagram.2fe214cb.svg"
-                width="50"
-                height="50"
-              />
-            </a>
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-            >
-              <img
-                alt="facebook"
-                src="/images/media/icons8-facebook.d9ed0702.svg"
-                width="50"
-                height="50"
-              />
-            </a>
-          </div>
-        </div>
-      </div>
+      </motion.section>
+
     </div>
   );
 }

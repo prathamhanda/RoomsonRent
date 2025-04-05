@@ -9,6 +9,7 @@ import RegisterPage from "./components/Landlord/RegisterPage";
 import { AuthProvider, useAuth } from "./context/AuthContext"; // Import Auth
 import { useNavigate } from "react-router-dom";
 import LandlordPortalForm from "./components/Landlord/LandlordPortalForm";
+import { Footer } from "./components/Footer";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -37,14 +38,15 @@ function App() {
             <HomePage/>
             } />
           <Route path="/dashboard" element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
             <LandlordPage/>
-            </ProtectedRoute>
+            // </ProtectedRoute>
             } />
           <Route path="/login" element={<LoginPage/>} />
           <Route path="/register" element={<RegisterPage/>} />
           <Route path="/add-listing" element={<LandlordPortalForm/>} />
         </Routes>
+        <Footer />
       </div>
     </Router>
     </AuthProvider>

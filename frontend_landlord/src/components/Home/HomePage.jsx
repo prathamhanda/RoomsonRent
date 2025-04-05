@@ -61,8 +61,8 @@ export default function HomePage() {
         />
 
         {/* Hero Content */}
-        <div className="text-white flex flex-col gap-4 items-center pt-32 px-4 text-center">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-wider">
+        <div className="text-white flex flex-col gap-4 items-center pt-40 px-4 text-center">
+          <h1 className="text-3xl md:text-4xl lg:text-3xl font-bold tracking-wider">
             Partner With Delhi's Premier Student Housing Platform
           </h1>
           <p className="text-xl md:text-2xl tracking-wider">
@@ -75,7 +75,7 @@ export default function HomePage() {
       </div>
 
       {/* Feature Cards */}
-      <div className="px-4 md:px-8 lg:px-20 mt-24 md:mt-32">
+      <div className="px-4 md:px-8 lg:px-20 mt-24 md:mt-32 lg:-mb-[7em]">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card className="rounded-3xl p-3 bg-white hover:shadow-lg transition-shadow">
             <div className="h-full border border-[#D8D8D8] rounded-2xl flex items-center p-4">
@@ -111,7 +111,7 @@ export default function HomePage() {
 
       {/* Landlord Benefits Section */}
       <div className="bg-[#F9FAFB] px-4 md:px-8 lg:px-20 py-16 mt-16">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10">Benefits for <span className="text-[#fe6f61]">Property Owners</span></h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 lg:mt-[2em]">Benefits for <span className="text-[#fe6f61]">Property Owners</span></h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <FeatureCard 
             icon="/images/media/c1.webp"
@@ -323,88 +323,8 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* Footer */}
-      <div className="bg-[#FE6F61] text-white">
-        <div className="flex flex-col md:flex-row">
-          <div className="flex-1 flex items-center justify-center text-4xl md:text-6xl font-bold py-8 md:py-12 border-b md:border-b-0 md:border-r border-opacity-30 border-white">
-            <Link to="/" className="no-underline text-white">ROR</Link>
-          </div>
-          
-          <div className="flex-1 flex flex-col justify-center items-center gap-4 py-8 md:py-12 border-b md:border-b-0 md:border-r border-opacity-30 border-white">
-            <p className="text-xl md:text-2xl font-semibold">CONTACT US</p>
-            <div className="text-center">
-              <a href="tel:+916207409628" className="block text-base md:text-lg hover:underline">
-                +91 62074 09628
-              </a>
-              <a href="mailto:officialroomsonrent@gmail.com" className="block text-base md:text-lg hover:underline">
-                officialroomsonrent@gmail.com
-              </a>
-            </div>
-          </div>
-          
-          <div className="flex-1 flex flex-col justify-center items-center gap-4 py-8 md:py-12">
-            <p className="text-xl md:text-2xl font-semibold">FOLLOW US</p>
-            <div className="flex gap-5">
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Twitter"
-                className="hover:opacity-80 transition-opacity"
-              >
-                <img
-                  alt="twitter"
-                  src="/images/media/icons8-twitter-bird.ebc67185.svg"
-                  className="w-8 h-8"
-                />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                className="hover:opacity-80 transition-opacity"
-              >
-                <img
-                  alt="linkedin"
-                  src="/images/media/icons8-linkedin.4a98e29e.svg"
-                  className="w-8 h-8"
-                />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="hover:opacity-80 transition-opacity"
-              >
-                <img
-                  alt="instagram"
-                  src="/images/media/icons8-instagram.2fe214cb.svg"
-                  className="w-8 h-8"
-                />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="hover:opacity-80 transition-opacity"
-              >
-                <img
-                  alt="facebook"
-                  src="/images/media/icons8-facebook.d9ed0702.svg"
-                  className="w-8 h-8"
-                />
-              </a>
-            </div>
-          </div>
-        </div>
-        
-        <div className="py-4 text-center text-sm bg-[#e55a4d] bg-opacity-50">
-          <p>© 2025 Rooms On Rent. All rights reserved. | <a href="/privacy" className="hover:underline">Privacy Policy</a> | <a href="/terms" className="hover:underline">Terms of Use</a></p>
-        </div>
-      </div>
+ 
+       
     </div>
   );
 }
