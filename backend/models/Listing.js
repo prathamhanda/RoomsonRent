@@ -1,10 +1,14 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
-const FloorSchema = new mongoose.Schema({
-  numberOfRooms: {
-    type: Number,
-    required: [true, 'Please add number of rooms']
+const RoomSchema = new mongoose.Schema({
+  roomId: {
+    type: String,
+    required: [true, 'Please add a room identifier']
+  },
+  type: {
+    type: String,
+    default: 'standard'
   },
   sharingOptions: {
     type: [String],
@@ -15,7 +19,23 @@ const FloorSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please specify target tenants'],
     enum: ['Students', 'Working Professionals', 'Family', 'Any']
+  },
+  photos: {
+    type: [String],
+    default: []
   }
+});
+
+const FloorSchema = new mongoose.Schema({
+  floorId: {
+    type: String,
+    required: [true, 'Please add a floor identifier']
+  },
+  numberOfRooms: {
+    type: Number,
+    required: [true, 'Please add number of rooms']
+  },
+  rooms: [RoomSchema]
 });
 
 const ListingSchema = new mongoose.Schema({
@@ -108,6 +128,10 @@ const ListingSchema = new mongoose.Schema({
     default: false
   },
   available: {
+    type: Boolean,
+    default: true
+  },
+  active: {
     type: Boolean,
     default: true
   },

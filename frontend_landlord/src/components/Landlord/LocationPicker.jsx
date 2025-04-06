@@ -44,6 +44,8 @@ const LocationPicker = ({ propertyIndex, initialPosition, onSelectLocation }) =>
   };
 
   const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    
     try {
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${searchQuery}&key=AIzaSyCcHrOBJ_7BpFNATBavw_8b3EtggNzkL2s`
@@ -51,6 +53,13 @@ const LocationPicker = ({ propertyIndex, initialPosition, onSelectLocation }) =>
       setSearchResults(response.data.results);
     } catch (error) {
       console.error('Error searching locations:', error);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
     }
   };
 
@@ -84,6 +93,7 @@ const LocationPicker = ({ propertyIndex, initialPosition, onSelectLocation }) =>
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Search location..."
           className="flex-1 p-2 border rounded"
         />

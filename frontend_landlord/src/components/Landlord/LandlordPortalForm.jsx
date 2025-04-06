@@ -113,8 +113,8 @@ const amenitiesList = [
     setFormData({ ...formData, properties: updatedProperties });
   };
 
-  // Handle room configuration changes
-  const handleRoomConfigChange = (propertyIndex, floorIndex, field, value) => {
+  // Handle room configuration change to maintain all rooms separately
+  const handleRoomConfigChange = (propertyIndex, floorIndex, roomIndex, field, value) => {
     const updatedProperties = [...formData.properties];
 
     if (!updatedProperties[propertyIndex].floors) {
@@ -122,18 +122,70 @@ const amenitiesList = [
     }
 
     if (!updatedProperties[propertyIndex].floors[floorIndex]) {
-      updatedProperties[propertyIndex].floors[floorIndex] = {};
+      updatedProperties[propertyIndex].floors[floorIndex] = { rooms: [] };
     }
 
-    updatedProperties[propertyIndex].floors[floorIndex][field] = value;
+    if (!updatedProperties[propertyIndex].floors[floorIndex].rooms) {
+      updatedProperties[propertyIndex].floors[floorIndex].rooms = [];
+    }
+
+    // Ensure we have enough room objects
+    while (updatedProperties[propertyIndex].floors[floorIndex].rooms.length <= roomIndex) {
+      updatedProperties[propertyIndex].floors[floorIndex].rooms.push({});
+    }
+
+    // Set the field value for the specific room
+    updatedProperties[propertyIndex].floors[floorIndex].rooms[roomIndex][field] = value;
+
     setFormData({ ...formData, properties: updatedProperties });
 
     // Clear error for this field
-    if (errors[`property_${propertyIndex}_floor_${floorIndex}_${field}`]) {
+    if (errors[`property_${propertyIndex}_floor_${floorIndex}_room_${roomIndex}_${field}`]) {
       const updatedErrors = { ...errors };
-      delete updatedErrors[
-        `property_${propertyIndex}_floor_${floorIndex}_${field}`
-      ];
+      delete updatedErrors[`property_${propertyIndex}_floor_${floorIndex}_room_${roomIndex}_${field}`];
+      setErrors(updatedErrors);
+    }
+  };
+
+  // Add a function to handle room sharing options
+  const handleRoomSharingSelection = (propertyIndex, floorIndex, roomIndex, sharingOption) => {
+    const updatedProperties = [...formData.properties];
+
+    if (!updatedProperties[propertyIndex].floors) {
+      updatedProperties[propertyIndex].floors = [];
+    }
+
+    if (!updatedProperties[propertyIndex].floors[floorIndex]) {
+      updatedProperties[propertyIndex].floors[floorIndex] = { rooms: [] };
+    }
+
+    if (!updatedProperties[propertyIndex].floors[floorIndex].rooms) {
+      updatedProperties[propertyIndex].floors[floorIndex].rooms = [];
+    }
+
+    if (!updatedProperties[propertyIndex].floors[floorIndex].rooms[roomIndex]) {
+      updatedProperties[propertyIndex].floors[floorIndex].rooms[roomIndex] = { sharingOptions: [] };
+    }
+
+    if (!updatedProperties[propertyIndex].floors[floorIndex].rooms[roomIndex].sharingOptions) {
+      updatedProperties[propertyIndex].floors[floorIndex].rooms[roomIndex].sharingOptions = [];
+    }
+
+    const sharingOptions = updatedProperties[propertyIndex].floors[floorIndex].rooms[roomIndex].sharingOptions;
+    const optionIndex = sharingOptions.indexOf(sharingOption);
+
+    if (optionIndex === -1) {
+      sharingOptions.push(sharingOption);
+    } else {
+      sharingOptions.splice(optionIndex, 1);
+    }
+
+    setFormData({ ...formData, properties: updatedProperties });
+
+    // Clear error if any
+    if (errors[`property_${propertyIndex}_floor_${floorIndex}_room_${roomIndex}_sharingOptions`]) {
+      const updatedErrors = { ...errors };
+      delete updatedErrors[`property_${propertyIndex}_floor_${floorIndex}_room_${roomIndex}_sharingOptions`];
       setErrors(updatedErrors);
     }
   };
@@ -172,7 +224,17 @@ const amenitiesList = [
     }
   };
 
-  // Update validateStep function to not trigger state updates during validation
+  // Add checkboxes for room selection
+  const handleRoomSelection = (propertyIndex, floorIndex, roomIndex) => {
+    const updatedProperties = [...formData.properties];
+    if (!updatedProperties[propertyIndex].floors[floorIndex].rooms) {
+      updatedProperties[propertyIndex].floors[floorIndex].rooms = [];
+    }
+    updatedProperties[propertyIndex].floors[floorIndex].selectedRoom = roomIndex;
+    setFormData({ ...formData, properties: updatedProperties });
+  };
+
+  // Update validateStep function to check all rooms on each floor
   const validateStep = (currentStep) => {
     const newErrors = {};
 
@@ -211,10 +273,7 @@ const amenitiesList = [
 
       case 4:
         formData.properties.forEach((property, index) => {
-          if (
-            !property.numberOfFloors ||
-            parseInt(property.numberOfFloors) < 1
-          ) {
+          if (!property.numberOfFloors || parseInt(property.numberOfFloors) < 1) {
             newErrors[`property_${index}_numberOfFloors`] =
               "Please enter at least 1 floor";
           } else if (property.floors) {
@@ -225,16 +284,23 @@ const amenitiesList = [
                 ] = "Number of rooms is required";
               }
 
-              if (!floor.sharingOptions || floor.sharingOptions.length === 0) {
-                newErrors[
-                  `property_${index}_floor_${floorIndex}_sharingOptions`
-                ] = "Select at least one sharing option";
-              }
+              // Check each room in the floor
+              if (floor.rooms) {
+                for (let roomIndex = 0; roomIndex < parseInt(floor.numberOfRooms); roomIndex++) {
+                  const room = floor.rooms[roomIndex];
+                  
+                  if (!room || !room.sharingOptions || room.sharingOptions.length === 0) {
+                    newErrors[
+                      `property_${index}_floor_${floorIndex}_room_${roomIndex}_sharingOptions`
+                    ] = `Room ${roomIndex + 1}: Select at least one sharing option`;
+                  }
 
-              if (!floor.targetTenants) {
-                newErrors[
-                  `property_${index}_floor_${floorIndex}_targetTenants`
-                ] = "Target tenants is required";
+                  if (!room || !room.targetTenants) {
+                    newErrors[
+                      `property_${index}_floor_${floorIndex}_room_${roomIndex}_targetTenants`
+                    ] = `Room ${roomIndex + 1}: Target tenants is required`;
+                  }
+                }
               }
             });
           }
@@ -298,6 +364,18 @@ const amenitiesList = [
     setStep(step - 1);
   };
 
+  // Add a handler for the Enter key to navigate through steps
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (step < 5) {
+        handleNextStep();
+      } else {
+        handleSubmit(e);
+      }
+    }
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -310,29 +388,47 @@ const amenitiesList = [
 
     try {
       // Transform the form data to match backend schema
-      const transformedProperties = formData.properties.map(property => ({
-        title: property.name,
-        description: `${property.name} - ${property.propertyType}`,
-        name: property.name,
-        propertyType: property.propertyType,
-        address: property.location,
-        landmark: property.landmark,
-        location: {
-          type: 'Point',
-          coordinates: [parseFloat(property.longitude), parseFloat(property.latitude)],
-          city: property.city || '',
-          state: property.state || '',
-          country: 'India'
-        },
-        numberOfFloors: parseInt(property.numberOfFloors),
-        floors: property.floors?.map(floor => ({
-          numberOfRooms: parseInt(floor.numberOfRooms),
-          sharingOptions: floor.sharingOptions,
-          targetTenants: floor.targetTenants
-        })),
-        amenities: property.amenities || [],
-        active: true
-      }));
+      const transformedProperties = formData.properties.map(property => {
+        // Process floors data to match backend schema
+        const floorData = property.floors?.map(floor => {
+          // Prepare all rooms data
+          const roomsData = floor.rooms
+            ?.slice(0, parseInt(floor.numberOfRooms))
+            ?.map((room, index) => ({
+              roomId: `room_${index + 1}`,
+              type: room.type || "standard",
+              sharingOptions: room.sharingOptions || [],
+              targetTenants: room.targetTenants || '',
+              photos: room.photos || []
+            })) || [];
+
+          return {
+            floorId: `floor_${Math.random().toString(36).substring(2, 10)}`,
+            numberOfRooms: parseInt(floor.numberOfRooms),
+            rooms: roomsData
+          };
+        });
+
+        return {
+          title: property.name,
+          description: `${property.name} - ${property.propertyType}`,
+          name: property.name,
+          propertyType: property.propertyType,
+          address: property.location,
+          landmark: property.landmark,
+          location: {
+            type: 'Point',
+            coordinates: [parseFloat(property.longitude), parseFloat(property.latitude)],
+            city: property.city || '',
+            state: property.state || '',
+            country: 'India'
+          },
+          numberOfFloors: parseInt(property.numberOfFloors),
+          floors: floorData || [],
+          amenities: property.amenities || [],
+          active: true
+        };
+      });
 
       // Submit each property
       for (const propertyData of transformedProperties) {
@@ -343,11 +439,10 @@ const amenitiesList = [
             headers: {
               'Content-Type': 'application/json',
             },
-            withCredentials: true, // Corrected this line
+            withCredentials: true,
           }
         );
         
-
         if (!response.data.success) {
           throw new Error(response.data.message || 'Failed to create listing');
         }
@@ -400,6 +495,7 @@ const amenitiesList = [
                 max="5"
                 value={formData.numberOfProperties}
                 onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
                 className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
                   errors.numberOfProperties
                     ? "border-red-500 bg-red-50"
@@ -449,6 +545,7 @@ const amenitiesList = [
                     onChange={(e) =>
                       handlePropertyChange(index, "name", e.target.value)
                     }
+                    onKeyDown={handleKeyDown}
                     placeholder="e.g., Shayam Ghar"
                     className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
                       errors[`property_${index}_name`]
@@ -552,6 +649,7 @@ const amenitiesList = [
                                 onChange={(e) =>
                                     handlePropertyChange(index, "landmark", e.target.value)
                                 }
+                                onKeyDown={handleKeyDown}
                                 placeholder="e.g., Near City Mall"
                                 className="w-full p-3 border-2 rounded-lg transition-all duration-200 border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
                             />
@@ -646,6 +744,7 @@ const amenitiesList = [
                         e.target.value
                       )
                     }
+                    onKeyDown={handleKeyDown}
                     className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
                       errors[`property_${index}_numberOfFloors`]
                         ? "border-red-500 bg-red-50"
@@ -675,16 +774,16 @@ const amenitiesList = [
                           (_, floorIndex) => (
                             <motion.div
                               key={floorIndex}
-                              className="mb-4 p-3 border border-gray-200 rounded"
+                              className="mb-6 p-4 border border-gray-200 rounded"
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: floorIndex * 0.1 }}
                             >
-                              <h5 className="font-medium mb-2">
+                              <h5 className="font-medium mb-3 text-[rgb(254,111,97)]">
                                 Floor {floorIndex + 1}
                               </h5>
 
-                              <div className="mb-3">
+                              <div className="mb-4">
                                 <label className="block text-gray-700 mb-1">
                                   Number of Rooms:
                                 </label>
@@ -696,13 +795,13 @@ const amenitiesList = [
                                       ?.numberOfRooms || ""
                                   }
                                   onChange={(e) =>
-                                    handleRoomConfigChange(
+                                    handlePropertyChange(
                                       index,
-                                      floorIndex,
-                                      "numberOfRooms",
+                                      `floors.${floorIndex}.numberOfRooms`,
                                       e.target.value
                                     )
                                   }
+                                  onKeyDown={handleKeyDown}
                                   className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
                                     errors[
                                       `property_${index}_floor_${floorIndex}_numberOfRooms`
@@ -724,147 +823,98 @@ const amenitiesList = [
                                 )}
                               </div>
 
-                              <div className="mb-3">
-                                <label className="block text-gray-700 mb-1">
-                                  Room Sharing Options:
-                                </label>
-                                <div className="flex flex-wrap gap-2">
-                                  {[
-                                    "Single",
-                                    "Double",
-                                    "Triple",
-                                    "4 Sharing",
-                                  ].map((option) => (
-                                    <motion.div
-                                      key={option}
-                                      whileHover={{ scale: 1.05 }}
-                                      whileTap={{ scale: 0.95 }}
-                                      className={`px-3 py-1 border rounded cursor-pointer transition-all duration-200 ${
-                                        property.floors?.[
-                                          floorIndex
-                                        ]?.sharingOptions?.includes(option)
-                                          ? "bg-red-100 border-blue-300 text-blue-800"
-                                          : "bg-white border-gray-300 hover:bg-gray-50"
-                                      }`}
-                                      onClick={() => {
-                                        const updatedProperties = [
-                                          ...formData.properties,
-                                        ];
-                                        if (!updatedProperties[index].floors) {
-                                          updatedProperties[index].floors = [];
-                                        }
-                                        if (
-                                          !updatedProperties[index].floors[
-                                            floorIndex
-                                          ]
-                                        ) {
-                                          updatedProperties[index].floors[
-                                            floorIndex
-                                          ] = { sharingOptions: [] };
-                                        } else if (
-                                          !updatedProperties[index].floors[
-                                            floorIndex
-                                          ].sharingOptions
-                                        ) {
-                                          updatedProperties[index].floors[
-                                            floorIndex
-                                          ].sharingOptions = [];
-                                        }
+                              {/* Room details for this floor */}
+                              {property.floors?.[floorIndex]?.numberOfRooms > 0 && (
+                                <div className="space-y-4 mt-4">
+                                  {[...Array(parseInt(property.floors[floorIndex].numberOfRooms))].map(
+                                    (_, roomIndex) => (
+                                      <div 
+                                        key={roomIndex} 
+                                        className="p-3 border border-gray-200 rounded-lg bg-gray-50"
+                                      >
+                                        <h6 className="font-medium mb-2">Room {roomIndex + 1}</h6>
+                                        
+                                        <div className="mb-3">
+                                          <label className="block text-gray-700 mb-1">
+                                            Room Sharing Options:
+                                          </label>
+                                          <div className="flex flex-wrap gap-2">
+                                            {["Single", "Double", "Triple", "4 Sharing"].map((option) => (
+                                              <motion.div
+                                                key={option}
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                className={`px-3 py-1 border rounded cursor-pointer transition-all duration-200 ${
+                                                  property.floors?.[floorIndex]?.rooms?.[roomIndex]?.sharingOptions?.includes(option)
+                                                    ? "bg-red-100 border-blue-300 text-blue-800"
+                                                    : "bg-white border-gray-300 hover:bg-gray-50"
+                                                }`}
+                                                onClick={() => handleRoomSharingSelection(index, floorIndex, roomIndex, option)}
+                                              >
+                                                {option}
+                                              </motion.div>
+                                            ))}
+                                          </div>
+                                          {errors[
+                                            `property_${index}_floor_${floorIndex}_room_${roomIndex}_sharingOptions`
+                                          ] && (
+                                            <p className="text-red-500 text-sm mt-1">
+                                              {errors[
+                                                `property_${index}_floor_${floorIndex}_room_${roomIndex}_sharingOptions`
+                                              ]}
+                                            </p>
+                                          )}
+                                        </div>
 
-                                        const options =
-                                          updatedProperties[index].floors[
-                                            floorIndex
-                                          ].sharingOptions;
-                                        const optionIndex =
-                                          options.indexOf(option);
-
-                                        if (optionIndex === -1) {
-                                          options.push(option);
-                                        } else {
-                                          options.splice(optionIndex, 1);
-                                        }
-
-                                        setFormData({
-                                          ...formData,
-                                          properties: updatedProperties,
-                                        });
-
-                                        // Clear error if any
-                                        if (
-                                          errors[
-                                            `property_${index}_floor_${floorIndex}_sharingOptions`
-                                          ]
-                                        ) {
-                                          const updatedErrors = { ...errors };
-                                          delete updatedErrors[
-                                            `property_${index}_floor_${floorIndex}_sharingOptions`
-                                          ];
-                                          setErrors(updatedErrors);
-                                        }
-                                      }}
-                                    >
-                                      {option}
-                                    </motion.div> // Closing tag for sharing option
-                                  ))}
-                                </div>
-                                {errors[
-                                  `property_${index}_floor_${floorIndex}_sharingOptions`
-                                ] && (
-                                  <p className="text-red-500 text-sm mt-1">
-                                    {
-                                      errors[
-                                        `property_${index}_floor_${floorIndex}_sharingOptions`
-                                      ]
-                                    }
-                                  </p>
-                                )}
-                              </div>
-
-                              <div className="mb-3">
-                                <label className="block text-gray-700 mb-1">
-                                  Target Tenants:
-                                </label>
-                                <select
-                                  value={
-                                    property.floors?.[floorIndex]
-                                      ?.targetTenants || ""
-                                  }
-                                  onChange={(e) =>
-                                    handleRoomConfigChange(
-                                      index,
-                                      floorIndex,
-                                      "targetTenants",
-                                      e.target.value
+                                        <div className="mb-3">
+                                          <label className="block text-gray-700 mb-1">
+                                            Target Tenants:
+                                          </label>
+                                          <select
+                                            value={
+                                              property.floors?.[floorIndex]?.rooms?.[roomIndex]?.targetTenants || ""
+                                            }
+                                            onChange={(e) =>
+                                              handleRoomConfigChange(
+                                                index,
+                                                floorIndex,
+                                                roomIndex,
+                                                "targetTenants",
+                                                e.target.value
+                                              )
+                                            }
+                                            onKeyDown={handleKeyDown}
+                                            className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
+                                              errors[
+                                                `property_${index}_floor_${floorIndex}_room_${roomIndex}_targetTenants`
+                                              ]
+                                                ? "border-red-500 bg-red-50"
+                                                : "border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
+                                            }`}
+                                          >
+                                            <option value="">Select tenant type</option>
+                                            <option value="Students">Students</option>
+                                            <option value="Working Professionals">
+                                              Working Professionals
+                                            </option>
+                                            <option value="Family">Family</option>
+                                            <option value="Any">Any</option>
+                                          </select>
+                                          {errors[
+                                            `property_${index}_floor_${floorIndex}_room_${roomIndex}_targetTenants`
+                                          ] && (
+                                            <p className="text-red-500 text-sm mt-1">
+                                              {errors[
+                                                `property_${index}_floor_${floorIndex}_room_${roomIndex}_targetTenants`
+                                              ]}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
                                     )
-                                  }
-                                  className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
-                                    errors[
-                                      `property_${index}_floor_${floorIndex}_targetTenants`
-                                    ]
-                                      ? "border-red-500 bg-red-50"
-                                      : "border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
-                                  }`}
-                                >
-                                  <option value="">Select tenant type</option>
-                                  <option value="Students">Students</option>
-                                  <option value="Working Professionals">
-                                    Working Professionals
-                                  </option>
-                                  <option value="Family">Family</option>
-                                  <option value="Any">Any</option>
-                                </select>
-                                {errors[
-                                  `property_${index}_floor_${floorIndex}_targetTenants`
-                                ] && (
-                                  <p className="text-red-500 text-sm mt-1">
-                                    {
-                                      errors[
-                                        `property_${index}_floor_${floorIndex}_targetTenants`
-                                      ]
-                                    }
-                                  </p>
-                                )}
-                              </div>
+                                  )}
+                                </div>
+                              )}
                             </motion.div>
                           )
                         )}
@@ -902,32 +952,45 @@ const amenitiesList = [
                   <h4 className="font-medium">
                     Property {index + 1}: {property.name || "Unnamed"}
                   </h4>
-                  <p>Type: {property.propertyType || "None selected"}</p>{" "}
-                  {/* Updated for single type */}
+                  <p>Type: {property.propertyType || "None selected"}</p>
                   <p>Location: {property.location || "Not specified"}</p>
                   <p>Landmark: {property.landmark || "Not specified"}</p>
                   <p>
                     Amenities:{" "}
-                    {property.amenities?.join(", ") || "None selected"}
+                    {property.amenities?.length > 0
+                      ? property.amenities.join(", ")
+                      : "None selected"}
                   </p>
                   <p>Number of Floors: {property.numberOfFloors || "0"}</p>
                   {property.floors && property.floors.length > 0 && (
                     <div className="mt-2">
                       <p className="font-medium">Floor Details:</p>
                       {property.floors.map((floor, floorIndex) => (
-                        <div key={floorIndex} className="ml-3 mt-1">
-                          <p>
-                            Floor {floorIndex + 1}: {floor.numberOfRooms || "0"}{" "}
-                            rooms
+                        <div key={floorIndex} className="ml-3 mt-1 p-2 border-l-2 border-gray-200">
+                          <p className="font-medium">
+                            Floor {floorIndex + 1}: {floor.numberOfRooms || "0"} rooms
                           </p>
-                          <p>
-                            Sharing Options:{" "}
-                            {floor.sharingOptions?.join(", ") || "None"}
-                          </p>
-                          <p>
-                            Target Tenants:{" "}
-                            {floor.targetTenants || "Not specified"}
-                          </p>
+                          
+                          {/* Display all rooms for this floor */}
+                          {floor.rooms && parseInt(floor.numberOfRooms) > 0 && (
+                            <div className="ml-4 space-y-2 mt-2">
+                              {floor.rooms.slice(0, parseInt(floor.numberOfRooms)).map((room, roomIndex) => (
+                                <div key={roomIndex} className="p-2 bg-gray-50 rounded">
+                                  <p className="text-sm font-medium">Room {roomIndex + 1}:</p>
+                                  <p className="text-sm">
+                                    Sharing Options:{" "}
+                                    {room.sharingOptions?.length > 0
+                                      ? room.sharingOptions.join(", ")
+                                      : "None"}
+                                  </p>
+                                  <p className="text-sm">
+                                    Target Tenants:{" "}
+                                    {room.targetTenants || "Not specified"}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -951,10 +1014,10 @@ const amenitiesList = [
         return null;
     }
   };
-
+  console.log(formData);
   return (
     
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-4" onKeyDown={handleKeyDown}>
       <div className="max-w-4xl mt-20 mx-auto">
         <div className="mb-8 bg-white rounded-lg p-6 shadow-lg">
           <h1 className="text-3xl font-bold text-center text-[rgb(254,111,97)] mb-4">

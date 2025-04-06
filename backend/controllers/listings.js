@@ -145,12 +145,27 @@ exports.createListing = asyncHandler(async (req, res, next) => {
 
   // Format floors data
   if (req.body.floors) {
-    // Ensure floors is properly structured
-    req.body.floors = req.body.floors.map(floor => ({
-      numberOfRooms: floor.numberOfRooms,
-      sharingOptions: floor.sharingOptions,
-      targetTenants: floor.targetTenants
-    }));
+    // Ensure floors is properly structured with rooms data
+    req.body.floors = req.body.floors.map(floor => {
+      const floorObj = {
+        floorId: floor.floorId || `floor_${Math.random().toString(36).substring(2, 10)}`,
+        numberOfRooms: floor.numberOfRooms,
+        rooms: []
+      };
+
+      // Process rooms for this floor
+      if (floor.rooms && Array.isArray(floor.rooms)) {
+        floorObj.rooms = floor.rooms.map(room => ({
+          roomId: room.roomId || `room_${Math.random().toString(36).substring(2, 10)}`,
+          type: room.type || 'standard',
+          sharingOptions: room.sharingOptions || [],
+          targetTenants: room.targetTenants || '',
+          photos: room.photos || []
+        }));
+      }
+
+      return floorObj;
+    });
   }
 
   const listing = await Listing.create(req.body);
@@ -196,11 +211,27 @@ exports.updateListing = asyncHandler(async (req, res, next) => {
 
   // Format floors data if provided
   if (req.body.floors) {
-    req.body.floors = req.body.floors.map(floor => ({
-      numberOfRooms: floor.numberOfRooms,
-      sharingOptions: floor.sharingOptions,
-      targetTenants: floor.targetTenants
-    }));
+    // Ensure floors is properly structured with rooms data
+    req.body.floors = req.body.floors.map(floor => {
+      const floorObj = {
+        floorId: floor.floorId || `floor_${Math.random().toString(36).substring(2, 10)}`,
+        numberOfRooms: floor.numberOfRooms,
+        rooms: []
+      };
+
+      // Process rooms for this floor
+      if (floor.rooms && Array.isArray(floor.rooms)) {
+        floorObj.rooms = floor.rooms.map(room => ({
+          roomId: room.roomId || `room_${Math.random().toString(36).substring(2, 10)}`,
+          type: room.type || 'standard',
+          sharingOptions: room.sharingOptions || [],
+          targetTenants: room.targetTenants || '',
+          photos: room.photos || []
+        }));
+      }
+
+      return floorObj;
+    });
   }
 
   // Update listing
