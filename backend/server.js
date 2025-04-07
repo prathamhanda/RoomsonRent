@@ -25,6 +25,7 @@ const bookings = require('./routes/bookings');
 const locations = require('./routes/locations');
 const reviews = require('./routes/reviews');
 const uploads = require('./routes/uploads');
+const cloudinaryTest = require('./routes/cloudinary-test');
 
 const app = express();
 
@@ -69,6 +70,7 @@ app.use('/api/bookings', bookings);
 app.use('/api/locations', locations);
 app.use('/api/reviews', reviews);
 app.use('/api/uploads', uploads);
+app.use('/api/cloudinary-test', cloudinaryTest);
 
 const midd = (req,res,next)=>{
     if (req.query.id==5){

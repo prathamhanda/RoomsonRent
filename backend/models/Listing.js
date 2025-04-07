@@ -23,6 +23,23 @@ const RoomSchema = new mongoose.Schema({
   photos: {
     type: [String],
     default: []
+  },
+  tenants: {
+    type: [{
+      name: {
+        type: String,
+        required: [true, 'Please add tenant name']
+      },
+      phone: {
+        type: String,
+        required: [true, 'Please add tenant phone number'],
+        match: [
+          /^\d{10}$/,
+          'Please add a valid 10-digit phone number'
+        ]
+      }
+    }],
+    default: []
   }
 });
 

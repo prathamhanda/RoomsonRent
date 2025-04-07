@@ -19,6 +19,7 @@
     "axios": "^1.6.7",
     "bcryptjs": "^2.4.3",
     "body-parser": "^2.2.0",
+    "cloudinary": "^2.6.0",
     "colors": "^1.4.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

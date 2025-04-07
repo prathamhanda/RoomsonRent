@@ -104,4 +104,31 @@ exports.updateUserProfile = asyncHandler(async (req, res, next) => {
     success: true,
     data: user
   });
+});
+
+// @desc    Check if user exists by phone number
+// @route   GET /api/users/check-user/:phone
+// @access  Private
+exports.checkUserByPhone = asyncHandler(async (req, res, next) => {
+  const phone = req.params.phone;
+
+  if (!phone || phone.length !== 10) {
+    return next(
+      new ErrorResponse('Please provide a valid 10-digit phone number', 400)
+    );
+  }
+
+  const user = await User.findOne({ phone }).select('name phone role');
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: 'User not found with this phone number'
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: user
+  });
 }); 

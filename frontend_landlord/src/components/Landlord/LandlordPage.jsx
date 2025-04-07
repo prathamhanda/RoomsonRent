@@ -7,6 +7,7 @@ import TenantCarousel from "./TenantCarousel"; // Assuming this component exists
 import ListingCard from "./ListingCard"; // Assuming this component exists and is styled
 import useFetch from "../../hooks/useFetch";
 import { Search, Home, Plus, User, Phone, Mail, MapPin } from 'lucide-react'; // Using lucide-react for icons
+import RoomDetailsCard from './RoomDetailsCard';
 
 // Animation Variants
 const containerVariants = {
@@ -292,6 +293,72 @@ export default function LandlordPage() {
           )}
         </div>
       </motion.section>
+
+      {/* Room Details Section */}
+      {myListings && myListings.data && myListings.data.length > 0 && (
+        <motion.section
+          className="bg-gray-100 py-16 lg:py-20 px-4 sm:px-6 lg:px-8 xl:px-16"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={sectionVariants}
+        >
+          <div className="max-w-7xl mx-auto">
+            <motion.h2 className="text-3xl md:text-4xl font-bold text-center mb-12" variants={itemVariants}>
+              <span className="text-[#fe6f61]">Room</span> Details
+            </motion.h2>
+            
+            <motion.div
+              className="space-y-8"
+              variants={containerVariants}
+            >
+              {myListings.data.map((listing) => (
+                <motion.div 
+                  key={listing._id} 
+                  variants={itemVariants}
+                  className="bg-white rounded-xl shadow-md overflow-hidden"
+                >
+                  <div className="p-4 border-b border-gray-200 bg-gray-50">
+                    <h3 className="text-xl font-semibold">{listing.title}</h3>
+                    <p className="text-sm text-gray-600">{listing.address}</p>
+                  </div>
+                  
+                  <div className="p-4">
+                    {listing.floors && listing.floors.length > 0 ? (
+                      <div className="space-y-6">
+                        {listing.floors.map((floor, floorIndex) => (
+                          <div key={floor.floorId}>
+                            <h4 className="text-lg font-medium mb-3 border-b border-gray-200 pb-2">
+                              Floor {floorIndex + 1}
+                            </h4>
+                            
+                            {floor.rooms && floor.rooms.length > 0 ? (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {floor.rooms.map((room, roomIndex) => (
+                                  <RoomDetailsCard 
+                                    key={room.roomId} 
+                                    floor={floor}
+                                    roomIndex={roomIndex}
+                                    room={room}
+                                  />
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 italic">No rooms configured for this floor</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center py-8 text-gray-500 italic">No floor details available</p>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </motion.section>
+      )}
 
       {/* Current Tenants Section */}
       <motion.section
