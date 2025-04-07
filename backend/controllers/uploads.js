@@ -136,58 +136,39 @@ exports.uploadRoomImage = asyncHandler(async (req, res, next) => {
   const listing = await Listing.findById(req.params.id);
 
   if (!listing) {
-    return next(
-      new ErrorResponse(`Listing not found with id of ${req.params.id}`, 404)
-    );
+    return next(new ErrorResponse(`Listing not found with id of ${req.params.id}`, 404));
   }
 
-  // Make sure user is listing owner
   if (listing.owner.toString() !== req.user.id && req.user.role !== 'admin') {
-    return next(
-      new ErrorResponse(
-        `User ${req.user.id} is not authorized to update this listing`,
-        403
-      )
-    );
+    return next(new ErrorResponse(`User ${req.user.id} is not authorized to update this listing`, 403));
   }
 
-  // Validate floor and room IDs
-  const floorId = req.params.floorId;
-  const roomId = req.params.roomId;
-  
+  const { floorId, roomId } = req.params;
   const floorIndex = listing.floors.findIndex(floor => floor.floorId === floorId);
   if (floorIndex === -1) {
     return next(new ErrorResponse(`Floor with ID ${floorId} not found`, 404));
   }
-  
+
   const roomIndex = listing.floors[floorIndex].rooms.findIndex(room => room.roomId === roomId);
   if (roomIndex === -1) {
     return next(new ErrorResponse(`Room with ID ${roomId} not found on floor ${floorId}`, 404));
   }
 
-  if (!req.files) {
+  if (!req.files || !req.files.file) {
     return next(new ErrorResponse(`Please upload a file`, 400));
   }
 
   const file = req.files.file;
 
-  // Make sure the image is a photo
   if (!file.mimetype.startsWith('image')) {
     return next(new ErrorResponse(`Please upload an image file`, 400));
   }
 
-  // Check filesize
   if (file.size > process.env.MAX_FILE_UPLOAD) {
-    return next(
-      new ErrorResponse(
-        `Please upload an image less than ${process.env.MAX_FILE_UPLOAD / 1000000}MB`,
-        400
-      )
-    );
+    return next(new ErrorResponse(`Please upload an image less than ${process.env.MAX_FILE_UPLOAD / 1000000}MB`, 400));
   }
 
   try {
-    // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(file.tempFilePath, {
       resource_type: 'image',
       folder: `rooms/${listing._id}/${floorId}/${roomId}`,
@@ -195,14 +176,14 @@ exports.uploadRoomImage = asyncHandler(async (req, res, next) => {
       overwrite: true,
     });
 
-    // Add the Cloudinary URL to the room's photos array
     listing.floors[floorIndex].rooms[roomIndex].photos = 
       listing.floors[floorIndex].rooms[roomIndex].photos || [];
+
     listing.floors[floorIndex].rooms[roomIndex].photos.push(result.secure_url);
-    
+
     await listing.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: {
         fileName: result.public_id,
@@ -211,9 +192,10 @@ exports.uploadRoomImage = asyncHandler(async (req, res, next) => {
     });
   } catch (error) {
     console.error('Cloudinary upload error:', error);
-    return next(new ErrorResponse(`Problem with file upload to Cloudinary`, 500));
+    return next(new ErrorResponse(`Problem with file upload to Cloudinary ` + error, 500));
   }
 });
+
 
 // @desc    Delete image
 // @route   DELETE /api/uploads/:id

@@ -13,12 +13,11 @@ const {
 
 const router = express.Router();
 
-const { protect, authorize } = require('../middleware/auth');
-const { checkAuthMiddleWare } = require('../controllers/auth');
+const { checkAuthMiddleWare, authorize } = require('../middleware/auth');
 
 router.get('/featured', getFeaturedListings);
-router.get('/favorites', protect, getUserFavorites);
-router.post('/:id/favorite', protect, toggleFavorite);
+router.get('/favorites', checkAuthMiddleWare, getUserFavorites);
+router.post('/:id/favorite', checkAuthMiddleWare, toggleFavorite);
 
 router.route('/')
   .get(getListings)
@@ -29,7 +28,7 @@ router.route('/owner')
 
 router.route('/:id')
   .get(getListing)
-  .put(protect, authorize('landlord', 'admin'), updateListing)
-  .delete(protect, authorize('landlord', 'admin'), deleteListing);
+  .put(checkAuthMiddleWare, authorize('landlord', 'admin'), updateListing)
+  .delete(checkAuthMiddleWare, authorize('landlord', 'admin'), deleteListing);
 
 module.exports = router;

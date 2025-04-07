@@ -15,7 +15,7 @@ const {
 
 const router = express.Router();
 
-const { protect } = require('../middleware/auth');
+const { checkAuthMiddleWare } = require('../middleware/auth');
 
 router.post('/register', register);
 router.post('/verifyOTP', verifyOTP);
@@ -26,10 +26,10 @@ router.get('/checkLogin', checkLogin);
 router.post('/login', login);
 
 router.get('/logout', logout);
-router.get('/profile', protect, getProfile);
+router.get('/profile', checkAuthMiddleWare, getProfile);
 router.post('/forgot-password', forgotPassword);
 router.put('/reset-password/:resettoken', resetPassword);
-router.put('/update-password', protect, updatePassword);
+router.put('/update-password', checkAuthMiddleWare, updatePassword);
 router.get('/verify-email/:verificationtoken', verifyEmail);
 router.post('/google-login', googleLogin);
 

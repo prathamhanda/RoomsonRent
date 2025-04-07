@@ -11,18 +11,18 @@ const {
 
 const router = express.Router();
 
-const { protect, authorize } = require('../middleware/auth');
+const { checkAuthMiddleWare, authorize } = require('../middleware/auth');
 
 router.get('/search', searchLocations);
 router.get('/name/:name', getLocationsByName);
 
 router.route('/')
   .get(getLocations)
-  .post(protect, authorize('admin'), createLocation);
+  .post(checkAuthMiddleWare, authorize('admin'), createLocation);
 
 router.route('/:id')
   .get(getLocation)
-  .put(protect, authorize('admin'), updateLocation)
-  .delete(protect, authorize('admin'), deleteLocation);
+  .put(checkAuthMiddleWare, authorize('admin'), updateLocation)
+  .delete(checkAuthMiddleWare, authorize('admin'), deleteLocation);
 
 module.exports = router; 

@@ -12,10 +12,10 @@ const {
 
 const router = express.Router();
 
-const { protect, authorize } = require('../middleware/auth');
+const { checkAuthMiddleWare, authorize } = require('../middleware/auth');
 
 // All routes require authentication
-router.use(protect);
+router.use(checkAuthMiddleWare);
 
 router.route('/')
   .get(authorize('admin'), getBookings)

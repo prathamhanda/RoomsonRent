@@ -10,16 +10,16 @@ const {
 
 const router = express.Router({ mergeParams: true });
 
-const { protect, authorize } = require('../middleware/auth');
+const { checkAuthMiddleWare, authorize } = require('../middleware/auth');
 
 router.route('/')
   .get(getReviews)
-  .post(protect, authorize('user'), addReview);
+  .post(checkAuthMiddleWare, authorize('user'), addReview);
 
 router.route('/:id')
   .get(getReview)
-  .put(protect, authorize('user', 'admin'), updateReview)
-  .delete(protect, authorize('user', 'admin'), deleteReview);
+  .put(checkAuthMiddleWare, authorize('user', 'admin'), updateReview)
+  .delete(checkAuthMiddleWare, authorize('user', 'admin'), deleteReview);
 
 router.get('/listing/:listingId', getListingReviews);
 

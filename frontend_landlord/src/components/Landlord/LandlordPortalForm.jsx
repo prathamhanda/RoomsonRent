@@ -61,7 +61,21 @@ const amenitiesList = [
       updatedProperties[index] = {};
     }
 
+    // Update the field value
     updatedProperties[index][field] = value;
+
+    // Special handling for numberOfFloors
+    if (field === 'numberOfFloors') {
+      const numFloors = parseInt(value) || 0;
+      if (!updatedProperties[index].floors) {
+        updatedProperties[index].floors = [];
+      }
+      // Preserve existing floor data while adjusting array size
+      updatedProperties[index].floors = Array(numFloors)
+        .fill()
+        .map((_, i) => updatedProperties[index].floors[i] || { rooms: [] });
+    }
+
     setFormData({ ...formData, properties: updatedProperties });
 
     // Clear error for this property field
@@ -232,6 +246,42 @@ const amenitiesList = [
     }
     updatedProperties[propertyIndex].floors[floorIndex].selectedRoom = roomIndex;
     setFormData({ ...formData, properties: updatedProperties });
+  };
+
+  // Add this new function to handle floor-specific changes
+  const handleFloorChange = (propertyIndex, floorIndex, field, value) => {
+    const updatedProperties = [...formData.properties];
+    
+    if (!updatedProperties[propertyIndex].floors) {
+      updatedProperties[propertyIndex].floors = [];
+    }
+    
+    if (!updatedProperties[propertyIndex].floors[floorIndex]) {
+      updatedProperties[propertyIndex].floors[floorIndex] = { rooms: [] };
+    }
+
+    // Update the specific field
+    updatedProperties[propertyIndex].floors[floorIndex][field] = value;
+
+    // If updating numberOfRooms, initialize the rooms array
+    if (field === 'numberOfRooms') {
+      const numRooms = parseInt(value) || 0;
+      updatedProperties[propertyIndex].floors[floorIndex].rooms = Array(numRooms)
+        .fill()
+        .map((_, i) => updatedProperties[propertyIndex].floors[floorIndex].rooms[i] || {
+          sharingOptions: [],
+          targetTenants: ''
+        });
+    }
+
+    setFormData({ ...formData, properties: updatedProperties });
+
+    // Clear any related errors
+    if (errors[`property_${propertyIndex}_floor_${floorIndex}_${field}`]) {
+      const updatedErrors = { ...errors };
+      delete updatedErrors[`property_${propertyIndex}_floor_${floorIndex}_${field}`];
+      setErrors(updatedErrors);
+    }
   };
 
   // Update validateStep function to check all rooms on each floor
@@ -795,9 +845,10 @@ const amenitiesList = [
                                       ?.numberOfRooms || ""
                                   }
                                   onChange={(e) =>
-                                    handlePropertyChange(
+                                    handleFloorChange(
                                       index,
-                                      `floors.${floorIndex}.numberOfRooms`,
+                                      floorIndex,
+                                      "numberOfRooms",
                                       e.target.value
                                     )
                                   }

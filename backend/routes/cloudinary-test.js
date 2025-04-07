@@ -1,14 +1,14 @@
 const express = require('express');
 const cloudinary = require('../config/cloudinary');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
+const { checkAuthMiddleWare } = require('../middleware/auth');
 
 // @desc    Test Cloudinary upload
 // @route   POST /api/cloudinary-test/upload
 // @access  Private
-router.post('/upload', protect, asyncHandler(async (req, res, next) => {
+router.post('/upload', checkAuthMiddleWare, asyncHandler(async (req, res, next) => {
   if (!req.files) {
     return next(new ErrorResponse('Please upload a file', 400));
   }
@@ -49,7 +49,7 @@ router.post('/upload', protect, asyncHandler(async (req, res, next) => {
 // @desc    Test Cloudinary delete
 // @route   DELETE /api/cloudinary-test/delete
 // @access  Private
-router.delete('/delete', protect, asyncHandler(async (req, res, next) => {
+router.delete('/delete', checkAuthMiddleWare, asyncHandler(async (req, res, next) => {
   const { public_id } = req.body;
 
   if (!public_id) {

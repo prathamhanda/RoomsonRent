@@ -3,42 +3,32 @@ const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
 const User = require('../models/User');
 
-// Protect routes
-exports.protect = asyncHandler(async (req, res, next) => {
-  let token;
 
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
-    // Set token from Bearer token in header
-    token = req.headers.authorization.split(' ')[1];
-  }
+// USE THIS checkauth
+exports.checkAuthMiddleWare = asyncHandler(async (req, res, next) => {
+  const token = req.cookies?.token;
 
-  // Make sure token exists
   if (!token) {
-    res.status(403).send('Kya krra hai bhai tu??!')
+      return res.status(401).json({  status: false, error: 'Not authorized, no token' });
   }
 
   try {
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    req.user = await User.findById(decoded.id);
-
-    next();
-  } catch (err) {
-    res.status(403).send('Kya krra hai bhai tu??!')
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      //get user from db
+      const user = await User.findById(decoded.id);
+      req.user = user;
+      next();
+  } catch (error) {
+      res.status(401).json({  status: false, error:'Not authorized, token failed, ' + error });
   }
 });
-// DONT USE THIS PROTECT
 
 // Grant access to specific roles
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     console.log(req.user);
     if (!roles.includes(req.user.role)) {
-      res.status(403).send('Kya krra hai bhai tu <> ??!')
+      res.status(403).send('ERR IN authorize middleware ??!')
     }
     next();
   };

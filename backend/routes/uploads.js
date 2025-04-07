@@ -8,14 +8,14 @@ const {
 
 const router = express.Router();
 
-const { protect, authorize } = require('../middleware/auth');
+const { checkAuthMiddleWare, authorize } = require('../middleware/auth');
 
 // All routes are protected
-router.use(protect);
+router.use(checkAuthMiddleWare);
 
-router.post('/listing/:id', authorize('owner', 'admin'), uploadListingImage);
+router.post('/listing/:id', checkAuthMiddleWare , authorize('landlord', 'admin'), uploadListingImage);
 router.post('/profile', uploadProfileImage);
-router.post('/room/:id/:floorId/:roomId', authorize('owner', 'admin'), uploadRoomImage);
+router.post('/room/:id/:floorId/:roomId',checkAuthMiddleWare, authorize('landlord', 'admin'), uploadRoomImage);
 router.delete('/:id', deleteImage);
 
 module.exports = router;

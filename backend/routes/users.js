@@ -10,10 +10,10 @@ const {
 
 const router = express.Router();
 
-const { protect, authorize } = require('../middleware/auth');
+const { checkAuthMiddleWare, authorize } = require('../middleware/auth');
 
-// Use protect middleware for all routes
-router.use(protect);
+// Use checkAuthMiddleWare middleware for all routes
+router.use(checkAuthMiddleWare);
 
 router.put('/profile', updateUserProfile);
 router.get('/check-user/:phone', checkUserByPhone);

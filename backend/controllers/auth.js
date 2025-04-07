@@ -3,27 +3,10 @@ const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const sendEmail = require('../utils/sendEmail');
 const User = require('../models/User');
+const {checkAuthMiddleWare} = require('../middleware/auth');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 
-exports.checkAuthMiddleWare = asyncHandler(async (req, res, next) => {
-
-    const token = req.cookies?.token;
-
-    if (!token) {
-        return res.status(401).json({  status: false, error: 'Not authorized, no token' });
-    }
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        //get user from db
-        const user = await User.findById(decoded.id);
-        req.user = user;
-        next();
-    } catch (error) {
-        res.status(401).json({  status: false, error:'Not authorized, token failed, ' + error });
-    }
-});
 
 
 exports.checkLogin = asyncHandler(async (req, res, next) => {
