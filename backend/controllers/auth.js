@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 
 
 exports.checkLogin = asyncHandler(async (req, res, next) => {
-  exports.checkAuthMiddleWare(req, res, () => {
+  checkAuthMiddleWare(req, res, () => {
     console.log(req.user.id);
     return res.status(200).json({  status: true, message: 'Authorized',user:req.user });
   });

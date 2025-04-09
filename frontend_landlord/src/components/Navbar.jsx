@@ -51,7 +51,7 @@ const NavbarMain = () => {
         ...initialRoutes,
         {
           label: "Tenants",
-          icon: "/images/media/Group 2.svg",
+          icon: "/images/media/tenant.svg",
           url: "/tenants",
         },
         {
