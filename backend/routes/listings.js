@@ -8,7 +8,8 @@ const {
   getFeaturedListings,
   getOwnerListings,
   toggleFavorite,
-  getUserFavorites
+  getUserFavorites,
+  getLandlordCapacity
 } = require('../controllers/listings');
 
 const router = express.Router();
@@ -18,6 +19,9 @@ const { checkAuthMiddleWare, authorize } = require('../middleware/auth');
 router.get('/featured', getFeaturedListings);
 router.get('/favorites', checkAuthMiddleWare, getUserFavorites);
 router.post('/:id/favorite', checkAuthMiddleWare, toggleFavorite);
+
+// Add capacity route
+router.get('/capacity', checkAuthMiddleWare, authorize('landlord', 'admin'), getLandlordCapacity);
 
 router.route('/')
   .get(getListings)

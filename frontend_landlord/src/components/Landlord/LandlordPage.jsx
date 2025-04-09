@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Card } from "@heroui/react"; // Assuming this is the correct Card import
@@ -49,10 +49,24 @@ const sectionVariants = {
 
 export default function LandlordPage() {
   const [searchFocus, setSearchFocus] = useState(false);
+  const [capacityStats, setCapacityStats] = useState({
+    totalCapacity: 0,
+    currentOccupancy: 0
+  });
 
   const { data: myListings, loading: listingsLoading, error: listingsError } = useFetch('/api/listings/owner', {
     credentials: 'include'
   });
+
+  const { data: capacityData, loading: capacityLoading } = useFetch('/api/listings/capacity', {
+    credentials: 'include'
+  });
+
+  useEffect(() => {
+    if (capacityData?.data) {
+      setCapacityStats(capacityData.data);
+    }
+  }, [capacityData]);
 
   const { scrollYProgress } = useScroll();
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
@@ -198,10 +212,10 @@ export default function LandlordPage() {
             variants={containerVariants}
           >
             <motion.div variants={itemVariants}>
-              <FinancialCard emoji="🏠" title="Total Tenants (Current)" value="85" />
+              <FinancialCard emoji="🏠" title="Total Tenants (Current)" value={capacityStats.currentOccupancy.toString()} />
             </motion.div>
             <motion.div variants={itemVariants}>
-              <FinancialCard emoji="🏢" title="Total Capacity (Maximum)" value="120" />
+              <FinancialCard emoji="🏢" title="Total Capacity (Maximum)" value={capacityStats.totalCapacity.toString()} />
             </motion.div>
             <motion.div variants={itemVariants}>
               <FinancialCard emoji="📊" title="Floor Mapping (Tenants)" value="5 Floors, 17 Rooms" />
