@@ -17,6 +17,10 @@ const RoomDetailsModal = ({ isOpen, onClose, listing, onSuccess }) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [step, setStep] = useState(1); // 1 for selection, 2 for photos, 3 for tenants
   const [uploadingStates, setUploadingStates] = useState([]);
+  const [verificationStatus, setVerificationStatus] = useState({
+    isVerified: false,
+    userData: null
+  });
   
   // Reset everything when modal opens/closes or listing changes
   useEffect(() => {
@@ -72,22 +76,29 @@ const RoomDetailsModal = ({ isOpen, onClose, listing, onSuccess }) => {
     }
     
     setIsVerifying(true);
+    setVerificationStatus({ isVerified: false, userData: null });
+
     try {
       const response = await axios.get(`${backendURL}/api/users/check-user/${newTenant.phone}`, {
         withCredentials: true
       });
       
       if (response.data.success) {
+        const userData = response.data.data;
+        setVerificationStatus({
+          isVerified: true,
+          userData: userData
+        });
+        setNewTenant(prev => ({ 
+          ...prev, 
+          name: userData.name,
+          userId: userData._id // Store user ID for later use
+        }));
         toast.success('User verified successfully!');
-        // If user exists, pre-fill the name from response
-        if (response.data.data && response.data.data.name) {
-          setNewTenant(prev => ({ ...prev, name: response.data.data.name }));
-        }
-      } else {
-        toast.error('User not found. Please ensure they are registered on the platform.');
       }
     } catch (error) {
       console.error('Error verifying user:', error);
+      setVerificationStatus({ isVerified: false, userData: null });
       toast.error('User not found or not registered');
     } finally {
       setIsVerifying(false);
@@ -95,13 +106,25 @@ const RoomDetailsModal = ({ isOpen, onClose, listing, onSuccess }) => {
   };
 
   const addTenant = () => {
+    if (!verificationStatus.isVerified) {
+      toast.error('Please verify the tenant first');
+      return;
+    }
+    
     if (!newTenant.name || !newTenant.phone) {
       toast.error('Please fill all tenant details');
       return;
     }
     
+    // Check if tenant is already added
+    if (tenants.some(t => t.phone === newTenant.phone)) {
+      toast.error('This tenant is already added');
+      return;
+    }
+    
     setTenants([...tenants, { ...newTenant }]);
     setNewTenant({ name: '', phone: '' });
+    setVerificationStatus({ isVerified: false, userData: null });
   };
 
   const removeTenant = (index) => {
@@ -168,6 +191,22 @@ const RoomDetailsModal = ({ isOpen, onClose, listing, onSuccess }) => {
         photoUrls = results.filter(url => url !== null);
       }
       
+      // Associate tenants with the room
+      const tenantAssignPromises = tenants.map(tenant => 
+        axios.put(
+          `${backendURL}/api/users/assign-room/${tenant.userId}`,
+          {
+            listingId: listing._id,
+            floorId: selectedFloor,
+            roomId: selectedRoom
+          },
+          { withCredentials: true }
+        )
+      );
+
+      // Wait for all tenant assignments to complete
+      await Promise.all(tenantAssignPromises);
+      
       // Then update room with photos and tenants
       const floorIndex = listing.floors.findIndex(floor => floor.floorId === selectedFloor);
       const roomIndex = listing.floors[floorIndex].rooms.findIndex(room => room.roomId === selectedRoom);
@@ -179,7 +218,11 @@ const RoomDetailsModal = ({ isOpen, onClose, listing, onSuccess }) => {
       const updatedRoom = {
         ...room,
         photos: [...(room.photos || []), ...photoUrls],
-        tenants: tenants
+        tenants: tenants.map(tenant => ({
+          userId: tenant.userId,
+          name: tenant.name,
+          phone: tenant.phone
+        }))
       };
       
       // Create a deep copy of listing to update
@@ -218,9 +261,25 @@ const RoomDetailsModal = ({ isOpen, onClose, listing, onSuccess }) => {
   };
 
   const modalVariants = {
-    hidden: { opacity: 0, y: 50, scale: 0.95 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3, ease: 'easeOut' } },
-    exit: { opacity: 0, y: 50, scale: 0.95, transition: { duration: 0.2, ease: 'easeIn' } }
+    hidden: { opacity: 0, y: "100%", scale: 1 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1, 
+      transition: { 
+        type: "spring",
+        damping: 25,
+        stiffness: 500
+      }
+    },
+    exit: { 
+      opacity: 0,
+      y: "100%",
+      transition: { 
+        duration: 0.2,
+        ease: 'easeIn'
+      }
+    }
   };
 
   // Render room configuration based on sharing options
@@ -250,14 +309,14 @@ const RoomDetailsModal = ({ isOpen, onClose, listing, onSuccess }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/60 z-50 flex items-start justify-center sm:items-center p-0 sm:p-4"
           initial="hidden"
           animate="visible"
           exit="hidden"
           variants={backdropVariants}
         >
           <motion.div
-            className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden"
+            className="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-3xl sm:rounded-xl shadow-xl overflow-hidden"
             variants={modalVariants}
             initial="hidden"
             animate="visible"
@@ -265,21 +324,21 @@ const RoomDetailsModal = ({ isOpen, onClose, listing, onSuccess }) => {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="border-b border-gray-200 p-4 flex justify-between items-center">
+            <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
               <h2 className="text-xl font-bold text-gray-800">
                 {step === 1 ? 'Select Room' : 
                  step === 2 ? 'Upload Photos' : 'Add Tenants'}
               </h2>
               <button 
                 onClick={onClose}
-                className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
               >
-                <X size={20} />
+                <X size={24} />
               </button>
             </div>
             
             {/* Content */}
-            <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+            <div className="overflow-y-auto h-[calc(100vh-120px)] sm:h-auto sm:max-h-[calc(90vh-120px)] p-4">
               {step === 1 && (
                 <div className="space-y-4">
                   <div>
@@ -395,72 +454,99 @@ const RoomDetailsModal = ({ isOpen, onClose, listing, onSuccess }) => {
               
               {step === 3 && (
                 <div className="space-y-4">
-                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-sm text-gray-600">
-                      Add current tenants living in this room. These should be registered users of the platform.
+                      Add current tenants living in this room. Only verified users can be added as tenants.
                     </p>
                   </div>
                   
-                  <div className="space-y-3">
-                    <div className="flex gap-2">
+                  <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <div className="flex-grow">
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Tenant Name
-                        </label>
-                        <input
-                          type="text"
-                          value={newTenant.name}
-                          onChange={(e) => setNewTenant({ ...newTenant, name: e.target.value })}
-                          placeholder="Enter tenant name"
-                          className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                        />
-                      </div>
-                      <div className="flex-grow">
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           Phone Number
                         </label>
-                        <div className="flex gap-1">
+                        <div className="flex gap-2">
                           <input
                             type="tel"
                             value={newTenant.phone}
-                            onChange={(e) => setNewTenant({ ...newTenant, phone: e.target.value })}
+                            onChange={(e) => {
+                              setNewTenant({ ...newTenant, phone: e.target.value });
+                              setVerificationStatus({ isVerified: false, userData: null });
+                            }}
                             placeholder="10-digit number"
-                            className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                            className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FE6F61] focus:border-transparent"
                           />
                           <button
                             onClick={verifyTenant}
-                            disabled={isVerifying}
-                            className="px-2 py-1 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors"
+                            disabled={isVerifying || !newTenant.phone}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              isVerifying 
+                                ? 'bg-gray-100 text-gray-400'
+                                : verificationStatus.isVerified
+                                ? 'bg-green-50 text-green-600'
+                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                            }`}
                           >
-                            {isVerifying ? 'Checking...' : 'Verify'}
+                            {isVerifying ? (
+                              <div className="flex items-center gap-2">
+                                <Loader size={16} className="animate-spin" />
+                                <span>Verifying...</span>
+                              </div>
+                            ) : verificationStatus.isVerified ? (
+                              <div className="flex items-center gap-2">
+                                <CheckCircle size={16} />
+                                <span>Verified</span>
+                              </div>
+                            ) : (
+                              'Verify'
+                            )}
                           </button>
                         </div>
                       </div>
-                      <button
-                        onClick={addTenant}
-                        className="mt-auto p-2 bg-[#FE6F61] text-white rounded-lg hover:bg-[#e5635b] transition-colors"
-                      >
-                        <Plus size={20} />
-                      </button>
                     </div>
+
+                    {verificationStatus.isVerified && verificationStatus.userData && (
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium text-green-800">
+                              {verificationStatus.userData.name}
+                            </h4>
+                            <p className="text-sm text-green-600">
+                              Verified User
+                            </p>
+                          </div>
+                          <button
+                            onClick={addTenant}
+                            className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                          >
+                            <Plus size={20} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     
                     {tenants.length > 0 && (
-                      <div className="mt-3">
-                        <h3 className="font-medium mb-2">Current Tenants:</h3>
-                        <div className="space-y-2">
+                      <div className="mt-6">
+                        <h3 className="font-medium text-gray-900 mb-3">Added Tenants</h3>
+                        <div className="space-y-3">
                           {tenants.map((tenant, index) => (
-                            <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg border border-gray-200">
+                            <div 
+                              key={index} 
+                              className="flex justify-between items-center p-4 bg-white rounded-lg border border-gray-200 shadow-sm"
+                            >
                               <div>
-                                <p className="font-medium">{tenant.name}</p>
+                                <p className="font-medium text-gray-900">{tenant.name}</p>
                                 <p className="text-sm text-gray-600">{tenant.phone}</p>
                               </div>
                               <motion.button
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => removeTenant(index)}
-                                className="text-red-500 p-1 hover:bg-red-50 rounded-full"
+                                className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
                               >
-                                <Trash2 size={16} />
+                                <Trash2 size={20} />
                               </motion.button>
                             </div>
                           ))}
@@ -473,7 +559,7 @@ const RoomDetailsModal = ({ isOpen, onClose, listing, onSuccess }) => {
             </div>
             
             {/* Footer */}
-            <div className="border-t border-gray-200 p-4 flex justify-between">
+            <div className="sticky bottom-0 z-10 bg-white border-t border-gray-200 p-4 flex justify-between">
               {step > 1 ? (
                 <button
                   onClick={() => setStep(step - 1)}

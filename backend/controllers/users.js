@@ -131,4 +131,40 @@ exports.checkUserByPhone = asyncHandler(async (req, res, next) => {
     success: true,
     data: user
   });
+});
+
+// @desc    Associate tenant with room
+// @route   PUT /api/users/assign-room/:userId
+// @access  Private/Admin
+exports.assignRoom = asyncHandler(async (req, res, next) => {
+  const { listingId, floorId, roomId } = req.body;
+
+  if (!listingId || !floorId || !roomId) {
+    return next(
+      new ErrorResponse('Please provide listing, floor and room IDs', 400)
+    );
+  }
+
+  const user = await User.findById(req.params.userId);
+
+  if (!user) {
+    return next(
+      new ErrorResponse(`User not found with id of ${req.params.userId}`, 404)
+    );
+  }
+
+  // Update user's room assignment
+  user.currentRoom = {
+    listingId,
+    floorId,
+    roomId,
+    assignedAt: Date.now()
+  };
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    data: user
+  });
 }); 
