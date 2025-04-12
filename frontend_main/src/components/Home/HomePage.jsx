@@ -1459,7 +1459,7 @@ export default function HomePage() {
       <div className="px-20 gap-16 flex flex-col">
         <div className="flex w-full gap-20 h-60">
           <div 
-            onClick={() => window.location.href = '/landlord'}
+            onClick={() => window.location.href = 'https://landlord.roomsonrent.in'}
             className="border-2 border-[#D8D8D8] rounded-2xl h-full flex-1 flex gap-10 cursor-pointer transition-all duration-300 hover:border-[#FE6F61] hover:shadow-lg hover:scale-[1.02]"
           >
             <div className="flex flex-col p-5 gap-2 text-[#2A2A2A]">

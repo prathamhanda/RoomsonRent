@@ -12,6 +12,7 @@ import LandlordPortalForm from "./components/Landlord/LandlordPortalForm";
 import RoomDetailsPage from "./components/Landlord/RoomDetailsPage";
 import PropertyEditPage from "./components/Landlord/PropertyEditPage";
 import { Footer } from "./components/Footer";
+import { Toaster } from 'react-hot-toast';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -33,6 +34,7 @@ function App() {
    <Router>
       <div className="min-h-screen">
         <NavbarMain />
+        <Toaster position="top-center" reverseOrder={false} />
         <Routes>
           <Route path="/" element={
             <HomePage/>

@@ -56,7 +56,7 @@ export default function LandlordPage() {
     currentOccupancy: 0
   });
 
-  const { data: myListings, loading: listingsLoading, error: listingsError } = useFetch('/api/listings/owner', {
+  const { data: myListings, loading: listingsLoading, error: listingsError, setData: setMyListings } = useFetch('/api/listings/owner', {
     credentials: 'include'
   });
 
@@ -70,6 +70,17 @@ export default function LandlordPage() {
     }
   }, [capacityData]);
 
+  const handleDeleteListing = (deletedListingId) => {
+    // Update the listings state by filtering out the deleted listing
+    if (myListings?.data) {
+      const updatedListings = myListings.data.filter(listing => listing._id !== deletedListingId);
+      setMyListings({
+        ...myListings,
+        count: updatedListings.length,
+        data: updatedListings
+      });
+    }
+  };
 
   const { scrollYProgress } = useScroll();
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
@@ -253,72 +264,45 @@ export default function LandlordPage() {
         variants={sectionVariants}
       >
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4"
-            variants={containerVariants}
-          >
-            <motion.div variants={itemVariants}>
-              <h2 className="text-3xl md:text-4xl font-bold">
-                My <span className="text-[#fe6f61]">Properties</span>
-              </h2>
-              <p className="text-gray-600 mt-2">Manage and monitor all your listed properties.</p>
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <Link to="/add-listing">
-                <motion.button
-                  className="flex items-center gap-2 px-6 py-3 bg-[#fe6f61] text-white rounded-lg shadow-md font-medium whitespace-nowrap"
-                  whileHover={{ scale: 1.05, backgroundColor: "#e05a4f", boxShadow: "0px 8px 15px rgba(0,0,0,0.1)" }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Plus size={20} /> Add New Property
-                </motion.button>
-              </Link>
-            </motion.div>
-          </motion.div>
+          <div className="flex justify-between items-center mb-8">
+            <motion.h2
+              className="text-3xl md:text-4xl font-bold"
+              variants={itemVariants}
+            >
+              My <span className="text-[#fe6f61]">Properties</span>
+            </motion.h2>
+            <Link
+              to="/add-listing"
+              className="inline-flex items-center px-4 py-2 bg-[#fe6f61] text-white rounded-lg hover:bg-[#e5635b] transition-colors"
+            >
+              <Plus size={20} className="mr-2" />
+              Add Property
+            </Link>
+          </div>
 
           {listingsLoading ? (
-            <div className="flex justify-center items-center min-h-[200px]">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-12 h-12 border-t-4 border-b-4 border-[#fe6f61] rounded-full"
-              />
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-[#fe6f61]"></div>
             </div>
           ) : listingsError ? (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center text-red-600 py-10 px-6 bg-red-50 rounded-lg border border-red-200"
-            >
-              <p className="font-semibold">Oops! Failed to load properties.</p>
-              <p className="text-sm">Please check your connection and try again later.</p>
-            </motion.div>
-          ) : !myListings?.data || myListings.data.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center py-12 px-6 bg-gray-100 rounded-lg border border-gray-200"
-            >
-              <Home size={48} className="mx-auto text-gray-400 mb-4" />
-              <p className="text-lg text-gray-600 mb-3">You haven't listed any properties yet.</p>
-              <Link
-                to="/add-listing"
-                className="text-[#fe6f61] hover:underline font-medium transition-colors"
-              >
-                Add your first property now!
-              </Link>
-            </motion.div>
+            <div className="text-center text-red-500">
+              Error loading listings. Please try again.
+            </div>
+          ) : myListings?.data?.length === 0 ? (
+            <div className="text-center text-gray-500">
+              No properties found. Add your first property!
+            </div>
           ) : (
             <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               variants={containerVariants}
-              initial="hidden"
-              animate="visible" // Animate immediately when data is ready
             >
-              {myListings.data.map((listing) => (
-                // Wrap ListingCard for individual animation and hover effect
-                <motion.div key={listing._id} variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
-                  <ListingCard listing={listing} />
+              {myListings?.data?.map((listing) => (
+                <motion.div key={listing._id} variants={itemVariants}>
+                  <ListingCard
+                    listing={listing}
+                    onDelete={handleDeleteListing}
+                  />
                 </motion.div>
               ))}
             </motion.div>
