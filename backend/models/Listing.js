@@ -26,6 +26,11 @@ const RoomSchema = new mongoose.Schema({
   },
   tenants: {
     type: [{
+      userId: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: [true, 'Please provide user ID']
+      },
       name: {
         type: String,
         required: [true, 'Please add tenant name']
@@ -37,6 +42,10 @@ const RoomSchema = new mongoose.Schema({
           /^\d{10}$/,
           'Please add a valid 10-digit phone number'
         ]
+      },
+      assignedAt: {
+        type: Date,
+        default: Date.now
       }
     }],
     default: []

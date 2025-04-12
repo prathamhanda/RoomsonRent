@@ -44,9 +44,50 @@ const UserSchema = new mongoose.Schema({
     required: false,
     match: [/^\d{6}$/, 'OTP must be a 6-digit number'],
   },
-  // otpExpire: {
-  //   type: Date,
-  // },
+  currentRooms: [{
+    listingId: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Listing',
+      required: true
+    },
+    listingName: {
+      type: String,
+      required: true
+    },
+    floorId: {
+      type: String,
+      required: true
+    },
+    floorNumber: {
+      type: Number,
+      required: true
+    },
+    roomId: {
+      type: String,
+      required: true
+    },
+    roomNumber: {
+      type: Number,
+      required: true
+    },
+    assignedBy: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    assignedAt: {
+      type: Date,
+      default: Date.now
+    },
+    sharingType: {
+      type: String,
+      required: true
+    },
+    active: {
+      type: Boolean,
+      default: true
+    }
+  }],
   verificationToken: String,
   verificationTokenExpire: Date,
   resetPasswordToken: String,

@@ -5,7 +5,8 @@ const {
   updateUser,
   deleteUser,
   updateUserProfile,
-  checkUserByPhone
+  checkUserByPhone,
+  assignRoom
 } = require('../controllers/users');
 
 const router = express.Router();
@@ -15,8 +16,12 @@ const { checkAuthMiddleWare, authorize } = require('../middleware/auth');
 // Use checkAuthMiddleWare middleware for all routes
 router.use(checkAuthMiddleWare);
 
+// Public routes (after authentication)
 router.put('/profile', updateUserProfile);
 router.get('/check-user/:phone', checkUserByPhone);
+
+// Landlord and admin routes
+router.put('/assign-room/:userId', authorize('landlord', 'admin'), assignRoom);
 
 // Admin only routes
 router.use(authorize('admin'));

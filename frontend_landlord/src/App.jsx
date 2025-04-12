@@ -9,6 +9,7 @@ import RegisterPage from "./components/Landlord/RegisterPage";
 import { AuthProvider, useAuth } from "./context/AuthContext"; // Import Auth
 import { useNavigate } from "react-router-dom";
 import LandlordPortalForm from "./components/Landlord/LandlordPortalForm";
+import RoomDetailsPage from "./components/Landlord/RoomDetailsPage";
 import { Footer } from "./components/Footer";
 
 const ProtectedRoute = ({ children }) => {
@@ -24,8 +25,6 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : null;
 };
 
-
-
 // Main App Component
 function App() {
   return (
@@ -38,13 +37,22 @@ function App() {
             <HomePage/>
             } />
           <Route path="/dashboard" element={
-            // <ProtectedRoute>
-            <LandlordPage/>
-            // </ProtectedRoute>
+            <ProtectedRoute>
+              <LandlordPage/>
+            </ProtectedRoute>
             } />
           <Route path="/login" element={<LoginPage/>} />
           <Route path="/register" element={<RegisterPage/>} />
-          <Route path="/add-listing" element={<LandlordPortalForm/>} />
+          <Route path="/add-listing" element={
+            <ProtectedRoute>
+              <LandlordPortalForm/>
+            </ProtectedRoute>
+          } />
+          <Route path="/landlord/listings/:listingId/floor/:floorId/room/:roomId" element={
+            <ProtectedRoute>
+              <RoomDetailsPage/>
+            </ProtectedRoute>
+          } />
         </Routes>
         <Footer />
       </div>

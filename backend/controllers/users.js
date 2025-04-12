@@ -1,6 +1,7 @@
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
+const Listing = require('../models/Listing');
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -145,21 +146,71 @@ exports.assignRoom = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // Find the user
   const user = await User.findById(req.params.userId);
-
   if (!user) {
     return next(
       new ErrorResponse(`User not found with id of ${req.params.userId}`, 404)
     );
   }
 
-  // Update user's room assignment
-  user.currentRoom = {
-    listingId,
-    floorId,
-    roomId,
-    assignedAt: Date.now()
+  // Find the listing and get room details
+  const listing = await Listing.findById(listingId);
+  if (!listing) {
+    return next(
+      new ErrorResponse(`Listing not found with id of ${listingId}`, 404)
+    );
+  }
+
+  // Find floor and room
+  const floor = listing.floors.find(f => f.floorId === floorId);
+  if (!floor) {
+    return next(
+      new ErrorResponse(`Floor not found with id of ${floorId}`, 404)
+    );
+  }
+
+  const floorIndex = listing.floors.findIndex(f => f.floorId === floorId);
+  const room = floor.rooms.find(r => r.roomId === roomId);
+  if (!room) {
+    return next(
+      new ErrorResponse(`Room not found with id of ${roomId}`, 404)
+    );
+  }
+
+  const roomIndex = floor.rooms.findIndex(r => r.roomId === roomId);
+
+  // Create room assignment object
+  const roomAssignment = {
+    listingId: listing._id,
+    listingName: listing.name,
+    floorId: floor.floorId,
+    floorNumber: floorIndex + 1,
+    roomId: room.roomId,
+    roomNumber: roomIndex + 1,
+    assignedBy: req.user.id,
+    assignedAt: new Date(),
+    sharingType: room.sharingOptions[0], // Using first sharing option as the assigned type
+    active: true
   };
+
+  // Check if user already has this room assigned
+  const existingAssignment = user.currentRooms.find(
+    room => room.listingId.toString() === listingId &&
+           room.floorId === floorId &&
+           room.roomId === roomId
+  );
+
+  if (existingAssignment) {
+    // Update existing assignment
+    Object.assign(existingAssignment, roomAssignment);
+  } else {
+    // Add new assignment
+    if (!user.currentRooms) {
+      user.currentRooms = [];
+    }
+    user.currentRooms.push(roomAssignment);
+  }
 
   await user.save();
 

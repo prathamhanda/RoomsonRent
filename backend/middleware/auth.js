@@ -9,27 +9,51 @@ exports.checkAuthMiddleWare = asyncHandler(async (req, res, next) => {
   const token = req.cookies?.token;
 
   if (!token) {
-      return res.status(401).json({  status: false, error: 'Not authorized, no token' });
+    return res.status(401).json({ 
+      success: false, 
+      error: 'Not authorized, no token' 
+    });
   }
 
   try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      //get user from db
-      const user = await User.findById(decoded.id);
-      req.user = user;
-      next();
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    //get user from db
+    const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+    
+    req.user = user;
+    next();
   } catch (error) {
-      res.status(401).json({  status: false, error:'Not authorized, token failed, ' + error });
+    return res.status(401).json({ 
+      success: false, 
+      error: 'Not authorized, token failed: ' + error.message 
+    });
   }
 });
 
 // Grant access to specific roles
 exports.authorize = (...roles) => {
   return (req, res, next) => {
-    console.log(req.user);
-    if (!roles.includes(req.user.role)) {
-      res.status(403).send('ERR IN authorize middleware ??!')
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not authenticated'
+      });
     }
+
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        error: `User role ${req.user.role} is not authorized to access this route`
+      });
+    }
+
     next();
   };
 }; 

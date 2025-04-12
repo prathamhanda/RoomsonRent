@@ -209,29 +209,74 @@ exports.updateListing = asyncHandler(async (req, res, next) => {
     };
   }
 
-  // Format floors data if provided
+  // Process tenant assignments if floors data is provided
   if (req.body.floors) {
-    // Ensure floors is properly structured with rooms data
-    req.body.floors = req.body.floors.map(floor => {
-      const floorObj = {
-        floorId: floor.floorId || `floor_${Math.random().toString(36).substring(2, 10)}`,
-        numberOfRooms: floor.numberOfRooms,
-        rooms: []
-      };
-
-      // Process rooms for this floor
-      if (floor.rooms && Array.isArray(floor.rooms)) {
-        floorObj.rooms = floor.rooms.map(room => ({
-          roomId: room.roomId || `room_${Math.random().toString(36).substring(2, 10)}`,
-          type: room.type || 'standard',
-          sharingOptions: room.sharingOptions || [],
-          targetTenants: room.targetTenants || '',
-          photos: room.photos || []
-        }));
-      }
-
-      return floorObj;
+    // Get all existing tenant assignments from the listing
+    const existingTenantAssignments = new Map();
+    listing.floors.forEach(floor => {
+      floor.rooms.forEach(room => {
+        room.tenants.forEach(tenant => {
+          existingTenantAssignments.set(tenant.userId.toString(), {
+            floorId: floor.floorId,
+            roomId: room.roomId
+          });
+        });
+      });
     });
+
+    // Process new tenant assignments
+    const newTenantAssignments = new Map();
+    req.body.floors.forEach(floor => {
+      floor.rooms.forEach(room => {
+        if (room.tenants && Array.isArray(room.tenants)) {
+          room.tenants.forEach(tenant => {
+            if (tenant.userId) {
+              newTenantAssignments.set(tenant.userId.toString(), {
+                floorId: floor.floorId,
+                roomId: room.roomId
+              });
+            }
+          });
+        }
+      });
+    });
+
+    // Find tenants to remove and update
+    const tenantsToRemove = [];
+    existingTenantAssignments.forEach((assignment, userId) => {
+      if (!newTenantAssignments.has(userId)) {
+        tenantsToRemove.push(userId);
+      }
+    });
+
+    // Update User model for removed tenants
+    if (tenantsToRemove.length > 0) {
+      await User.updateMany(
+        { _id: { $in: tenantsToRemove } },
+        { $unset: { currentRoom: "" } }
+      );
+    }
+
+    // Update User model for new/updated tenant assignments
+    const userUpdatePromises = [];
+    newTenantAssignments.forEach((assignment, userId) => {
+      userUpdatePromises.push(
+        User.findByIdAndUpdate(
+          userId,
+          {
+            currentRoom: {
+              listingId: listing._id,
+              floorId: assignment.floorId,
+              roomId: assignment.roomId,
+              assignedAt: Date.now()
+            }
+          },
+          { new: true }
+        )
+      );
+    });
+
+    await Promise.all(userUpdatePromises);
   }
 
   // Update listing
