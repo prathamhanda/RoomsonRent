@@ -313,6 +313,91 @@ exports.getOwnerListings = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    Get capacity statistics for owner's properties
+// @route   GET /api/listings/capacity
+// @access  Private (Owner, Admin)
+exports.getCapacityStats = asyncHandler(async (req, res, next) => {
+  const listings = await Listing.find({ owner: req.user.id });
+  
+  let stats = {
+    totalCapacity: 0,
+    currentOccupancy: 0,
+    roomTypeBreakdown: {
+      single: 0,
+      double: 0,
+      triple: 0,
+      fourSharing: 0
+    },
+    floorCount: 0,
+    roomCount: 0
+  };
+
+  listings.forEach(listing => {
+    if (listing.floors && Array.isArray(listing.floors)) {
+      stats.floorCount += listing.floors.length;
+      
+      listing.floors.forEach(floor => {
+        if (floor.rooms && Array.isArray(floor.rooms)) {
+          stats.roomCount += floor.rooms.length;
+          
+          floor.rooms.forEach(room => {
+            if (room.sharingOptions && Array.isArray(room.sharingOptions)) {
+              // Get the first sharing option as that's how it's structured in the data
+              const sharingOption = room.sharingOptions[0];
+              
+              // Calculate capacity based on sharing option
+              switch(sharingOption) {
+                case 'Single':
+                  stats.totalCapacity += 1;
+                  stats.roomTypeBreakdown.single += 1;
+                  break;
+                case 'Double':
+                  stats.totalCapacity += 2;
+                  stats.roomTypeBreakdown.double += 1;
+                  break;
+                case 'Triple':
+                  stats.totalCapacity += 3;
+                  stats.roomTypeBreakdown.triple += 1;
+                  break;
+                case '4 Sharing':
+                  stats.totalCapacity += 4;
+                  stats.roomTypeBreakdown.fourSharing += 1;
+                  break;
+                default:
+                  // Try to parse number from the sharing option string
+                  const match = sharingOption.match(/\d+/);
+                  if (match) {
+                    const num = parseInt(match[0]);
+                    if (!isNaN(num)) {
+                      stats.totalCapacity += num;
+                      stats.roomTypeBreakdown.other += 1;
+                    }
+                  }
+              }
+            }
+            
+            // Calculate current occupancy
+            if (room.tenants && Array.isArray(room.tenants)) {
+              stats.currentOccupancy += room.tenants.length;
+            }
+          });
+        }
+      });
+    }
+  });
+
+  res.status(200).json({
+    success: true,
+    data: {
+      totalCapacity: stats.totalCapacity,
+      currentOccupancy: stats.currentOccupancy,
+      floorCount: stats.floorCount,
+      roomCount: stats.roomCount,
+      roomTypeBreakdown: stats.roomTypeBreakdown
+    }
+  });
+});
+
 // @desc    Toggle favorite listing
 // @route   POST /api/listings/:id/favorite
 // @access  Private
