@@ -623,7 +623,7 @@ export default function LandlordPage() {
             variants={containerVariants}
           >
             <motion.a
-              href="https://wa.me/916207409628" // Use wa.me link for direct chat
+              href="https://wa.me/917065051618" // Use wa.me link for direct chat
               target="_blank"
               rel="noopener noreferrer"
               className="block relative"
@@ -637,12 +637,12 @@ export default function LandlordPage() {
               <Card className="flex flex-col items-center border border-gray-200 rounded-xl p-6 pt-8 w-60 text-center bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg">
                 <img alt="WhatsApp icon" src="/images/media/whatsapp.webp" width="48" height="48" className="mb-4" />
                 <span className="text-lg font-semibold text-gray-800">WhatsApp Us</span>
-                <span className="text-sm text-gray-500 mt-1">(+91 6207...)</span>
+                <span className="text-sm text-gray-500 mt-1">(+91 7065051618)</span>
               </Card>
             </motion.a>
 
             <motion.a
-              href="tel:+916207409628"
+              href="tel:+917065051618"
               target="_self"
               className="block"
               variants={itemVariants}
@@ -652,7 +652,7 @@ export default function LandlordPage() {
               <Card className="flex flex-col items-center border border-gray-200 rounded-xl p-6 w-60 text-center bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg">
                 <Phone size={48} className="mb-4 text-blue-500" />
                 <span className="text-lg font-semibold text-gray-800">Call Us</span>
-                <span className="text-sm text-gray-500 mt-1">+91 62074 09628</span>
+                <span className="text-sm text-gray-500 mt-1">+91 7065051618</span>
               </Card>
             </motion.a>
 

@@ -1659,7 +1659,7 @@ export default function HomePage() {
                 2 Mins Reply
               </div>
             <a
-              href="https://chat.whatsapp.com/D8XEoda1w2GBAeO2gtMT0b"
+              href="https://wa.me/917065051618"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center border rounded-xl p-4 px-12 flex-col gap-4"
@@ -1676,7 +1676,7 @@ export default function HomePage() {
             </a>
             </div>
             <a
-              href="tel:+916207409628"
+              href="tel:+917065051618"
               target="_self"
               className="flex items-center border rounded-xl p-4 px-12 flex-col gap-4"
             >
@@ -1687,7 +1687,7 @@ export default function HomePage() {
                 height="48"
               />
               <div className="flex flex-col gap-2">
-                <span className="text-lg font-bold">+91 62074 09628</span>
+                <span className="text-lg font-bold">+91 70650 51618</span>
               </div>
             </a>
             <a
