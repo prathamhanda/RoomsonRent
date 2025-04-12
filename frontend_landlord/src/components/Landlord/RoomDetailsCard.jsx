@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Phone, Image, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { User, Phone, Image, X, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 
 const RoomDetailsCard = ({ floor, roomIndex, room }) => {
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Function to optimize Cloudinary URLs for different sizes
   const optimizeCloudinaryUrl = (url, width = 400) => {
@@ -194,30 +195,65 @@ const RoomDetailsCard = ({ floor, roomIndex, room }) => {
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: roomIndex * 0.1 }}
-        className="p-3 border border-gray-200 rounded-lg bg-white"
+        className="border border-gray-200 rounded-lg bg-white overflow-hidden"
       >
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-medium text-gray-800">Room {roomIndex + 1}</h3>
-          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-            {room.sharingOptions.join(', ')}
-          </span>
-        </div>
-        
-        <div className="mb-2">
-          <p className="text-xs text-gray-500">For {room.targetTenants}</p>
-        </div>
-        
-        <div className="space-y-3">
-          <div>
-            <h4 className="text-xs font-medium text-gray-600 mb-1">Photos:</h4>
-            {renderPhotos()}
+        {/* Header - Always visible */}
+        <motion.div
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="p-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between"
+        >
+          <div className="flex items-center space-x-3">
+            <h3 className="font-medium text-gray-800">Room {roomIndex + 1}</h3>
+            <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+              {room.sharingOptions.join(', ')}
+            </span>
           </div>
-          
-          <div>
-            <h4 className="text-xs font-medium text-gray-600 mb-1">Tenants:</h4>
-            {renderTenants()}
-          </div>
-        </div>
+          <motion.div
+            animate={{ rotate: isExpanded ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ChevronDown size={20} className="text-gray-500" />
+          </motion.div>
+        </motion.div>
+
+        {/* Expandable Content */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="p-3 pt-0 border-t border-gray-100">
+                <div className="mb-2">
+                  <p className="text-xs text-gray-500">For {room.targetTenants}</p>
+                </div>
+                
+                <div className="space-y-3">
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <h4 className="text-xs font-medium text-gray-600 mb-1">Photos:</h4>
+                    {renderPhotos()}
+                  </motion.div>
+                  
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <h4 className="text-xs font-medium text-gray-600 mb-1">Tenants:</h4>
+                    {renderTenants()}
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
       
       <PhotoGallery />

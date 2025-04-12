@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -20,6 +20,7 @@
     "@react-google-maps/api": "^2.20.6",
     "@tailwindcss/vite": "^4.0.14",
     "axios": "^1.8.3",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "firebase": "^11.4.0",
     "framer-motion": "^12.5.0",

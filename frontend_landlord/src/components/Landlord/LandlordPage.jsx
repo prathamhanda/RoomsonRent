@@ -51,12 +51,12 @@ const sectionVariants = {
 export default function LandlordPage() {
   const [searchFocus, setSearchFocus] = useState(false);
   const { user } = useAuth();
-  const [capacityStats, setCapacityStats] = useState({
+  const [capacityStats, setCapacityStats] = useState({ 
     totalCapacity: 0,
     currentOccupancy: 0
   });
 
-  const { data: myListings, loading: listingsLoading, error: listingsError, setData: setMyListings } = useFetch('/api/listings/owner', {
+  const { data: myListings, loading: listingsLoading, error: listingsError } = useFetch('/api/listings/owner', {
     credentials: 'include'
   });
 
@@ -73,19 +73,6 @@ export default function LandlordPage() {
 
   const { scrollYProgress } = useScroll();
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
-
-  const handleDeleteListing = (deletedListingId) => {
-    // Update the listings state by filtering out the deleted listing
-    if (myListings?.data) {
-      const updatedListings = myListings.data.filter(listing => listing._id !== deletedListingId);
-      setMyListings({
-        ...myListings,
-        count: updatedListings.length,
-        data: updatedListings
-      });
-    }
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
 
@@ -323,15 +310,15 @@ export default function LandlordPage() {
             </motion.div>
           ) : (
             <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
               variants={containerVariants}
+              initial="hidden"
+              animate="visible" // Animate immediately when data is ready
             >
               {myListings.data.map((listing) => (
-                <motion.div key={listing._id} variants={itemVariants}>
-                  <ListingCard
-                    listing={listing}
-                    onDelete={handleDeleteListing}
-                  />
+                // Wrap ListingCard for individual animation and hover effect
+                <motion.div key={listing._id} variants={itemVariants} whileHover={{ y: -5, transition: { duration: 0.2 } }}>
+                  <ListingCard listing={listing} />
                 </motion.div>
               ))}
             </motion.div>

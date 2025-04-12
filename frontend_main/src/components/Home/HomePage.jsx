@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from "react";
-
+import React, { useState, useMemo, useEffect } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@heroui/card";
@@ -10,6 +10,9 @@ export default function HomePage() {
   const [searchFocus, setSearchFocus] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const colleges = [
     "Zakir Husain College Delhi",
@@ -115,41 +118,72 @@ export default function HomePage() {
     setShowSuggestions(false);
   };
 
-  // Mock data for listings
-  const regularRooms = [ 
-    {
-      id: 1,
-      name: "Micheal Jackson 1st Floor R2",
-      location: "Vasanat Vihar, South Delhi",
-      price: "7,000",
-      amenities: ["A/C", "WiFi", "Single Occupancy", "Short Stay"],
-      image: "/images/78c3c990590b6c112e5b5cb34f1fbfac.webp",
-    },
-    {
-      id: 2,
-      name: "Micheal Jackson 1st Floor R3",
-      location: "Vasanat Vihar, South Delhi",
-      price: "8,000",
-      amenities: ["WiFi", "Triple Occupancy"],
-      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
-    },
-    {
-      id: 3,
-      name: "Micheal Jackson 1st Floor R3",
-      location: "Vasanat Vihar, South Delhi",
-      price: "8,000",
-      amenities: ["WiFi", "Triple Occupancy"],
-      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
-    },
-    {
-      id: 4,
-      name: "Micheal Jackson 1st Floor R3",
-      location: "Vasanat Vihar, South Delhi",
-      price: "8,000",
-      amenities: ["WiFi", "Triple Occupancy"],
-      image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
-    },
-  ];
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/listings', {
+          params: {
+            limit: 10,
+            sort: '-createdAt'
+          }
+        });
+        
+        if (response.data.success) {
+          setListings(response.data.data);
+        }
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching listings:', err);
+        setError('Failed to fetch listings');
+        setLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, []);
+
+  // Replace mock regularRooms with transformed listings data
+  const regularRooms = useMemo(() => {
+    return listings.map(listing => {
+      // Find an appropriate room image
+      let roomImage = "/images/78c3c990590b6c112e5b5cb34f1fbfac.webp"; // Default fallback image
+
+      // First try to get image from first room of first floor
+      if (listing.floors && listing.floors.length > 0 && 
+          listing.floors[0].rooms && listing.floors[0].rooms.length > 0 && 
+          listing.floors[0].rooms[0].photos && listing.floors[0].rooms[0].photos.length > 0) {
+        roomImage = listing.floors[0].rooms[0].photos[0];
+      } else {
+        // If not found, look through all floors and rooms for the first available image
+        for (const floor of listing.floors || []) {
+          let imageFound = false;
+          for (const room of floor.rooms || []) {
+            if (room.photos && room.photos.length > 0) {
+              roomImage = room.photos[0];
+              imageFound = true;
+              break;
+            }
+          }
+          if (imageFound) break;
+        }
+      }
+
+      return {
+        id: listing._id,
+        name: listing.title,
+        location: `${listing.address}, ${listing.location?.city || ''}`,
+        price: listing.price?.toLocaleString() || "---",
+        amenities: [
+          ...(listing.furnishingStatus === "Furnished" ? ["A/C"] : []),
+          ...(listing.amenities?.includes("Wi-Fi") ? ["WiFi"] : []),
+          ...(listing.propertyType === "Boys PG" || listing.propertyType === "Girls PG" ? ["Single Occupancy"] : []),
+          ...(listing.propertyType === "PG" ? ["Triple Occupancy"] : []),
+          ...(listing.available ? ["Short Stay"] : [])
+        ],
+        image: roomImage
+      };
+    });
+  }, [listings]);
 
   const premiumRooms = [
     {
@@ -619,8 +653,8 @@ export default function HomePage() {
                             </p>
                             <div className="flex gap-3 mt-auto">
                               <Button
-                                as="a"
-                                href="/room/book"
+                                as={Link}
+                                to={`/property/${room.id}`}
                                 className="flex text-white rounded-xl bg-[#FE6F61] font-semibold"
                                 size="sm"
                               >
@@ -782,8 +816,8 @@ export default function HomePage() {
                             </p>
                             <div className="flex gap-3 mt-auto">
                               <Button
-                                as="a"
-                                href="/room/book"
+                                as={Link}
+                                to={`/property/${room.id}`}
                                 className="flex text-white bg-[#C59856] font-semibold rounded-xl"
                                 size="sm"
                               >
@@ -906,8 +940,8 @@ export default function HomePage() {
                             </p>
                             <div className="flex gap-3 mt-auto">
                               <Button
-                                as="a"
-                                href="/room/book"
+                                as={Link}
+                                to={`/property/${room.id}`}
                                 className="flex text-white rounded-xl bg-[#FE6F61] font-semibold"
                                 size="sm"
                               >
@@ -1022,8 +1056,8 @@ export default function HomePage() {
                             </p>
                             <div className="flex gap-3 mt-auto">
                               <Button
-                                as="a"
-                                href="/room/book"
+                                as={Link}
+                                to={`/property/${room.id}`}
                                 className="flex text-white rounded-xl bg-[#FE6F61] font-semibold"
                                 size="sm"
                               >
