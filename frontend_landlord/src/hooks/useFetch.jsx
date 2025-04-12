@@ -37,7 +37,7 @@ const useFetch = (urlpart, options = {}) => {
         fetchData();
     }, [urlpart, JSON.stringify(options)]);
 
-    return { data, loading, error };
+    return { data, loading, error, setData };
 };
 
 export default useFetch;

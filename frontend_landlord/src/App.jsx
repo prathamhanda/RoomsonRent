@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext"; // Import Auth
 import { useNavigate } from "react-router-dom";
 import LandlordPortalForm from "./components/Landlord/LandlordPortalForm";
 import RoomDetailsPage from "./components/Landlord/RoomDetailsPage";
+import PropertyEditPage from "./components/Landlord/PropertyEditPage";
 import { Footer } from "./components/Footer";
 
 const ProtectedRoute = ({ children }) => {
@@ -51,6 +52,11 @@ function App() {
           <Route path="/landlord/listings/:listingId/floor/:floorId/room/:roomId" element={
             <ProtectedRoute>
               <RoomDetailsPage/>
+            </ProtectedRoute>
+          } />
+          <Route path="/landlord/listings/:listingId/edit" element={
+            <ProtectedRoute>
+              <PropertyEditPage/>
             </ProtectedRoute>
           } />
         </Routes>

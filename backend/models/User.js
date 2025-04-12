@@ -108,6 +108,94 @@ UserSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
+// Middleware to sync tenant changes with listings
+UserSchema.pre('save', async function(next) {
+  if (this.isModified('currentRooms')) {
+    const Listing = require('./Listing'); // Require here to avoid circular dependency
+    
+    // Get all listings that need updating
+    const listingIds = this.currentRooms
+      .filter(room => room.active)
+      .map(room => room.listingId);
+    
+    // Update each listing
+    for (const listingId of listingIds) {
+      const listing = await Listing.findById(listingId);
+      if (listing) {
+        // Find the room in the listing
+        const currentRoom = this.currentRooms.find(
+          room => room.listingId.toString() === listingId.toString() && room.active
+        );
+        
+        if (currentRoom) {
+          // Update or add tenant to the room
+          listing.floors = listing.floors.map(floor => {
+            if (floor.floorId === currentRoom.floorId) {
+              floor.rooms = floor.rooms.map(room => {
+                if (room.roomId === currentRoom.roomId) {
+                  // Update tenant information
+                  const existingTenantIndex = room.tenants?.findIndex(
+                    t => t.userId.toString() === this._id.toString()
+                  );
+                  
+                  if (existingTenantIndex === -1) {
+                    // Add new tenant
+                    if (!room.tenants) room.tenants = [];
+                    room.tenants.push({
+                      userId: this._id,
+                      name: this.name,
+                      phone: this.phone,
+                      assignedAt: currentRoom.assignedAt
+                    });
+                  } else {
+                    // Update existing tenant
+                    room.tenants[existingTenantIndex] = {
+                      userId: this._id,
+                      name: this.name,
+                      phone: this.phone,
+                      assignedAt: currentRoom.assignedAt
+                    };
+                  }
+                }
+                return room;
+              });
+            }
+            return floor;
+          });
+          
+          await listing.save();
+        }
+      }
+    }
+    
+    // Remove tenant from listings they're no longer in
+    const inactiveListingIds = this.currentRooms
+      .filter(room => !room.active)
+      .map(room => room.listingId);
+    
+    for (const listingId of inactiveListingIds) {
+      const listing = await Listing.findById(listingId);
+      if (listing) {
+        listing.floors = listing.floors.map(floor => {
+          floor.rooms = floor.rooms.map(room => {
+            if (room.tenants) {
+              room.tenants = room.tenants.filter(
+                tenant => tenant.userId.toString() !== this._id.toString()
+              );
+            }
+            return room;
+          });
+          return floor;
+        });
+        
+        await listing.save();
+      }
+    }
+  }
+  
+  next();
+});
+
 // Sign JWT and return
 UserSchema.methods.getSignedJwtToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {

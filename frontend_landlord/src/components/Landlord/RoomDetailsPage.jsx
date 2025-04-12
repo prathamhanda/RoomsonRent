@@ -285,6 +285,45 @@ const RoomDetailsPage = () => {
     }
   };
 
+  const handleDeletePhoto = async (photoUrl) => {
+    try {
+      // Create a deep copy of the listing for updates
+      const updatedListing = JSON.parse(JSON.stringify(listing));
+      
+      // Find the floor and room indices
+      const floorIndex = updatedListing.floors.findIndex(floor => floor.floorId === floorId);
+      const roomIndex = updatedListing.floors[floorIndex].rooms.findIndex(room => room.roomId === roomId);
+      
+      // Remove the photo from the room's photos array
+      updatedListing.floors[floorIndex].rooms[roomIndex].photos = 
+        updatedListing.floors[floorIndex].rooms[roomIndex].photos.filter(photo => photo !== photoUrl);
+      
+      // Update the listing in the backend
+      const response = await axios.put(
+        `${backendURL}/api/listings/${listingId}`,
+        updatedListing,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        }
+      );
+
+      if (response.data.success) {
+        // Update local state
+        setListing(updatedListing);
+        setPhotos(updatedListing.floors[floorIndex].rooms[roomIndex].photos);
+        toast.success('Photo deleted successfully');
+      } else {
+        throw new Error('Failed to update listing');
+      }
+    } catch (error) {
+      console.error('Error deleting photo:', error);
+      toast.error('Failed to delete photo');
+    }
+  };
+
   // Render upload status icon based on state
   const renderUploadStatusIcon = (state) => {
     switch (state) {

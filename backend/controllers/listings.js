@@ -176,6 +176,61 @@ exports.createListing = asyncHandler(async (req, res, next) => {
   });
 });
 
+// Helper function to sync tenants
+const syncTenantsWithUsers = async (listing) => {
+  // Get all existing tenant assignments from the listing
+  const existingTenantAssignments = new Map();
+  listing.floors.forEach(floor => {
+    floor.rooms.forEach(room => {
+      if (room.tenants && Array.isArray(room.tenants)) {
+        room.tenants.forEach(tenant => {
+          if (tenant.userId) {
+            existingTenantAssignments.set(tenant.userId.toString(), {
+              floorId: floor.floorId,
+              roomId: room.roomId
+            });
+          }
+        });
+      }
+    });
+  });
+
+  // Update User model for all tenants
+  const userUpdatePromises = [];
+  
+  // Remove currentRoom from users who are no longer tenants
+  const allCurrentTenants = Array.from(existingTenantAssignments.keys());
+  userUpdatePromises.push(
+    User.updateMany(
+      { 
+        'currentRoom.listingId': listing._id,
+        _id: { $nin: allCurrentTenants }
+      },
+      { $unset: { currentRoom: "" } }
+    )
+  );
+
+  // Update currentRoom for current tenants
+  existingTenantAssignments.forEach((assignment, userId) => {
+    userUpdatePromises.push(
+      User.findByIdAndUpdate(
+        userId,
+        {
+          currentRoom: {
+            listingId: listing._id,
+            floorId: assignment.floorId,
+            roomId: assignment.roomId,
+            assignedAt: Date.now()
+          }
+        },
+        { new: true }
+      )
+    );
+  });
+
+  await Promise.all(userUpdatePromises);
+};
+
 // @desc    Update listing
 // @route   PUT /api/listings/:id
 // @access  Private (Owner, Admin)
@@ -209,81 +264,14 @@ exports.updateListing = asyncHandler(async (req, res, next) => {
     };
   }
 
-  // Process tenant assignments if floors data is provided
-  if (req.body.floors) {
-    // Get all existing tenant assignments from the listing
-    const existingTenantAssignments = new Map();
-    listing.floors.forEach(floor => {
-      floor.rooms.forEach(room => {
-        room.tenants.forEach(tenant => {
-          existingTenantAssignments.set(tenant.userId.toString(), {
-            floorId: floor.floorId,
-            roomId: room.roomId
-          });
-        });
-      });
-    });
-
-    // Process new tenant assignments
-    const newTenantAssignments = new Map();
-    req.body.floors.forEach(floor => {
-      floor.rooms.forEach(room => {
-        if (room.tenants && Array.isArray(room.tenants)) {
-          room.tenants.forEach(tenant => {
-            if (tenant.userId) {
-              newTenantAssignments.set(tenant.userId.toString(), {
-                floorId: floor.floorId,
-                roomId: room.roomId
-              });
-            }
-          });
-        }
-      });
-    });
-
-    // Find tenants to remove and update
-    const tenantsToRemove = [];
-    existingTenantAssignments.forEach((assignment, userId) => {
-      if (!newTenantAssignments.has(userId)) {
-        tenantsToRemove.push(userId);
-      }
-    });
-
-    // Update User model for removed tenants
-    if (tenantsToRemove.length > 0) {
-      await User.updateMany(
-        { _id: { $in: tenantsToRemove } },
-        { $unset: { currentRoom: "" } }
-      );
-    }
-
-    // Update User model for new/updated tenant assignments
-    const userUpdatePromises = [];
-    newTenantAssignments.forEach((assignment, userId) => {
-      userUpdatePromises.push(
-        User.findByIdAndUpdate(
-          userId,
-          {
-            currentRoom: {
-              listingId: listing._id,
-              floorId: assignment.floorId,
-              roomId: assignment.roomId,
-              assignedAt: Date.now()
-            }
-          },
-          { new: true }
-        )
-      );
-    });
-
-    await Promise.all(userUpdatePromises);
-  }
-
   // Update listing
   listing = await Listing.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true
   });
+
+  // Sync tenants with users whenever the listing is updated
+  await syncTenantsWithUsers(listing);
 
   res.status(200).json({
     success: true,
@@ -313,7 +301,34 @@ exports.deleteListing = asyncHandler(async (req, res, next) => {
     );
   }
 
-  await listing.remove();
+  // Get all tenants from the listing
+  const tenantsToUpdate = [];
+  listing.floors.forEach(floor => {
+    floor.rooms.forEach(room => {
+      if (room.tenants && room.tenants.length > 0) {
+        tenantsToUpdate.push(...room.tenants.map(tenant => tenant.userId));
+      }
+    });
+  });
+
+  // Update all tenants to remove the specific currentRooms entry for this listing
+  if (tenantsToUpdate.length > 0) {
+    await User.updateMany(
+      {
+        _id: { $in: tenantsToUpdate }
+      },
+      {
+        $pull: {
+          currentRooms: {
+            listingId: listing._id
+          }
+        }
+      }
+    );
+  }
+
+  // Delete the listing
+  await Listing.deleteOne({ _id: listing._id });
 
   res.status(200).json({
     success: true,
