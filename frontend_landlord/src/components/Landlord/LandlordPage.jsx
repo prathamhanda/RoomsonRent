@@ -8,6 +8,7 @@ import ListingCard from "./ListingCard"; // Assuming this component exists and i
 import useFetch from "../../hooks/useFetch";
 import { Search, Home, Plus, User, Phone, Mail, MapPin } from 'lucide-react'; // Using lucide-react for icons
 import RoomDetailsCard from './RoomDetailsCard';
+import { useAuth } from "../../context/AuthContext"; 
 
 // Animation Variants
 const containerVariants = {
@@ -49,6 +50,7 @@ const sectionVariants = {
 
 export default function LandlordPage() {
   const [searchFocus, setSearchFocus] = useState(false);
+  const { user } = useAuth();
   const [capacityStats, setCapacityStats] = useState({
     totalCapacity: 0,
     currentOccupancy: 0
@@ -67,6 +69,7 @@ export default function LandlordPage() {
       setCapacityStats(capacityData.data);
     }
   }, [capacityData]);
+
 
   const { scrollYProgress } = useScroll();
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
@@ -95,7 +98,7 @@ export default function LandlordPage() {
           className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 drop-shadow-md"
           variants={itemVariants}
         >
-          Welcome, {  }
+          Welcome, { user?.name?.split(' ')[0] || 'Landlord' }
         </motion.h1>
 
         <motion.p
