@@ -167,7 +167,9 @@ const ListingCard = ({ listing, onDelete }) => {
                     onClick={() => toggleFloor(floor.floorId)}
                     className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
                   >
-                    <span className="font-medium text-gray-700">Floor {floorIndex + 1}</span>
+                    <span className="font-medium text-gray-700">
+                      {floorIndex === 0 ? "Ground Floor" : `Floor ${floorIndex}`}
+                    </span>
                     <div className="flex items-center gap-2">
                       {!expandedFloors[floor.floorId] && (
                         <div className="px-3 py-1 bg-[#FE6F61]/10 text-[#FE6F61] text-xs font-medium rounded-full">

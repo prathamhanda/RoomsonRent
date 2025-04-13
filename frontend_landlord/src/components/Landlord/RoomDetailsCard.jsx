@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Phone, Image, X, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 
-const RoomDetailsCard = ({ floor, roomIndex, room }) => {
+const RoomDetailsCard = ({ floor, roomIndex, room, floorName }) => {
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -197,24 +197,25 @@ const RoomDetailsCard = ({ floor, roomIndex, room }) => {
         transition={{ duration: 0.3, delay: roomIndex * 0.1 }}
         className="border border-gray-200 rounded-lg bg-white overflow-hidden"
       >
-        {/* Header - Always visible */}
-        <motion.div
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="p-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between"
-        >
-          <div className="flex items-center space-x-3">
-            <h3 className="font-medium text-gray-800">Room {roomIndex + 1}</h3>
-            <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-              {room.sharingOptions.join(', ')}
-            </span>
+        <div className="p-4">
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <h3 className="font-medium text-gray-900">Room {roomIndex + 1}</h3>
+              <p className="text-sm text-gray-500">{floorName}</p>
+            </div>
+            <motion.div
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between"
+            >
+              <motion.div
+                animate={{ rotate: isExpanded ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown size={20} className="text-gray-500" />
+              </motion.div>
+            </motion.div>
           </div>
-          <motion.div
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ChevronDown size={20} className="text-gray-500" />
-          </motion.div>
-        </motion.div>
+        </div>
 
         {/* Expandable Content */}
         <AnimatePresence>

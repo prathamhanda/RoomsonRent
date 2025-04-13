@@ -769,7 +769,7 @@ const PropertyEditPage = () => {
                 transition={{ delay: floorIndex * 0.1 }}
               >
                 <h3 className="font-medium mb-3 text-[rgb(254,111,97)]">
-                  Floor {floorIndex + 1}
+                  {floorIndex === 0 ? "Ground Floor" : `Floor ${floorIndex}`}
                 </h3>
 
                 <div className="mb-4">
@@ -973,7 +973,9 @@ const PropertyEditPage = () => {
                 <h3 className="font-medium mb-2">Rooms Configuration</h3>
                 {formData.floors?.map((floor, floorIndex) => (
                   <div key={floor.floorId} className="mb-4 pl-4 border-l-2 border-gray-200">
-                    <h4 className="font-medium">Floor {floorIndex + 1}</h4>
+                    <h4 className="font-medium">
+                      {floorIndex === 0 ? "Ground Floor" : `Floor ${floorIndex}`}
+                    </h4>
                     <div className="grid gap-4 mt-2">
                       {floor.rooms?.map((room, roomIndex) => (
                         <div key={room.roomId} className="pl-4 border-l border-gray-200">

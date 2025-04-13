@@ -345,7 +345,7 @@ export default function LandlordPage() {
                         {listing.floors.map((floor, floorIndex) => (
                           <div key={floor.floorId}>
                             <h4 className="text-lg font-medium mb-3 border-b border-gray-200 pb-2">
-                              Floor {floorIndex + 1}
+                              {floorIndex === 0 ? "Ground Floor" : `Floor ${floorIndex}`}
                             </h4>
                             
                             {floor.rooms && floor.rooms.length > 0 ? (
@@ -356,6 +356,7 @@ export default function LandlordPage() {
                                     floor={floor}
                                     roomIndex={roomIndex}
                                     room={room}
+                                    floorName={floorIndex === 0 ? "Ground Floor" : `Floor ${floorIndex}`}
                                   />
                                 ))}
                               </div>

@@ -830,7 +830,7 @@ const amenitiesList = [
                               transition={{ delay: floorIndex * 0.1 }}
                             >
                               <h5 className="font-medium mb-3 text-[rgb(254,111,97)]">
-                                Floor {floorIndex + 1}
+                                {floorIndex === 0 ? "Ground Floor" : `Floor ${floorIndex}`}
                               </h5>
 
                               <div className="mb-4">
@@ -1019,7 +1019,7 @@ const amenitiesList = [
                       {property.floors.map((floor, floorIndex) => (
                         <div key={floorIndex} className="ml-3 mt-1 p-2 border-l-2 border-gray-200">
                           <p className="font-medium">
-                            Floor {floorIndex + 1}: {floor.numberOfRooms || "0"} rooms
+                            {floorIndex === 0 ? "Ground Floor" : `Floor ${floorIndex}`}: {floor.numberOfRooms || "0"} rooms
                           </p>
                           
                           {/* Display all rooms for this floor */}
@@ -1145,7 +1145,6 @@ const amenitiesList = [
               </motion.button>
             ) : null}
           </motion.div>
-        {/* </form> */}
       </div>
     </div>
   );

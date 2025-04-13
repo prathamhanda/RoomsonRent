@@ -255,19 +255,19 @@ const PropertyBookingPage = () => {
                 
                 {/* Floor Selection */}
                 <div className="mb-4">
-                  <p className="text-gray-700 mb-2">Floor:</p>
-                  <div className="flex flex-wrap gap-2">
+                  <label className="block text-gray-700 font-medium mb-2">Select Floor</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {listing.floors.map((floor, index) => (
                       <button
                         key={floor.floorId}
                         onClick={() => handleFloorChange(floor)}
-                        className={`px-4 py-2 rounded-md transition-colors ${
+                        className={`p-3 rounded-lg border transition-all duration-200 ${
                           selectedFloor?.floorId === floor.floorId
-                            ? "bg-[#FE6F61] text-white"
-                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                            ? 'bg-[#FE6F61] text-white border-[#FE6F61]'
+                            : 'border-gray-200 hover:border-[#FE6F61]'
                         }`}
                       >
-                        Floor {index + 1}
+                        {index === 0 ? "Ground Floor" : `Floor ${index}`}
                       </button>
                     ))}
                   </div>
