@@ -121,7 +121,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/listings', {
+        const response = await axios.get('https://backend.roomsonrent.in/api/listings', {
           params: {
             limit: 10,
             sort: '-createdAt'
