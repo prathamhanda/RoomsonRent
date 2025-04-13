@@ -1143,16 +1143,7 @@ const amenitiesList = [
               >
                 Next
               </motion.button>
-            ) : (
-              <motion.button
-                type="submit"
-                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300 ml-auto"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Submit
-              </motion.button>
-            )}
+            ) : null}
           </motion.div>
         {/* </form> */}
       </div>

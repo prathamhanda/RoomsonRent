@@ -28,7 +28,7 @@ const PropertyBookingPage = () => {
     const fetchListing = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:5000/api/listings/${id}`);
+        const response = await axios.get(`https://backend.roomsonrent.in/api/listings/${id}`);
         
         if (response.data.success) {
           setListing(response.data.data);
