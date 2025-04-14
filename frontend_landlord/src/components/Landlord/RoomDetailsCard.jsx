@@ -81,6 +81,8 @@ const RoomDetailsCard = ({ floor, roomIndex, room, floorName }) => {
             src={optimizeCloudinaryUrl(photo, 150)}
             alt={`Room ${roomIndex + 1} photo ${index + 1}`}
             className="h-12 w-full object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+            loading={index === 0 ? "eager" : "lazy"}
+            fetchpriority={index === 0 ? "high" : "auto"}
             onClick={() => {
               setCurrentPhotoIndex(index);
               setShowPhotoGallery(true);
@@ -133,6 +135,8 @@ const RoomDetailsCard = ({ floor, roomIndex, room, floorName }) => {
                 src={optimizeCloudinaryUrl(room.photos[currentPhotoIndex], 1000)}
                 alt={`Room photo ${currentPhotoIndex + 1}`}
                 className="w-full max-h-[70vh] object-contain"
+                loading="lazy"
+                decoding="async"
               />
               
               {room.photos.length > 1 && (

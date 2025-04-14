@@ -121,6 +121,9 @@ const ListingCard = ({ listing, onDelete }) => {
                 src={optimizeCloudinaryUrl(propertyImage, 600)} 
                 alt={listing.title}
                 className="w-full h-full object-cover"
+                loading="eager"
+                fetchpriority="high"
+                decoding="sync"
               />
             ) : (
               <div className="w-full h-full bg-gray-200 flex items-center justify-center">

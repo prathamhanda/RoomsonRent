@@ -288,8 +288,12 @@ export default function HomePage() {
         <img
           src="/ror-home-img.webp"
           alt="home"
+          priority="true"
+          fetchpriority="high"
+          rel="preload"
+          as="image"
           className="absolute -z-20 pointer-events-none select-none h-[450px] md:h-[650px] w-full object-cover"
-        />
+        /> 
 
         {/* Header */}
         <div className="w-full flex justify-between items-center text-white py-4 md:py-8 px-4 md:px-20">
@@ -856,6 +860,482 @@ export default function HomePage() {
                 </div>
               </Card>
             </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Regular Accommodation Listings */}
+      <div className="bg-[#F9FAFB] px-4 md:px-20 py-8 md:py-10">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-2 md:gap-3">
+            <p className="font-bold text-2xl md:text-4xl">
+              Your <span className="text-[#fe6f61]">Perfect</span> Accommodation
+            </p>
+          </div>
+
+          <div className="flex items-center relative group">
+            <button className="absolute left-0 md:-left-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+              ‹
+            </button>
+            <div className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4">
+              {regularRooms.map((room) => (
+                <div key={room.id}>
+                  <Card className="h-[220px] w-[300px] md:w-[500px] p-3 bg-white">
+                    <div className="rounded-lg p-0 border-1 border-[#D8D8D8]">
+                      <div className="flex h-full">
+                        <img
+                          alt="room"
+                          src={room.image}
+                          width="200"
+                          height="200"
+                          className="object-cover h-full w-2/5 rounded-l-md"
+                          loading="lazy"
+                        />
+                        <div className="flex flex-col justify-between p-2 md:p-3 w-full">
+                          <div className="flex flex-col">
+                            <div>
+                              <Link
+                                to={`/property/${room.id}`}
+                                className="font-semibold hover:underline text-sm md:text-base"
+                              >
+                                {room.name}
+                              </Link>
+                              <p className="text-[10px] md:text-xs text-[#979797] ml-[2px]">
+                                {room.location}
+                              </p>
+                              <div className="h-1"></div>
+                              <div className="flex gap-1 flex-wrap">
+                                {room.amenities.map((amenity, index) => {
+                                  let colorClass = "";
+                                  let iconSrc = "";
+
+                                  if (amenity === "A/C" || amenity === "WiFi") {
+                                    colorClass = "bg-[#F0FFF0] text-[#3EAF3F]";
+                                    iconSrc = amenity === "A/C" 
+                                      ? "/images/media/ac.0f94ec49.svg"
+                                      : "/images/media/wifi.b765d654.svg";
+                                  } else if (amenity === "Single Occupancy" || amenity === "Triple Occupancy") {
+                                    colorClass = "bg-[#FFFCF0] text-[#FFC130]";
+                                    iconSrc = amenity === "Single Occupancy"
+                                      ? "/images/media/single_occu.2c89da93.svg"
+                                      : "/images/media/multi_occu.83dd5276.svg";
+                                  } else if (amenity === "Short Stay") {
+                                    colorClass = "bg-[#ffeaee] text-[#ed3a56]";
+                                    iconSrc = "/images/media/short_stay_pink.5c3b7b9d.svg";
+                                  }
+
+                                  return (
+                                    <div
+                                      key={index}
+                                      className={`rounded-[0.3rem] flex gap-1 text-[8px] md:text-[10px] items-center justify-between p-[5px] font-semibold ${colorClass}`}
+                                    >
+                                      <img
+                                        alt={amenity}
+                                        src={iconSrc}
+                                        width="16"
+                                        height="16"
+                                        className="object-cover w-3 h-3 md:w-4 md:h-4"
+                                      />
+                                      {amenity}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <p className="font-semibold text-[10px] md:text-xs">
+                              Rs.{" "}
+                              <span className="text-base md:text-lg">{room.price}/-</span>{" "}
+                              per month
+                            </p>
+                            <div className="flex gap-2 md:gap-3 mt-auto">
+                              <Button
+                                as={Link}
+                                to={`/property/${room.id}`}
+                                className="flex text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-1 px-2 md:px-3"
+                              >
+                                Book Now
+                              </Button>
+                              <Button
+                                as="a"
+                                href="/room/visit"
+                                variant="bordered"
+                                className="flex-1 font-semibold border-[#FE6F61] text-[#FE6F61] text-xs md:text-sm py-1 px-2 md:px-3"
+                              >
+                                Site Visit
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              ))}
+            </div>
+            <button className="absolute right-0 md:-right-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+              ›
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Premium Accommodation Section */}
+      <div className="px-4 md:px-20 py-8 md:py-10">
+        <div className="flex flex-col gap-5 bg-[#F8F3EF] border-[#C59856] border-2 rounded-3xl p-4 md:p-6 relative">
+          <div className="absolute w-[100px] md:w-[200px] right-0 top-0 h-full rounded-r-[22px] bg-gradient-to-r from-[#C59856]/0 via-[#C59856]/30 via-48% to-[#C59856]/50"></div>
+          <p className="font-bold text-2xl md:text-4xl text-[#AE8549] flex items-center gap-3">
+            <img
+              alt="star"
+              src="/images/media/Star 1.992519b2.svg"
+              width="24"
+              height="24"
+              className="md:w-[32px] md:h-[31px]"
+            />
+            Premium Accommodation Show-Off
+          </p>
+
+          <div className="flex items-center relative group">
+            <button className="absolute left-0 md:-left-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+              ‹
+            </button>
+            <div className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4">
+              {premiumRooms.map((room) => (
+                <div key={room.id}>
+                  <Card className="h-[220px] w-[300px] md:w-[500px] p-3 border-1 border-[#C59856] bg-white">
+                    <div className="rounded-lg p-0">
+                      <div className="flex h-full">
+                        <img
+                          alt="room"
+                          src={room.image}
+                          width="200"
+                          height="200"
+                          className="object-cover h-full w-2/5 rounded-l-md"
+                          loading="lazy"
+                        />
+                        <div className="flex flex-col justify-between p-2 md:p-3 w-full">
+                          <div className="flex flex-col">
+                            <p className="flex items-center gap-2 text-[#C59856] text-[10px] md:text-xs bg-opacity-10 rounded-md px-2 py-1 self-start">
+                              <img
+                                alt="crown"
+                                src="/images/media/premium_crown.793445f4.svg"
+                                width="12"
+                                height="10"
+                                className="md:w-[14px] md:h-[12px]"
+                              />
+                              Premium
+                            </p>
+                            <div>
+                              <Link
+                                to={`/property/${room.id}`}
+                                className="font-semibold hover:underline text-sm md:text-base"
+                              >
+                                {room.name}
+                              </Link>
+                              <p className="text-[10px] md:text-xs text-[#979797] ml-[2px]">
+                                {room.location}
+                              </p>
+                              <div className="h-1"></div>
+                              <div className="flex gap-1 flex-wrap">
+                                {room.amenities.map((amenity, index) => {
+                                  const getAmenityIcon = (amenity) => {
+                                    switch(amenity) {
+                                      case "A/C": return "/images/media/ac_premium.f83072a3.svg";
+                                      case "WiFi": return "/images/media/wifi_premium.b7a33161.svg";
+                                      case "Single Occupancy": return "/images/media/single_occu_premium.5b2527bc.svg";
+                                      case "Triple Occupancy": return "/images/media/multi_occu_premium.87ea45bc.svg";
+                                      case "Short Stay": return "/images/media/short_stay_premium.469c496c.svg";
+                                      default: return "";
+                                    }
+                                  };
+
+                                  return (
+                                    <div
+                                      key={index}
+                                      className="rounded-[0.3rem] flex gap-1 text-[8px] md:text-[10px] items-center justify-between p-[5px] font-semibold border-1 border-[#C59856] text-[#C59856]"
+                                    >
+                                      <img
+                                        alt={amenity}
+                                        src={getAmenityIcon(amenity)}
+                                        width="16"
+                                        height="16"
+                                        className="object-cover w-3 h-3 md:w-4 md:h-4"
+                                      />
+                                      {amenity}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <p className="font-semibold text-[10px] md:text-xs">
+                              Rs.{" "}
+                              <span className="text-base md:text-lg text-[#C59856]">
+                                {room.price}/-
+                              </span>{" "}
+                              per month
+                            </p>
+                            <div className="flex gap-2 md:gap-3 mt-auto">
+                              <Button
+                                as={Link}
+                                to={`/property/${room.id}`}
+                                className="flex text-white bg-[#C59856] font-semibold rounded-xl text-xs md:text-sm py-1 px-2 md:px-3"
+                              >
+                                Book Now
+                              </Button>
+                              <Button
+                                as="a"
+                                href="/room/visit"
+                                variant="bordered"
+                                className="flex-1 font-semibold border-[#C59856] text-[#C59856] text-xs md:text-sm py-1 px-2 md:px-3"
+                              >
+                                Site Visit
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              ))}
+            </div>
+            <button className="absolute right-0 md:-right-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+              ›
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Short Stays Section */}
+      <div className="px-4 md:px-20 py-8 md:py-10">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-2 md:gap-3">
+            <p className="font-bold text-2xl md:text-4xl">
+              <span className="text-[#fe6f61]">Short</span> Stays
+            </p>
+          </div>
+
+          <div className="flex items-center relative group">
+            <button className="absolute left-0 md:-left-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+              ‹
+            </button>
+            <div className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4">
+              {regularRooms.filter(room => room.amenities.includes("Short Stay")).map((room) => (
+                <div key={room.id}>
+                  <Card className="h-[220px] w-[300px] md:w-[500px] p-3 bg-white">
+                    {/* Same card content as regular rooms */}
+                    <div className="rounded-lg p-0 border-1 border-[#D8D8D8]">
+                      <div className="flex h-full">
+                        <img
+                          alt="room"
+                          src={room.image}
+                          width="200"
+                          height="200"
+                          className="object-cover h-full w-2/5 rounded-l-md"
+                          loading="lazy"
+                        />
+                        <div className="flex flex-col justify-between p-2 md:p-3 w-full">
+                          {/* Same content structure as regular rooms */}
+                          <div className="flex flex-col">
+                            <div>
+                              <Link
+                                to={`/property/${room.id}`}
+                                className="font-semibold hover:underline text-sm md:text-base"
+                              >
+                                {room.name}
+                              </Link>
+                              <p className="text-[10px] md:text-xs text-[#979797] ml-[2px]">
+                                {room.location}
+                              </p>
+                              <div className="h-1"></div>
+                              <div className="flex gap-1 flex-wrap">
+                                {room.amenities.map((amenity, index) => {
+                                  let colorClass = "";
+                                  let iconSrc = "";
+
+                                  if (amenity === "A/C" || amenity === "WiFi") {
+                                    colorClass = "bg-[#F0FFF0] text-[#3EAF3F]";
+                                    iconSrc = amenity === "A/C" 
+                                      ? "/images/media/ac.0f94ec49.svg"
+                                      : "/images/media/wifi.b765d654.svg";
+                                  } else if (amenity === "Single Occupancy" || amenity === "Triple Occupancy") {
+                                    colorClass = "bg-[#FFFCF0] text-[#FFC130]";
+                                    iconSrc = amenity === "Single Occupancy"
+                                      ? "/images/media/single_occu.2c89da93.svg"
+                                      : "/images/media/multi_occu.83dd5276.svg";
+                                  } else if (amenity === "Short Stay") {
+                                    colorClass = "bg-[#ffeaee] text-[#ed3a56]";
+                                    iconSrc = "/images/media/short_stay_pink.5c3b7b9d.svg";
+                                  }
+
+                                  return (
+                                    <div
+                                      key={index}
+                                      className={`rounded-[0.3rem] flex gap-1 text-[8px] md:text-[10px] items-center justify-between p-[5px] font-semibold ${colorClass}`}
+                                    >
+                                      <img
+                                        alt={amenity}
+                                        src={iconSrc}
+                                        width="16"
+                                        height="16"
+                                        className="object-cover w-3 h-3 md:w-4 md:h-4"
+                                      />
+                                      {amenity}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <p className="font-semibold text-[10px] md:text-xs">
+                              Rs.{" "}
+                              <span className="text-base md:text-lg">{room.price}/-</span>{" "}
+                              per month
+                            </p>
+                            <div className="flex gap-2 md:gap-3 mt-auto">
+                              <Button
+                                as={Link}
+                                to={`/property/${room.id}`}
+                                className="flex text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-1 px-2 md:px-3"
+                              >
+                                Book Now
+                              </Button>
+                              <div className="flex-1 px-3 border-2 border-transparent"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              ))}
+            </div>
+            <button className="absolute right-0 md:-right-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+              ›
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Flatmate Needed Section */}
+      <div className="px-4 md:px-20 py-8 md:py-10">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-2 md:gap-3">
+            <p className="font-bold text-2xl md:text-4xl">
+              Flatmate <span className="text-[#fe6f61]">Needed</span>
+            </p>
+          </div>
+
+          <div className="flex items-center relative group">
+            <button className="absolute left-0 md:-left-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+              ‹
+            </button>
+            <div className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4">
+              {regularRooms.map((room) => (
+                <div key={room.id}>
+                  <Card className="h-[220px] w-[300px] md:w-[500px] p-3 bg-white">
+                    {/* Same card content structure as regular rooms */}
+                    <div className="rounded-lg p-0 border-1 border-[#D8D8D8]">
+                      <div className="flex h-full">
+                        <img
+                          alt="room"
+                          src={room.image}
+                          width="200"
+                          height="200"
+                          className="object-cover h-full w-2/5 rounded-l-md"
+                          loading="lazy"
+                        />
+                        <div className="flex flex-col justify-between p-2 md:p-3 w-full">
+                          {/* Same content structure as regular rooms */}
+                          <div className="flex flex-col">
+                            <div>
+                              <Link
+                                to={`/property/${room.id}`}
+                                className="font-semibold hover:underline text-sm md:text-base"
+                              >
+                                {room.name}
+                              </Link>
+                              <p className="text-[10px] md:text-xs text-[#979797] ml-[2px]">
+                                {room.location}
+                              </p>
+                              <div className="h-1"></div>
+                              <div className="flex gap-1 flex-wrap">
+                                {room.amenities.map((amenity, index) => {
+                                  let colorClass = "";
+                                  let iconSrc = "";
+
+                                  if (amenity === "A/C" || amenity === "WiFi") {
+                                    colorClass = "bg-[#F0FFF0] text-[#3EAF3F]";
+                                    iconSrc = amenity === "A/C" 
+                                      ? "/images/media/ac.0f94ec49.svg"
+                                      : "/images/media/wifi.b765d654.svg";
+                                  } else if (amenity === "Single Occupancy" || amenity === "Triple Occupancy") {
+                                    colorClass = "bg-[#FFFCF0] text-[#FFC130]";
+                                    iconSrc = amenity === "Single Occupancy"
+                                      ? "/images/media/single_occu.2c89da93.svg"
+                                      : "/images/media/multi_occu.83dd5276.svg";
+                                  } else if (amenity === "Short Stay") {
+                                    colorClass = "bg-[#ffeaee] text-[#ed3a56]";
+                                    iconSrc = "/images/media/short_stay_pink.5c3b7b9d.svg";
+                                  }
+
+                                  return (
+                                    <div
+                                      key={index}
+                                      className={`rounded-[0.3rem] flex gap-1 text-[8px] md:text-[10px] items-center justify-between p-[5px] font-semibold ${colorClass}`}
+                                    >
+                                      <img
+                                        alt={amenity}
+                                        src={iconSrc}
+                                        width="16"
+                                        height="16"
+                                        className="object-cover w-3 h-3 md:w-4 md:h-4"
+                                      />
+                                      {amenity}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <p className="font-semibold text-[10px] md:text-xs">
+                              Rs.{" "}
+                              <span className="text-base md:text-lg">{room.price}/-</span>{" "}
+                              per month
+                            </p>
+                            <div className="flex gap-2 md:gap-3 mt-auto">
+                              <Button
+                                as={Link}
+                                to={`/property/${room.id}`}
+                                className="flex text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-1 px-2 md:px-3"
+                              >
+                                Book Now
+                              </Button>
+                              <Button
+                                as="a"
+                                href="/room/visit"
+                                variant="bordered"
+                                className="flex-1 font-semibold border-[#FE6F61] text-[#FE6F61] text-xs md:text-sm py-1 px-2 md:px-3"
+                              >
+                                Site Visit
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              ))}
+            </div>
+            <button className="absolute right-0 md:-right-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+              ›
+            </button>
           </div>
         </div>
       </div>
