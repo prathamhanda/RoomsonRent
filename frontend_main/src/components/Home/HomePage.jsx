@@ -289,7 +289,7 @@ export default function HomePage() {
           src="/ror-home-img.webp"
           alt="home"
           priority="true"
-          fetchpriority="high"
+          fetchPriority="high"
           rel="preload"
           as="image"
           className="absolute -z-20 pointer-events-none select-none h-[450px] md:h-[650px] w-full object-cover"
@@ -958,8 +958,8 @@ export default function HomePage() {
                                 Book Now
                               </Button>
                               <Button
-                                as="a"
-                                href="/room/visit"
+                                as={Link}
+                                to={`/property/${room.id}/visit`}
                                 variant="bordered"
                                 className="flex-1 font-semibold border-[#FE6F61] text-[#FE6F61] text-xs md:text-sm py-1 px-2 md:px-3"
                               >
@@ -1086,8 +1086,8 @@ export default function HomePage() {
                                 Book Now
                               </Button>
                               <Button
-                                as="a"
-                                href="/room/visit"
+                                as={Link}
+                                to={`/property/${room.id}/visit`}
                                 variant="bordered"
                                 className="flex-1 font-semibold border-[#C59856] text-[#C59856] text-xs md:text-sm py-1 px-2 md:px-3"
                               >
@@ -1317,8 +1317,8 @@ export default function HomePage() {
                                 Book Now
                               </Button>
                               <Button
-                                as="a"
-                                href="/room/visit"
+                                as={Link}
+                                to={`/property/${room.id}/visit`}
                                 variant="bordered"
                                 className="flex-1 font-semibold border-[#FE6F61] text-[#FE6F61] text-xs md:text-sm py-1 px-2 md:px-3"
                               >
