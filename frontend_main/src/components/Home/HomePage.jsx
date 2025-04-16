@@ -1931,7 +1931,7 @@ export default function HomePage() {
             </div>
           </motion.div>
           <motion.div 
-            onClick={() => window.location.href = 'https://forms.google.com'}
+            onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLScn1Vqjq2SyijD-KeqgVggrCTxS36tC_QtEs3Xt6CM2ojz3gQ/viewform?usp=header', '_blank')}
             className="border-2 border-[#D8D8D8] rounded-2xl h-auto md:h-60 flex-1 flex flex-col md:flex-row gap-4 md:gap-10 cursor-pointer p-4 md:p-0"
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
