@@ -122,7 +122,7 @@ const ListingCard = ({ listing, onDelete }) => {
                 alt={listing.title}
                 className="w-full h-full object-cover"
                 loading="eager"
-                fetchpriority="high"
+                fetchPriority="high"
                 decoding="sync"
               />
             ) : (

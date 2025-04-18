@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Phone, Image, X, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const RoomDetailsCard = ({ floor, roomIndex, room, floorName }) => {
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
@@ -45,18 +46,33 @@ const RoomDetailsCard = ({ floor, roomIndex, room, floorName }) => {
     }
 
     return (
-      <div className="space-y-2">
+      <div className="space-y-3">
         {room.tenants.map((tenant, index) => (
-          <div key={index} className="flex items-center">
-            <User size={16} className="text-blue-500 mr-2 flex-shrink-0" />
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">{tenant.name}</span>
-              <div className="flex items-center text-xs text-gray-500">
-                <Phone size={12} className="mr-1" />
-                <span>{tenant.phone}</span>
+          <motion.div
+            key={index}
+            whileHover={{ y: -2 }}
+            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-[#fe6f61]/30 hover:bg-[#fe6f61]/5 transition-colors group"
+          >
+            
+            <div className="flex items-center">
+              <div className="w-10 h-10 rounded-full bg-[#fe6f61]/10 flex items-center justify-center flex-shrink-0">
+                <User size={20} className="text-[#fe6f61]" />
+              </div>
+              <div className="ml-3">
+                <span className="text-sm font-medium text-gray-900 group-hover:text-[#fe6f61] transition-colors">{tenant.name}</span>
+                <div className="flex items-center text-xs text-gray-500">
+                  <Phone size={12} className="mr-1" />
+                  <span>{tenant.phone}</span>
+                </div>
               </div>
             </div>
-          </div>
+            <Link
+              to={`/tenant/${tenant.userId}`}
+              className="p-2 text-gray-400 hover:text-[#fe6f61] transition-colors"
+            >
+              <ChevronRight size={20} />
+            </Link>
+          </motion.div>
         ))}
       </div>
     );
@@ -82,7 +98,7 @@ const RoomDetailsCard = ({ floor, roomIndex, room, floorName }) => {
             alt={`Room ${roomIndex + 1} photo ${index + 1}`}
             className="h-12 w-full object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
             loading={index === 0 ? "eager" : "lazy"}
-            fetchpriority={index === 0 ? "high" : "auto"}
+            fetchPriority={index === 0 ? "high" : "auto"}
             onClick={() => {
               setCurrentPhotoIndex(index);
               setShowPhotoGallery(true);

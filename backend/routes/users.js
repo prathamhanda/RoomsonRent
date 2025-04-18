@@ -23,15 +23,12 @@ router.get('/check-user/:phone', checkUserByPhone);
 // Landlord and admin routes
 router.put('/assign-room/:userId', authorize('landlord', 'admin'), assignRoom);
 
+// Routes accessible to both landlords and admins
+router.get('/', authorize('landlord', 'admin'), getUsers);
+router.get('/:id', authorize('landlord', 'admin'), getUser);
+
 // Admin only routes
-router.use(authorize('admin'));
-
-router.route('/')
-  .get(getUsers);
-
-router.route('/:id')
-  .get(getUser)
-  .put(updateUser)
-  .delete(deleteUser);
+router.put('/:id', authorize('admin'), updateUser);
+router.delete('/:id', authorize('admin'), deleteUser);
 
 module.exports = router; 

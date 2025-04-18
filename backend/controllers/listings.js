@@ -3,15 +3,35 @@ const asyncHandler = require('../middleware/async');
 const Listing = require('../models/Listing');
 const User = require('../models/User');
 
+// Helper function to calculate distance between coordinates
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  const distance = R * c; // Distance in km
+  return parseFloat(distance.toFixed(1));
+};
+
+const deg2rad = (deg) => {
+  return deg * (Math.PI/180);
+};
+
 // @desc    Get all listings
 // @route   GET /api/listings
 // @access  Public
 exports.getListings = asyncHandler(async (req, res, next) => {
   // Copy req.query
   const reqQuery = { ...req.query };
+  const { lat, lng } = req.query;
+  const userLocation = lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null;
 
   // Fields to exclude
-  const removeFields = ['select', 'sort', 'page', 'limit', 'query'];
+  const removeFields = ['select', 'sort', 'page', 'limit', 'query', 'lat', 'lng'];
 
   // Loop over removeFields and delete them from reqQuery
   removeFields.forEach(param => delete reqQuery[param]);
@@ -66,7 +86,41 @@ exports.getListings = asyncHandler(async (req, res, next) => {
   query = query.skip(startIndex).limit(limit);
 
   // Executing query
-  const listings = await query;
+  let listings = await query;
+
+  // Add distance if user location is provided
+  if (userLocation) {
+    listings = listings.map(listing => {
+      const listingObj = listing.toObject();
+      
+      if (listing.location && listing.location.coordinates && listing.location.coordinates.length === 2) {
+        const listingCoords = {
+          lat: listing.location.coordinates[1],
+          lng: listing.location.coordinates[0]
+        };
+        
+        listingObj.distance = calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          listingCoords.lat,
+          listingCoords.lng
+        );
+      } else {
+        listingObj.distance = null;
+      }
+      
+      return listingObj;
+    });
+
+    // Sort by distance if requested
+    if (req.query.sort === 'distance') {
+      listings.sort((a, b) => {
+        if (a.distance === null) return 1;
+        if (b.distance === null) return -1;
+        return a.distance - b.distance;
+      });
+    }
+  }
 
   // Pagination result
   const pagination = {};

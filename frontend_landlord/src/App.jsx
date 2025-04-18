@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import LandlordPortalForm from "./components/Landlord/LandlordPortalForm";
 import RoomDetailsPage from "./components/Landlord/RoomDetailsPage";
 import PropertyEditPage from "./components/Landlord/PropertyEditPage";
+import TenantProfile from "./pages/TenantProfile";
 import { Footer } from "./components/Footer";
 import { Toaster } from 'react-hot-toast';
 
@@ -59,6 +60,11 @@ function App() {
           <Route path="/landlord/listings/:listingId/edit" element={
             <ProtectedRoute>
               <PropertyEditPage/>
+            </ProtectedRoute>
+          } />
+          <Route path="/tenant/:userId" element={
+            <ProtectedRoute>
+              <TenantProfile/>
             </ProtectedRoute>
           } />
         </Routes>
