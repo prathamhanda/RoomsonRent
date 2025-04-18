@@ -218,4 +218,70 @@ exports.assignRoom = asyncHandler(async (req, res, next) => {
     success: true,
     data: user
   });
+});
+
+// @desc    Create or get user by phone
+// @route   POST /api/users/create-or-get
+// @access  Private/Landlord/Admin
+exports.createOrGetUser = asyncHandler(async (req, res, next) => {
+  const { 
+    phone, 
+    name,
+    email,
+    role = 'user',
+    verified = false,
+    avatar = '',
+    gender = 'not_specified',
+    address = '',
+    city = '',
+    state = '',
+    pincode = '',
+    otp = null
+  } = req.body;
+
+  if (!phone || phone.length !== 10) {
+    return next(
+      new ErrorResponse('Please provide a valid 10-digit phone number', 400)
+    );
+  }
+
+  // Try to find existing user
+  let user = await User.findOne({ phone });
+
+  if (!user && name) {
+    // Create new user if not found
+    try {
+      user = await User.create({
+        phone,
+        name,
+        email: email || `${phone}@placeholder.com`,
+        role,
+        verified,
+        avatar,
+        gender,
+        address,
+        city,
+        state,
+        pincode,
+        otp,
+        currentRooms: []
+      });
+    } catch (error) {
+      return next(
+        new ErrorResponse(`Error creating user: ${error.message}`, 400)
+      );
+    }
+  }
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: 'User not found and no name provided to create new user'
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: user
+  });
 }); 

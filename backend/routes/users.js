@@ -6,7 +6,8 @@ const {
   deleteUser,
   updateUserProfile,
   checkUserByPhone,
-  assignRoom
+  assignRoom,
+  createOrGetUser
 } = require('../controllers/users');
 
 const router = express.Router();
@@ -22,6 +23,7 @@ router.get('/check-user/:phone', checkUserByPhone);
 
 // Landlord and admin routes
 router.put('/assign-room/:userId', authorize('landlord', 'admin'), assignRoom);
+router.post('/create-or-get', authorize('landlord', 'admin'), createOrGetUser);
 
 // Routes accessible to both landlords and admins
 router.get('/', authorize('landlord', 'admin'), getUsers);

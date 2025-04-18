@@ -19,12 +19,7 @@ const RoomDetailsPage = () => {
   const [photoFiles, setPhotoFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
   const [uploadingStates, setUploadingStates] = useState([]);
-  const [verificationStatus, setVerificationStatus] = useState({
-    isVerified: false,
-    userData: null
-  });
   const [skipTenants, setSkipTenants] = useState(false);
   const [skipPhotos, setSkipPhotos] = useState(false);
 
@@ -84,73 +79,112 @@ const RoomDetailsPage = () => {
       // Create preview URLs
       const newPreviewUrls = files.map(file => URL.createObjectURL(file));
       setPreviewUrls([...previewUrls, ...newPreviewUrls]);
-      
-      // Add uploading states for new files
-      setUploadingStates([...uploadingStates, ...files.map(() => 'pending')]);
     }
   };
 
   const removePreview = (index) => {
     const updatedFiles = [...photoFiles];
     const updatedPreviews = [...previewUrls];
-    const updatedStates = [...uploadingStates];
     
     // Revoke the object URL to avoid memory leaks
     URL.revokeObjectURL(updatedPreviews[index]);
     
     updatedFiles.splice(index, 1);
     updatedPreviews.splice(index, 1);
-    updatedStates.splice(index, 1);
     
     setPhotoFiles(updatedFiles);
     setPreviewUrls(updatedPreviews);
-    setUploadingStates(updatedStates);
   };
 
-  const verifyTenant = async () => {
-    if (!newTenant.phone || newTenant.phone.length !== 10) {
-      toast.error('Please enter a valid 10-digit phone number');
-      return;
-    }
-    
-    setIsVerifying(true);
-    setVerificationStatus({ isVerified: false, userData: null });
+  const checkAndFillUserData = async (phone) => {
+    if (!phone || phone.length !== 10) return;
 
     try {
-      const response = await axios.get(`${backendURL}/api/users/check-user/${newTenant.phone}`, {
+      const response = await axios.get(`${backendURL}/api/users/check-user/${phone}`, {
         withCredentials: true
       });
       
       if (response.data.success) {
         const userData = response.data.data;
-        setVerificationStatus({
-          isVerified: true,
-          userData: userData
-        });
         setNewTenant(prev => ({ 
           ...prev, 
           name: userData.name,
           userId: userData._id
         }));
-        toast.success('User verified successfully!');
+        toast.success('Found registered user!');
       }
     } catch (error) {
-      console.error('Error verifying user:', error);
-      setVerificationStatus({ isVerified: false, userData: null });
-      toast.error('User not found or not registered');
-    } finally {
-      setIsVerifying(false);
+      // User not found - just clear the name field
+      setNewTenant(prev => ({
+        ...prev,
+        name: '',
+        userId: undefined
+      }));
+    }
+  };
+
+  const createOrGetTenant = async () => {
+    if (!newTenant.phone || newTenant.phone.length !== 10) {
+      toast.error('Please enter a valid 10-digit phone number');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${backendURL}/api/users/create-or-get`,
+        {
+          phone: newTenant.phone,
+          name: newTenant.name,
+          email: `${newTenant.phone}@placeholder.com`,
+          role: 'user',
+          verified: false,
+          avatar: '',
+          currentRooms: [],
+          gender: 'not_specified',
+          address: '',
+          city: '',
+          state: '',
+          pincode: '',
+          otp: null
+        },
+        {
+          withCredentials: true
+        }
+      );
+      
+      if (response.data.success) {
+        const userData = response.data.data;
+        const tenantData = {
+          userId: userData._id, // Ensure we have the userId
+          name: userData.name,
+          phone: userData.phone
+        };
+        
+        // Update newTenant state with the user data
+        setNewTenant(tenantData);
+        
+        // Add the tenant with complete data including userId
+        setTenants(prev => [...prev, tenantData]);
+        
+        // Reset the form
+        setNewTenant({ name: '', phone: '' });
+        toast.success('Tenant added successfully!');
+      }
+    } catch (error) {
+      console.error('Error adding tenant:', error);
+      toast.error(error.response?.data?.error || 'Failed to add tenant');
     }
   };
 
   const addTenant = () => {
-    if (!verificationStatus.isVerified) {
-      toast.error('Please verify the tenant first');
+    if (!newTenant.phone) {
+      toast.error('Please enter a phone number');
       return;
     }
     
-    if (!newTenant.name || !newTenant.phone) {
-      toast.error('Please fill all tenant details');
+    // For unregistered users, require a name
+    if (!newTenant.userId && !newTenant.name) {
+      toast.error('Please enter tenant name');
       return;
     }
     
@@ -162,7 +196,6 @@ const RoomDetailsPage = () => {
     
     setTenants([...tenants, { ...newTenant }]);
     setNewTenant({ name: '', phone: '' });
-    setVerificationStatus({ isVerified: false, userData: null });
   };
 
   const removeTenant = (index) => {
@@ -174,21 +207,16 @@ const RoomDetailsPage = () => {
   const handleSubmit = async () => {
     setIsUploading(true);
     try {
-      // First upload photos if any and if not skipped
-      let photoUrls = [...photos]; // Include existing photos
+      // First upload photos if any and not skipped
+      let photoUrls = [...photos];
       if (!skipPhotos && photoFiles.length > 0) {
         const uploadPromises = photoFiles.map(async (file, index) => {
           try {
-            // Update state to uploading
-            const newUploadingStates = [...uploadingStates];
-            newUploadingStates[index] = 'uploading';
-            setUploadingStates(newUploadingStates);
-            
             const formData = new FormData();
             formData.append('file', file);
             
             const uploadResponse = await axios.post(
-              `${backendURL}/api/uploads/room/${listingId}/${floorId}/${roomId}`,
+              `${backendURL}/api/uploads/room/${listingId.replace(/['"]/g, '')}/${floorId}/${roomId}`,
               formData,
               {
                 headers: {
@@ -199,27 +227,15 @@ const RoomDetailsPage = () => {
             );
             
             if (uploadResponse.data.success) {
-              // Update state to success
-              const newUploadingStates = [...uploadingStates];
-              newUploadingStates[index] = 'success';
-              setUploadingStates(newUploadingStates);
-              
               return uploadResponse.data.data.filePath;
-            } else {
-              throw new Error('Upload failed');
             }
+            return null;
           } catch (error) {
-            // Update state to error
-            const newUploadingStates = [...uploadingStates];
-            newUploadingStates[index] = 'error';
-            setUploadingStates(newUploadingStates);
-            
             console.error(`Error uploading file ${index}:`, error);
             return null;
           }
         });
         
-        // Wait for all uploads to complete
         const results = await Promise.all(uploadPromises);
         photoUrls = [...photoUrls, ...results.filter(url => url !== null)];
       }
@@ -229,23 +245,33 @@ const RoomDetailsPage = () => {
       
       // Find the floor and room indices
       const floorIndex = updatedListing.floors.findIndex(floor => floor.floorId === floorId);
+      if (floorIndex === -1) {
+        throw new Error('Floor not found');
+      }
+
       const roomIndex = updatedListing.floors[floorIndex].rooms.findIndex(room => room.roomId === roomId);
+      if (roomIndex === -1) {
+        throw new Error('Room not found');
+      }
+
+      // Get the current room data
+      const currentRoom = updatedListing.floors[floorIndex].rooms[roomIndex];
       
-      // Update room data with photos and tenants
+      // Update room data while preserving other properties
       updatedListing.floors[floorIndex].rooms[roomIndex] = {
-        ...updatedListing.floors[floorIndex].rooms[roomIndex],
-        photos: skipPhotos ? [] : photoUrls,
-        tenants: skipTenants ? [] : tenants.map(tenant => ({
-          userId: tenant.userId,
+        ...currentRoom, // Preserve all existing room properties
+        photos: skipPhotos ? currentRoom.photos : photoUrls,
+        tenants: skipTenants ? currentRoom.tenants : tenants.map(tenant => ({
+          userId: tenant.userId,  // This should be a valid MongoDB ObjectId
           name: tenant.name,
           phone: tenant.phone,
           assignedAt: new Date().toISOString()
         }))
       };
 
-      // First update the listing
+      // Update the listing
       const updateResponse = await axios.put(
-        `${backendURL}/api/listings/${listingId}`,
+        `${backendURL}/api/listings/${listingId.replace(/['"]/g, '')}`,
         updatedListing,
         {
           headers: {
@@ -255,13 +281,13 @@ const RoomDetailsPage = () => {
         }
       );
 
-      if (!skipTenants) {
-        // Then update each tenant's user record
+      if (!skipTenants && updateResponse.data.success) {
+        // Update each tenant's user record
         const tenantUpdatePromises = tenants.map(tenant =>
           axios.put(
             `${backendURL}/api/users/assign-room/${tenant.userId}`,
             {
-              listingId,
+              listingId: listingId.replace(/['"]/g, ''),
               floorId,
               roomId
             },
@@ -269,7 +295,6 @@ const RoomDetailsPage = () => {
           )
         );
 
-        // Wait for all tenant updates to complete
         await Promise.all(tenantUpdatePromises);
       }
       
@@ -279,7 +304,13 @@ const RoomDetailsPage = () => {
       }
     } catch (error) {
       console.error('Error updating room:', error);
-      toast.error('Failed to update room details');
+      if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to update room details');
+      }
     } finally {
       setIsUploading(false);
     }
@@ -321,20 +352,6 @@ const RoomDetailsPage = () => {
     } catch (error) {
       console.error('Error deleting photo:', error);
       toast.error('Failed to delete photo');
-    }
-  };
-
-  // Render upload status icon based on state
-  const renderUploadStatusIcon = (state) => {
-    switch (state) {
-      case 'uploading':
-        return <Loader size={16} className="text-blue-500 animate-spin" />;
-      case 'success':
-        return <CheckCircle size={16} className="text-green-500" />;
-      case 'error':
-        return <XCircle size={16} className="text-red-500" />;
-      default:
-        return null;
     }
   };
 
@@ -421,19 +438,13 @@ const RoomDetailsPage = () => {
                             className="w-full h-32 object-cover rounded-lg"
                           />
                           <div className="absolute top-1 right-1 flex space-x-1">
-                            {uploadingStates[index] !== 'pending' && (
-                              <div className="bg-white/80 p-1 rounded-full shadow-md">
-                                {renderUploadStatusIcon(uploadingStates[index])}
-                              </div>
-                            )}
                             <motion.button
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                               onClick={() => removePreview(index)}
                               className="bg-white/80 hover:bg-white p-1 rounded-full shadow-md"
-                              disabled={uploadingStates[index] === 'uploading'}
                             >
-                              <Trash2 size={16} className={`text-red-500 ${uploadingStates[index] === 'uploading' ? 'opacity-50' : ''}`} />
+                              <Trash2 size={16} className="text-red-500" />
                             </motion.button>
                           </div>
                         </div>
@@ -466,67 +477,47 @@ const RoomDetailsPage = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Phone Number
                         </label>
+                        <input
+                          type="tel"
+                          value={newTenant.phone}
+                          onChange={(e) => {
+                            const phone = e.target.value;
+                            setNewTenant(prev => ({ ...prev, phone }));
+                            if (phone.length === 10) {
+                              checkAndFillUserData(phone);
+                            }
+                          }}
+                          placeholder="10-digit number"
+                          className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FE6F61] focus:border-transparent"
+                        />
+                      </div>
+                      <div className="flex-grow">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Name
+                        </label>
                         <div className="flex gap-2">
                           <input
-                            type="tel"
-                            value={newTenant.phone}
-                            onChange={(e) => {
-                              setNewTenant({ ...newTenant, phone: e.target.value });
-                              setVerificationStatus({ isVerified: false, userData: null });
-                            }}
-                            placeholder="10-digit number"
+                            type="text"
+                            value={newTenant.name}
+                            onChange={(e) => setNewTenant({ ...newTenant, name: e.target.value })}
+                            placeholder="Tenant name"
                             className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#FE6F61] focus:border-transparent"
                           />
                           <button
-                            onClick={verifyTenant}
-                            disabled={isVerifying || !newTenant.phone}
+                            onClick={createOrGetTenant}
+                            disabled={!newTenant.phone || (!newTenant.userId && !newTenant.name)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                              isVerifying 
+                              !newTenant.phone || (!newTenant.userId && !newTenant.name)
                                 ? 'bg-gray-100 text-gray-400'
-                                : verificationStatus.isVerified
-                                ? 'bg-green-50 text-green-600'
-                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                                : 'bg-[#FE6F61] text-white hover:bg-[#e5635b]'
                             }`}
                           >
-                            {isVerifying ? (
-                              <div className="flex items-center gap-2">
-                                <Loader size={16} className="animate-spin" />
-                                <span>Verifying...</span>
-                              </div>
-                            ) : verificationStatus.isVerified ? (
-                              <div className="flex items-center gap-2">
-                                <CheckCircle size={16} />
-                                <span>Verified</span>
-                              </div>
-                            ) : (
-                              'Verify'
-                            )}
+                            Add Tenant
                           </button>
                         </div>
                       </div>
                     </div>
 
-                    {verificationStatus.isVerified && verificationStatus.userData && (
-                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium text-green-800">
-                              {verificationStatus.userData.name}
-                            </h4>
-                            <p className="text-sm text-green-600">
-                              Verified User
-                            </p>
-                          </div>
-                          <button
-                            onClick={addTenant}
-                            className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                          >
-                            <Plus size={20} />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                    
                     {tenants.length > 0 && (
                       <div className="mt-6">
                         <h3 className="font-medium text-gray-900 mb-3">Added Tenants</h3>
@@ -563,9 +554,9 @@ const RoomDetailsPage = () => {
             <div className="flex justify-end">
               <button
                 onClick={handleSubmit}
-                disabled={isUploading || (!skipTenants && tenants.length === 0 && !verificationStatus.isVerified)}
+                disabled={isUploading || (!skipTenants && tenants.length === 0)}
                 className={`px-6 py-3 bg-[#FE6F61] text-white rounded-lg transition-colors ${
-                  isUploading || (!skipTenants && tenants.length === 0 && !verificationStatus.isVerified)
+                  isUploading || (!skipTenants && tenants.length === 0)
                     ? 'opacity-50 cursor-not-allowed'
                     : 'hover:bg-[#e5635b]'
                 }`}
