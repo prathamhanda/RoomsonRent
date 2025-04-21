@@ -15,6 +15,8 @@ export default function HomePage() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationError, setLocationError] = useState(false);
 
   // Close menu when user clicks escape key
   useEffect(() => {
@@ -43,6 +45,41 @@ export default function HomePage() {
       document.body.style.overflow = 'unset';
     };
   }, [menuOpen]);
+
+  // Function to calculate distance between two points using Haversine formula
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    return distance;
+  };
+
+  // Get user's location
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          setLocationError(true);
+        }
+      );
+    } else {
+      console.error("Geolocation not available");
+      setLocationError(true);
+    }
+  }, []);
 
   const colleges = [
     "Zakir Husain College Delhi",
@@ -198,10 +235,29 @@ export default function HomePage() {
         }
       }
 
+      // Calculate distance if user location is available
+      let locationDisplay = `${listing.address}, ${listing.location?.city || ''}`;
+      if (userLocation && listing.location?.coordinates) {
+        const distance = calculateDistance(
+          userLocation.latitude,
+          userLocation.longitude,
+          listing.location.coordinates[1], // MongoDB stores coordinates as [longitude, latitude]
+          listing.location.coordinates[0]
+        );
+        
+        if (distance < 1) {
+          // If less than 1 km, show in meters
+          locationDisplay = `${Math.round(distance * 1000)} meters away`;
+        } else {
+          // If more than 1 km, show in km with one decimal place
+          locationDisplay = `${distance.toFixed(1)} kilometres away`;
+        }
+      }
+
       return {
         id: listing._id,
         name: listing.title,
-        location: `${listing.address}, ${listing.location?.city || ''}`,
+        location: locationDisplay,
         price: listing.price?.toLocaleString() || "---",
         amenities: [
           ...(listing.furnishingStatus === "Furnished" ? ["A/C"] : []),
@@ -213,7 +269,7 @@ export default function HomePage() {
         image: roomImage
       };
     });
-  }, [listings]);
+  }, [listings, userLocation]); // Added userLocation as dependency
 
   const premiumRooms = [
     {
