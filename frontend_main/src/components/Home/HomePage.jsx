@@ -1,14 +1,21 @@
 import React, { useState, useMemo, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@heroui/card";
-import {Button, ButtonGroup} from "@heroui/button";
+import { Button, ButtonGroup } from "@heroui/button";
+import { useAuth } from "@/context/AuthContext";
+import backendURL from "@/config/config";
+import Navbar from "../Navbar";
+import { toast, Toaster } from 'react-hot-toast';
 
 export default function HomePage() {
+  const { isAuthenticated, user, checkLogin } = useAuth();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [mobileSupportOpen, setMobileSupportOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchFocus, setSearchFocus] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -188,7 +195,10 @@ export default function HomePage() {
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const response = await axios.get('https://backend.roomsonrent.in/api/listings', {
+        const response = await axios.get(
+          process.env.NODE_ENV === 'production' 
+            ? 'https://backend.roomsonrent.in/api/listings' 
+            : 'http://localhost:5000/api/listings', {
           params: {
             limit: 10,
             sort: '-createdAt'
@@ -337,8 +347,31 @@ export default function HomePage() {
     },
   ];
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${backendURL}/api/auth/logout`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        await checkLogin();
+        toast.success('Logged out successfully!', {
+          icon: '✅',
+          duration: 3000
+        });
+        // Force refresh to ensure clean state
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to log out. Please try again.');
+    }
+  };
+
   return (
     <div className="overflow-x-hidden">
+      <Toaster position="top-center" reverseOrder={false} />
       {/* Hero Section with Background */}
       <div className="relative">
         <img
@@ -353,7 +386,7 @@ export default function HomePage() {
 
         {/* Header */}
         <div className="w-full flex justify-between items-center text-white py-4 md:py-8 px-4 md:px-20">
-          <Link href="/" className="text-2xl md:text-3xl font-bold relative z-30">
+          <Link to="/" className="text-2xl md:text-3xl font-bold relative z-30">
             Rooms On Rent
           </Link>
           
@@ -377,7 +410,7 @@ export default function HomePage() {
           </div>
           
           {/* Desktop Menu */}
-          <div className="hidden md:flex gap-7">
+          <div className="hidden md:flex gap-7 items-center">
             <div className="relative">
               <button
                 className="flex gap-3 items-center h-full"
@@ -497,9 +530,51 @@ export default function HomePage() {
               />
               Wishlist
             </a>
-            <Button className="bg-[#FE6F61] text-white rounded-full font-semibold">
-              Login/ Sign Up
-            </Button>
+            
+            {isAuthenticated && user ? (
+              <div className="relative">
+                <button 
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 focus:outline-none"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-semibold border-2 border-white">
+                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  <span className="hidden md:block">{user.name || 'User'}</span>
+                </button>
+                
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                      <p className="text-xs text-gray-500">{user.phone}</p>
+                    </div>
+                    <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      Your Profile
+                    </Link>
+                    <Link to="/bookings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      Your Bookings
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Button 
+                className="bg-[#FE6F61] text-white rounded-full font-semibold"
+                onClick={() => navigate('/login')}
+              >
+                Login/ Sign Up
+              </Button>
+            )}
           </div>
         </div>
 
@@ -687,12 +762,52 @@ export default function HomePage() {
                   </a>
                   
                   <div className="mt-auto pt-6">
-                    <Button 
-                      className="bg-[#FE6F61] text-white rounded-full font-semibold w-full py-3 text-lg shadow-md hover:shadow-lg transition-shadow" 
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      Login/ Sign Up
-                    </Button>
+                    {isAuthenticated && user ? (
+                      <>
+                        <div className="flex items-center gap-3 mb-4 px-2">
+                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-semibold">
+                            {user.name ? user.name.split(' ')[0].charAt(0).toUpperCase() : 'U'}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">{user.name}</span>
+                            <span className="text-xs text-gray-500">{user.phone}</span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Link 
+                            to="/profile" 
+                            className="w-full text-center py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50"
+                          >
+                            Your Profile
+                          </Link>
+                          <Link 
+                            to="/bookings" 
+                            className="w-full text-center py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50"
+                          >
+                            Your Bookings
+                          </Link>
+                          <Button 
+                            onClick={() => {
+                              setMenuOpen(false);
+                              handleLogout();
+                            }}
+                            className="w-full py-2 text-red-600 border border-red-200 hover:bg-red-50 rounded-lg font-semibold" 
+                          >
+                            Sign out
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <Button 
+                        className="bg-[#FE6F61] text-white rounded-full font-semibold w-full py-3 text-lg shadow-md hover:shadow-lg transition-shadow" 
+                        onClick={() => {
+                          setMenuOpen(false);
+                          navigate('/login');
+                        }}
+                      >
+                        Login/ Sign Up
+                      </Button>
+                    )}
                   </div>
                 </div>
               </motion.div>

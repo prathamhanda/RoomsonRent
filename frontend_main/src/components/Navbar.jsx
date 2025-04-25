@@ -1,17 +1,46 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@heroui/button";
+import { useAuth } from "@/context/AuthContext";
+import backendURL from "@/config/config";
+import { toast, Toaster } from 'react-hot-toast';
 
 const Navbar = () => {
   const [supportOpen, setSupportOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, checkLogin } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${backendURL}/api/auth/logout`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        await checkLogin();
+        toast.success('Logged out successfully!', {
+          icon: '✅',
+          duration: 3000
+        });
+        // Force refresh to ensure clean state
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to log out. Please try again.');
+    }
+  };
 
   return (
     <div className="w-full flex justify-between items-center text-white py-8 px-20">
+      <Toaster position="top-center" reverseOrder={false} />
       <Link to="/" className="text-3xl font-bold">
         Rooms On Rent
       </Link>
-      <div className="flex gap-7">
+      <div className="flex gap-7 items-center">
         <div className="relative">
           <button
             className="flex gap-3 items-center h-full"
@@ -75,14 +104,50 @@ const Navbar = () => {
           <img alt="wishlist" src="/images/media/Heart.7e108041.svg" width="20" height="20" />
           Wishlist
         </a>
-        {location.pathname === "/login" ? (
-          <Button className="bg-[#FE6F61] text-white rounded-full font-semibold" onClick={() => window.location.href = '/'}>
-            Home
-          </Button>
+        
+        {isAuthenticated && user ? (
+          <div className="relative">
+            <button 
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center gap-2 focus:outline-none"
+            >
+              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-semibold border-2 border-white">
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <span className="hidden md:block">{user.name || 'User'}</span>
+            </button>
+            
+            {userMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                  <p className="text-xs text-gray-500">{user.phone}</p>
+                </div>
+                <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Your Profile
+                </Link>
+                <Link to="/bookings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Your Bookings
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
-          <Button className="bg-[#FE6F61] text-white rounded-full font-semibold" onClick={() => window.location.href = '/login'}>
-            Login/ Sign Up
-          </Button>
+          location.pathname === "/login" || location.pathname === "/register" ? (
+            <Button className="bg-[#FE6F61] text-white rounded-full font-semibold" onClick={() => navigate('/')}>
+              Home
+            </Button>
+          ) : (
+            <Button className="bg-[#FE6F61] text-white rounded-full font-semibold" onClick={() => navigate('/login')}>
+              Login/ Sign Up
+            </Button>
+          )
         )}
       </div>
     </div>
