@@ -154,45 +154,55 @@ exports.uploadRoomImage = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Room with ID ${roomId} not found on floor ${floorId}`, 404));
   }
 
-  if (!req.files || !req.files.file) {
-    return next(new ErrorResponse(`Please upload a file`, 400));
+  if (!req.files) {
+    return next(new ErrorResponse(`Please upload files`, 400));
   }
 
-  const file = req.files.file;
+  // Handle both single and multiple file uploads
+  const files = req.files.file ? (Array.isArray(req.files.file) ? req.files.file : [req.files.file]) : [];
 
-  if (!file.mimetype.startsWith('image')) {
-    return next(new ErrorResponse(`Please upload an image file`, 400));
-  }
-
-  if (file.size > process.env.MAX_FILE_UPLOAD) {
-    return next(new ErrorResponse(`Please upload an image less than ${process.env.MAX_FILE_UPLOAD / 1000000}MB`, 400));
+  if (files.length === 0) {
+    return next(new ErrorResponse(`No files to upload`, 400));
   }
 
   try {
-    const result = await cloudinary.uploader.upload(file.tempFilePath, {
-      resource_type: 'image',
-      folder: `rooms/${listing._id}/${floorId}/${roomId}`,
-      public_id: `room_${Date.now()}`,
-      overwrite: true,
+    const uploadPromises = files.map(file => {
+      if (!file.mimetype.startsWith('image')) {
+        throw new Error(`File ${file.name} is not an image`);
+      }
+
+      if (file.size > process.env.MAX_FILE_UPLOAD) {
+        throw new Error(`File ${file.name} exceeds size limit of ${process.env.MAX_FILE_UPLOAD / 1000000}MB`);
+      }
+
+      return cloudinary.uploader.upload(file.tempFilePath, {
+        resource_type: 'image',
+        folder: `rooms/${listing._id}/${floorId}/${roomId}`,
+        public_id: `room_${Date.now()}_${Math.round(Math.random() * 1000)}`,
+        overwrite: true,
+      });
     });
 
+    const results = await Promise.all(uploadPromises);
+    const uploadedUrls = results.map(result => result.secure_url);
+
+    // Add new photos to the room's photos array
     listing.floors[floorIndex].rooms[roomIndex].photos = 
       listing.floors[floorIndex].rooms[roomIndex].photos || [];
-
-    listing.floors[floorIndex].rooms[roomIndex].photos.push(result.secure_url);
+    listing.floors[floorIndex].rooms[roomIndex].photos.push(...uploadedUrls);
 
     await listing.save();
 
     return res.status(200).json({
       success: true,
       data: {
-        fileName: result.public_id,
-        filePath: result.secure_url
+        fileCount: uploadedUrls.length,
+        filePaths: uploadedUrls
       }
     });
   } catch (error) {
     console.error('Cloudinary upload error:', error);
-    return next(new ErrorResponse(`Problem with file upload to Cloudinary ` + error, 500));
+    return next(new ErrorResponse(`Problem with file upload to Cloudinary: ${error.message}`, 500));
   }
 });
 

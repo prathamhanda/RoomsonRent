@@ -318,13 +318,11 @@ export default function HomePage() {
       <div className="bg-[#FE6F61] px-4 md:px-8 lg:px-20 py-12 text-white text-center">
         <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to maximize your rental income?</h2>
         <p className="mb-8 max-w-2xl mx-auto">Join hundreds of property owners who have increased their occupancy rates and simplified their property management with ROR</p>
-        <button className="bg-white text-[#FE6F61] font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors">
+        <button onClick={() => window.location.href = '/login'}   className="bg-white text-[#FE6F61] font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors">
           List Your Property Now
         </button>
       </div>
 
- 
-       
     </div>
   );
 }

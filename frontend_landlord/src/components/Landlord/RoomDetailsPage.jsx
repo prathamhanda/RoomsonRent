@@ -210,34 +210,31 @@ const RoomDetailsPage = () => {
       // First upload photos if any and not skipped
       let photoUrls = [...photos];
       if (!skipPhotos && photoFiles.length > 0) {
-        const uploadPromises = photoFiles.map(async (file, index) => {
-          try {
-            const formData = new FormData();
+        try {
+          const formData = new FormData();
+          // Append all files with the same field name
+          photoFiles.forEach(file => {
             formData.append('file', file);
-            
-            const uploadResponse = await axios.post(
-              `${backendURL}/api/uploads/room/${listingId.replace(/['"]/g, '')}/${floorId}/${roomId}`,
-              formData,
-              {
-                headers: {
-                  'Content-Type': 'multipart/form-data'
-                },
-                withCredentials: true
-              }
-            );
-            
-            if (uploadResponse.data.success) {
-              return uploadResponse.data.data.filePath;
+          });
+          
+          const uploadResponse = await axios.post(
+            `${backendURL}/api/uploads/room/${listingId.replace(/['"]/g, '')}/${floorId}/${roomId}`,
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              },
+              withCredentials: true
             }
-            return null;
-          } catch (error) {
-            console.error(`Error uploading file ${index}:`, error);
-            return null;
+          );
+          
+          if (uploadResponse.data.success) {
+            photoUrls = [...photoUrls, ...uploadResponse.data.data.filePaths];
           }
-        });
-        
-        const results = await Promise.all(uploadPromises);
-        photoUrls = [...photoUrls, ...results.filter(url => url !== null)];
+        } catch (error) {
+          console.error('Error uploading files:', error);
+          toast.error('Failed to upload some images');
+        }
       }
       
       // Create a deep copy of the listing for updates
@@ -262,7 +259,7 @@ const RoomDetailsPage = () => {
         ...currentRoom, // Preserve all existing room properties
         photos: skipPhotos ? currentRoom.photos : photoUrls,
         tenants: skipTenants ? currentRoom.tenants : tenants.map(tenant => ({
-          userId: tenant.userId,  // This should be a valid MongoDB ObjectId
+          userId: tenant.userId,
           name: tenant.name,
           phone: tenant.phone,
           assignedAt: new Date().toISOString()

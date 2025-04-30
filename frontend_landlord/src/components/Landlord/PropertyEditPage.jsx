@@ -270,33 +270,37 @@ const PropertyEditPage = () => {
 
   // Handle image upload to Cloudinary
   const handleImageUpload = async (files, floorId, roomId) => {
-    const uploadPromises = Array.from(files).map(async (file) => {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "your_cloudinary_upload_preset");
-      
-      try {
-        const response = await axios.post(
-          "https://api.cloudinary.com/v1_1/your_cloud_name/image/upload",
-          formData
-        );
-        return response.data.secure_url;
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        throw error;
-      }
-    });
-
     try {
-      const uploadedUrls = await Promise.all(uploadPromises);
-      return uploadedUrls;
+      const formData = new FormData();
+      Array.from(files).forEach(file => {
+        formData.append('file', file);
+      });
+
+      const response = await axios.post(
+        `${backendURL}/api/uploads/room/${listingId}/${floorId}/${roomId}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          withCredentials: true
+        }
+      );
+
+      if (response.data.success) {
+        toast.success(`Successfully uploaded ${files.length} images`);
+        return response.data.data.filePaths;
+      } else {
+        throw new Error('Failed to upload images');
+      }
     } catch (error) {
-      toast.error("Error uploading images");
+      console.error("Error uploading images:", error);
+      toast.error(error.response?.data?.message || "Error uploading images");
       return [];
     }
   };
 
-  // Handle image deletion from Cloudinary
+  // Handle image deletion
   const handleImageDelete = async (imageUrl, floorId, roomId) => {
     try {
       // First update the local state to provide immediate feedback
@@ -320,7 +324,6 @@ const PropertyEditPage = () => {
           );
 
           if (response.data.success) {
-            // Update local state only after successful backend update
             setFormData(updatedFormData);
             toast.success("Image deleted successfully");
           } else {
@@ -852,36 +855,47 @@ const PropertyEditPage = () => {
                               alt={`Room ${roomIndex + 1} photo ${photoIndex + 1}`}
                               className="w-full h-32 object-cover rounded-lg"
                             />
-                            <button
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
                               onClick={() => handleImageDelete(photo, floor.floorId, room.roomId)}
-                              className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="absolute top-2 right-2 p-1.5 bg-white/90 hover:bg-red-500 hover:text-white text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg"
                             >
                               <Trash2 className="w-4 h-4" />
-                            </button>
+                            </motion.button>
                           </div>
                         ))}
-                        <label className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg hover:border-[rgb(254,111,97)] cursor-pointer">
+                        <motion.label 
+                          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg hover:border-[rgb(254,111,97)] cursor-pointer transition-all duration-200 hover:bg-gray-50"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
                           <input
                             type="file"
                             multiple
                             accept="image/*"
                             className="hidden"
                             onChange={async (e) => {
-                              const urls = await handleImageUpload(
-                                e.target.files,
-                                floor.floorId,
-                                room.roomId
-                              );
-                              if (urls.length > 0) {
-                                const updatedFloors = [...formData.floors];
-                                const updatedRoom = updatedFloors[floorIndex].rooms[roomIndex];
-                                updatedRoom.photos = [...(updatedRoom.photos || []), ...urls];
-                                setFormData({ ...formData, floors: updatedFloors });
+                              if (e.target.files?.length) {
+                                const urls = await handleImageUpload(
+                                  e.target.files,
+                                  floor.floorId,
+                                  room.roomId
+                                );
+                                if (urls?.length > 0) {
+                                  const updatedFloors = [...formData.floors];
+                                  const updatedRoom = updatedFloors[floorIndex].rooms[roomIndex];
+                                  updatedRoom.photos = [...(updatedRoom.photos || []), ...urls];
+                                  setFormData({ ...formData, floors: updatedFloors });
+                                }
                               }
                             }}
                           />
-                          <Upload className="w-6 h-6 text-gray-400" />
-                        </label>
+                          <div className="flex flex-col items-center gap-2">
+                            <Upload className="w-6 h-6 text-gray-400" />
+                            <p className="text-sm text-gray-500">Upload Photos</p>
+                          </div>
+                        </motion.label>
                       </div>
                     </div>
 
