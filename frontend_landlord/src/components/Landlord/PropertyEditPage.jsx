@@ -500,6 +500,32 @@ const PropertyEditPage = () => {
     setFormData({ ...formData, floors: updatedFloors });
   };
 
+  // Add a new function to handle floor activation
+  const toggleFloorActive = (floorIndex, isActive) => {
+    const updatedFloors = [...formData.floors];
+    
+    if (!updatedFloors[floorIndex]) {
+      updatedFloors[floorIndex] = { rooms: [] };
+    }
+    
+    updatedFloors[floorIndex].active = isActive;
+    
+    // If activating the floor, ensure it has at least 1 room
+    if (isActive && (!updatedFloors[floorIndex].numberOfRooms || 
+        updatedFloors[floorIndex].numberOfRooms < 1)) {
+      updatedFloors[floorIndex].numberOfRooms = 1;
+    }
+    
+    setFormData({ ...formData, floors: updatedFloors });
+    
+    // Clear any related errors
+    if (errors[`floor_${floorIndex}_numberOfRooms`]) {
+      const updatedErrors = { ...errors };
+      delete updatedErrors[`floor_${floorIndex}_numberOfRooms`];
+      setErrors(updatedErrors);
+    }
+  };
+
   // Validation functions
   const validateStep = (currentStep) => {
     const newErrors = {};
@@ -524,10 +550,25 @@ const PropertyEditPage = () => {
         if (!formData.numberOfFloors || formData.numberOfFloors < 1) {
           newErrors.numberOfFloors = "Please enter at least 1 floor";
         }
+        
+        // Check if at least one floor is active
+        const hasActiveFloor = formData.floors?.some(floor => 
+          floor.active !== false && floor.numberOfRooms > 0);
+          
+        if (!hasActiveFloor) {
+          newErrors.activeFloors = "At least one floor must be available for rent";
+        }
+        
         formData.floors?.forEach((floor, floorIndex) => {
+          // Skip validation for inactive floors
+          if (floor.active === false) {
+            return;
+          }
+          
           if (!floor.numberOfRooms || floor.numberOfRooms < 1) {
             newErrors[`floor_${floorIndex}_rooms`] = "Number of rooms is required";
           }
+          
           floor.rooms?.forEach((room, roomIndex) => {
             if (!room.sharingOptions?.length) {
               newErrors[`floor_${floorIndex}_room_${roomIndex}_sharing`] = "Select at least one sharing option";
@@ -762,6 +803,13 @@ const PropertyEditPage = () => {
                 <p className="text-red-500 text-sm mt-1">{errors.numberOfFloors}</p>
               )}
             </div>
+            
+            {errors.activeFloors && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-500 text-sm">{errors.activeFloors}</p>
+                <p className="text-gray-700 text-xs mt-1">Please make at least one floor available by toggling the switch.</p>
+              </div>
+            )}
 
             {formData.floors?.map((floor, floorIndex) => (
               <motion.div
@@ -771,175 +819,159 @@ const PropertyEditPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: floorIndex * 0.1 }}
               >
-                <h3 className="font-medium mb-3 text-[rgb(254,111,97)]">
-                  {floorIndex === 0 ? "Ground Floor" : `Floor ${floorIndex}`}
-                </h3>
-
-                <div className="mb-4">
-                  <label className="block text-gray-700 mb-2">Number of Rooms:</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={floor.numberOfRooms || ""}
-                    onChange={(e) => handleFloorChange(floorIndex, "numberOfRooms", e.target.value)}
-                    className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
-                      errors[`floor_${floorIndex}_rooms`]
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
-                    }`}
-                  />
-                  {errors[`floor_${floorIndex}_rooms`] && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors[`floor_${floorIndex}_rooms`]}
-                    </p>
-                  )}
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-medium text-[rgb(254,111,97)]">
+                    {floorIndex === 0 ? "Ground Floor" : `Floor ${floorIndex}`}
+                  </h3>
+                  <div className="flex items-center">
+                    <label className="inline-flex items-center cursor-pointer mr-2">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={floor.active !== false}
+                        onChange={(e) => toggleFloorActive(floorIndex, e.target.checked)}
+                      />
+                      <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[rgb(254,111,97)] rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[rgb(254,111,97)]"></div>
+                      <span className="ms-3 text-sm font-medium text-gray-700">
+                        {floor.active !== false ? "Available" : "Not Available"}
+                      </span>
+                    </label>
+                  </div>
                 </div>
 
-                {floor.rooms?.map((room, roomIndex) => (
-                  <div
-                    key={room.roomId || roomIndex}
-                    className="p-4 mb-4 border border-gray-200 rounded-lg bg-gray-50"
-                  >
-                    <h4 className="font-medium mb-3">Room {roomIndex + 1}</h4>
-
+                {floor.active !== false ? (
+                  <>
                     <div className="mb-4">
-                      <label className="block text-gray-700 mb-2">Sharing Options:</label>
-                      <div className="flex flex-wrap gap-2">
-                        {["Single", "Double", "Triple", "4 Sharing"].map((option) => (
-                          <motion.div
-                            key={option}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className={`px-3 py-1 border rounded cursor-pointer transition-all duration-200 ${
-                              room.sharingOptions?.includes(option)
-                                ? "bg-blue-100 border-blue-300 text-blue-800"
-                                : "bg-white border-gray-300 hover:bg-gray-50"
-                            }`}
-                            onClick={() => handleRoomSharingSelection(floorIndex, roomIndex, option)}
-                          >
-                            {option}
-                          </motion.div>
-                        ))}
-                      </div>
+                      <label className="block text-gray-700 mb-2">Number of Rooms:</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={floor.numberOfRooms || ""}
+                        onChange={(e) => handleFloorChange(floorIndex, "numberOfRooms", e.target.value)}
+                        className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
+                          errors[`floor_${floorIndex}_rooms`]
+                            ? "border-red-500 bg-red-50"
+                            : "border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
+                        }`}
+                      />
+                      {errors[`floor_${floorIndex}_rooms`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors[`floor_${floorIndex}_rooms`]}
+                        </p>
+                      )}
                     </div>
 
-                    <div className="mb-4">
-                      <label className="block text-gray-700 mb-2">Target Tenants:</label>
-                      <select
-                        value={room.targetTenants || ""}
-                        onChange={(e) =>
-                          handleRoomConfigChange(
-                            floorIndex,
-                            roomIndex,
-                            "targetTenants",
-                            e.target.value
-                          )
-                        }
-                        className="w-full p-3 border-2 rounded-lg transition-all duration-200 border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
+                    {floor.rooms?.map((room, roomIndex) => (
+                      <div
+                        key={room.roomId || roomIndex}
+                        className="p-4 mb-4 border border-gray-200 rounded-lg bg-gray-50"
                       >
-                        <option value="">Select target tenants</option>
-                        <option value="Students">Students</option>
-                        <option value="Working Professionals">Working Professionals</option>
-                        <option value="Family">Family</option>
-                        <option value="Any">Any</option>
-                      </select>
-                    </div>
+                        <h4 className="font-medium mb-3">Room {roomIndex + 1}</h4>
 
-                    <div className="mb-4">
-                      <label className="block text-gray-700 mb-2">Room Photos:</label>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {room.photos?.map((photo, photoIndex) => (
-                          <div key={photoIndex} className="relative group">
-                            <img
-                              src={photo}
-                              alt={`Room ${roomIndex + 1} photo ${photoIndex + 1}`}
-                              className="w-full h-32 object-cover rounded-lg"
-                            />
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => handleImageDelete(photo, floor.floorId, room.roomId)}
-                              className="absolute top-2 right-2 p-1.5 bg-white/90 hover:bg-red-500 hover:text-white text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </motion.button>
+                        <div className="mb-4">
+                          <label className="block text-gray-700 mb-2">Sharing Options:</label>
+                          <div className="flex flex-wrap gap-2">
+                            {["Single", "Double", "Triple", "4 Sharing"].map((option) => (
+                              <motion.div
+                                key={option}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={`px-3 py-1 border rounded cursor-pointer transition-all duration-200 ${
+                                  room.sharingOptions?.includes(option)
+                                    ? "bg-blue-100 border-blue-300 text-blue-800"
+                                    : "bg-white border-gray-300 hover:bg-gray-50"
+                                }`}
+                                onClick={() => handleRoomSharingSelection(floorIndex, roomIndex, option)}
+                              >
+                                {option}
+                              </motion.div>
+                            ))}
                           </div>
-                        ))}
-                        <motion.label 
-                          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg hover:border-[rgb(254,111,97)] cursor-pointer transition-all duration-200 hover:bg-gray-50"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <input
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            className="hidden"
-                            onChange={async (e) => {
-                              if (e.target.files?.length) {
-                                const urls = await handleImageUpload(
-                                  e.target.files,
-                                  floor.floorId,
-                                  room.roomId
-                                );
-                                if (urls?.length > 0) {
-                                  const updatedFloors = [...formData.floors];
-                                  const updatedRoom = updatedFloors[floorIndex].rooms[roomIndex];
-                                  updatedRoom.photos = [...(updatedRoom.photos || []), ...urls];
-                                  setFormData({ ...formData, floors: updatedFloors });
-                                }
-                              }
-                            }}
-                          />
-                          <div className="flex flex-col items-center gap-2">
-                            <Upload className="w-6 h-6 text-gray-400" />
-                            <p className="text-sm text-gray-500">Upload Photos</p>
-                          </div>
-                        </motion.label>
-                      </div>
-                    </div>
-
-                    <div className="mb-4">
-                      <label className="block text-gray-700 mb-2">Manage Tenants:</label>
-                      <div className="flex gap-2 mb-2">
-                        <input
-                          type="tel"
-                          placeholder="Enter tenant phone number"
-                          className="flex-1 p-2 border rounded"
-                          pattern="[0-9]{10}"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              handleTenantVerification(
-                                e.target.value,
-                                floorIndex,
-                                roomIndex
-                              );
-                              e.target.value = '';
-                            }
-                          }}
-                        />
-                      </div>
-                      
-                      {room.tenants?.map((tenant, tenantIndex) => (
-                        <div
-                          key={tenant.userId}
-                          className="flex items-center justify-between p-2 bg-white rounded border mb-2"
-                        >
-                          <div>
-                            <p className="font-medium">{tenant.name}</p>
-                            <p className="text-sm text-gray-600">{tenant.phone}</p>
-                          </div>
-                          <button
-                            onClick={() => handleTenantRemoval(floorIndex, roomIndex, tenant.userId)}
-                            className="p-1 text-red-500 hover:bg-red-50 rounded"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
                         </div>
-                      ))}
-                    </div>
+
+                        <div className="mb-4">
+                          <label className="block text-gray-700 mb-2">Target Tenants:</label>
+                          <select
+                            value={room.targetTenants || ""}
+                            onChange={(e) =>
+                              handleRoomConfigChange(
+                                floorIndex,
+                                roomIndex,
+                                "targetTenants",
+                                e.target.value
+                              )
+                            }
+                            className="w-full p-3 border-2 rounded-lg transition-all duration-200 border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
+                          >
+                            <option value="">Select target tenants</option>
+                            <option value="Students">Students</option>
+                            <option value="Working Professionals">Working Professionals</option>
+                            <option value="Family">Family</option>
+                            <option value="Any">Any</option>
+                          </select>
+                        </div>
+
+                        <div className="mb-4">
+                          <label className="block text-gray-700 mb-2">Room Photos:</label>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {room.photos?.map((photo, photoIndex) => (
+                              <div key={photoIndex} className="relative group">
+                                <img
+                                  src={photo}
+                                  alt={`Room ${roomIndex + 1} photo ${photoIndex + 1}`}
+                                  className="w-full h-32 object-cover rounded-lg"
+                                />
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => handleImageDelete(photo, floor.floorId, room.roomId)}
+                                  className="absolute top-2 right-2 p-1.5 bg-white/90 hover:bg-red-500 hover:text-white text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </motion.button>
+                              </div>
+                            ))}
+                            <motion.label 
+                              className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg hover:border-[rgb(254,111,97)] cursor-pointer transition-all duration-200 hover:bg-gray-50"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              <input
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  if (e.target.files?.length) {
+                                    const urls = await handleImageUpload(
+                                      e.target.files,
+                                      floor.floorId,
+                                      room.roomId
+                                    );
+                                    if (urls?.length > 0) {
+                                      const updatedFloors = [...formData.floors];
+                                      const updatedRoom = updatedFloors[floorIndex].rooms[roomIndex];
+                                      updatedRoom.photos = [...(updatedRoom.photos || []), ...urls];
+                                      setFormData({ ...formData, floors: updatedFloors });
+                                    }
+                                  }
+                                }}
+                              />
+                              <div className="flex flex-col items-center gap-2">
+                                <Upload className="w-6 h-6 text-gray-400" />
+                                <p className="text-sm text-gray-500">Upload Photos</p>
+                              </div>
+                            </motion.label>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <div className="p-4 bg-gray-100 rounded-lg text-center text-gray-500">
+                    This floor is not available for rent
                   </div>
-                ))}
+                )}
               </motion.div>
             ))}
           </motion.div>

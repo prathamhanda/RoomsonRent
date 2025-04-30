@@ -14,6 +14,7 @@ const PropertyBookingPage = () => {
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [activeFloors, setActiveFloors] = useState([]);
   const [bookingData, setBookingData] = useState({
     checkInDate: format(new Date(Date.now() + 86400000), "yyyy-MM-dd"), // Tomorrow
     checkOutDate: format(new Date(Date.now() + 2592000000), "yyyy-MM-dd"), // 30 days from now
@@ -31,12 +32,21 @@ const PropertyBookingPage = () => {
         const response = await axios.get(`https://backend.roomsonrent.in/api/listings/${id}`);
         
         if (response.data.success) {
-          setListing(response.data.data);
-          // Set default selected floor and room
-          if (response.data.data.floors && response.data.data.floors.length > 0) {
-            setSelectedFloor(response.data.data.floors[0]);
-            if (response.data.data.floors[0].rooms && response.data.data.floors[0].rooms.length > 0) {
-              setSelectedRoom(response.data.data.floors[0].rooms[0]);
+          const listingData = response.data.data;
+          setListing(listingData);
+          
+          // Filter active floors that have rooms
+          const availableFloors = listingData.floors.filter(
+            floor => (floor.active !== false) && floor.rooms && floor.rooms.length > 0
+          );
+          
+          setActiveFloors(availableFloors);
+          
+          // Set default selected floor and room if available
+          if (availableFloors.length > 0) {
+            setSelectedFloor(availableFloors[0]);
+            if (availableFloors[0].rooms && availableFloors[0].rooms.length > 0) {
+              setSelectedRoom(availableFloors[0].rooms[0]);
             }
           }
         } else {
@@ -111,6 +121,19 @@ const PropertyBookingPage = () => {
       <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50 p-4">
         <h1 className="text-2xl font-bold text-red-500 mb-4">Error Loading Property</h1>
         <p className="text-gray-700 mb-8">{error || "Property not found"}</p>
+        <Link to="/" className="px-6 py-3 bg-[#FE6F61] text-white rounded-full shadow-md hover:bg-[#e55a4d] transition-colors">
+          Back to Home
+        </Link>
+      </div>
+    );
+  }
+
+  // Check if there are any active floors with rooms
+  if (activeFloors.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50 p-4">
+        <h1 className="text-2xl font-bold text-amber-500 mb-4">Property Not Available</h1>
+        <p className="text-gray-700 mb-8">This property currently has no available rooms.</p>
         <Link to="/" className="px-6 py-3 bg-[#FE6F61] text-white rounded-full shadow-md hover:bg-[#e55a4d] transition-colors">
           Back to Home
         </Link>
@@ -195,8 +218,8 @@ const PropertyBookingPage = () => {
                     <p className="font-semibold">{listing.furnishingStatus}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-gray-500 text-sm">Total Floors</p>
-                    <p className="font-semibold">{listing.numberOfFloors}</p>
+                    <p className="text-gray-500 text-sm">Available Floors</p>
+                    <p className="font-semibold">{activeFloors.length}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <p className="text-gray-500 text-sm">Price</p>
@@ -257,19 +280,23 @@ const PropertyBookingPage = () => {
                 <div className="mb-4">
                   <label className="block text-gray-700 font-medium mb-2">Select Floor</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {listing.floors.map((floor, index) => (
-                      <button
-                        key={floor.floorId}
-                        onClick={() => handleFloorChange(floor)}
-                        className={`p-3 rounded-lg border transition-all duration-200 ${
-                          selectedFloor?.floorId === floor.floorId
-                            ? 'bg-[#FE6F61] text-white border-[#FE6F61]'
-                            : 'border-gray-200 hover:border-[#FE6F61]'
-                        }`}
-                      >
-                        {index === 0 ? "Ground Floor" : `Floor ${index}`}
-                      </button>
-                    ))}
+                    {activeFloors.map((floor, index) => {
+                      // Find the original index in the full floors array for proper labeling
+                      const originalIndex = listing.floors.findIndex(f => f.floorId === floor.floorId);
+                      return (
+                        <button
+                          key={floor.floorId}
+                          onClick={() => handleFloorChange(floor)}
+                          className={`p-3 rounded-lg border transition-all duration-200 ${
+                            selectedFloor?.floorId === floor.floorId
+                              ? 'bg-[#FE6F61] text-white border-[#FE6F61]'
+                              : 'border-gray-200 hover:border-[#FE6F61]'
+                          }`}
+                        >
+                          {originalIndex === 0 ? "Ground Floor" : `Floor ${originalIndex}`}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 

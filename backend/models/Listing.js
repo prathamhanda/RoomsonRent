@@ -59,7 +59,11 @@ const FloorSchema = new mongoose.Schema({
   },
   numberOfRooms: {
     type: Number,
-    required: [true, 'Please add number of rooms']
+    default: 0
+  },
+  active: {
+    type: Boolean,
+    default: true
   },
   rooms: [RoomSchema]
 });

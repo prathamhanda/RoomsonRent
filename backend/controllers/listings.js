@@ -203,7 +203,8 @@ exports.createListing = asyncHandler(async (req, res, next) => {
     req.body.floors = req.body.floors.map(floor => {
       const floorObj = {
         floorId: floor.floorId || `floor_${Math.random().toString(36).substring(2, 10)}`,
-        numberOfRooms: floor.numberOfRooms,
+        numberOfRooms: floor.numberOfRooms || 0,
+        active: typeof floor.active === 'boolean' ? floor.active : true,
         rooms: []
       };
 

@@ -284,6 +284,36 @@ const amenitiesList = [
     }
   };
 
+  // Add a new function to handle floor activation/deactivation
+  const toggleFloorActive = (propertyIndex, floorIndex, isActive) => {
+    const updatedProperties = [...formData.properties];
+    
+    if (!updatedProperties[propertyIndex].floors) {
+      updatedProperties[propertyIndex].floors = [];
+    }
+    
+    if (!updatedProperties[propertyIndex].floors[floorIndex]) {
+      updatedProperties[propertyIndex].floors[floorIndex] = { rooms: [] };
+    }
+
+    updatedProperties[propertyIndex].floors[floorIndex].active = isActive;
+    
+    // If activating the floor, ensure it has at least 1 room
+    if (isActive && (!updatedProperties[propertyIndex].floors[floorIndex].numberOfRooms || 
+        updatedProperties[propertyIndex].floors[floorIndex].numberOfRooms < 1)) {
+      updatedProperties[propertyIndex].floors[floorIndex].numberOfRooms = 1;
+    }
+    
+    setFormData({ ...formData, properties: updatedProperties });
+    
+    // Clear any related errors
+    if (errors[`property_${propertyIndex}_floor_${floorIndex}_numberOfRooms`]) {
+      const updatedErrors = { ...errors };
+      delete updatedErrors[`property_${propertyIndex}_floor_${floorIndex}_numberOfRooms`];
+      setErrors(updatedErrors);
+    }
+  };
+
   // Update validateStep function to check all rooms on each floor
   const validateStep = (currentStep) => {
     const newErrors = {};
@@ -327,28 +357,38 @@ const amenitiesList = [
             newErrors[`property_${index}_numberOfFloors`] =
               "Please enter at least 1 floor";
           } else if (property.floors) {
+            // Check if at least one floor is active
+            const hasActiveFloor = property.floors.some(floor => 
+              floor.active !== false && floor.numberOfRooms > 0);
+              
+            if (!hasActiveFloor) {
+              newErrors[`property_${index}_activeFloors`] = 
+                "At least one floor must be available for rent";
+            }
+            
             property.floors.forEach((floor, floorIndex) => {
-              if (!floor.numberOfRooms || parseInt(floor.numberOfRooms) < 1) {
-                newErrors[
-                  `property_${index}_floor_${floorIndex}_numberOfRooms`
-                ] = "Number of rooms is required";
+              // Skip validation for inactive floors
+              if (floor.active === false) {
+                return;
               }
+              
+              if (floor.numberOfRooms && parseInt(floor.numberOfRooms) > 0) {
+                // Check each room in the floor
+                if (floor.rooms) {
+                  for (let roomIndex = 0; roomIndex < parseInt(floor.numberOfRooms); roomIndex++) {
+                    const room = floor.rooms[roomIndex];
+                    
+                    if (!room || !room.sharingOptions || room.sharingOptions.length === 0) {
+                      newErrors[
+                        `property_${index}_floor_${floorIndex}_room_${roomIndex}_sharingOptions`
+                      ] = `Room ${roomIndex + 1}: Select at least one sharing option`;
+                    }
 
-              // Check each room in the floor
-              if (floor.rooms) {
-                for (let roomIndex = 0; roomIndex < parseInt(floor.numberOfRooms); roomIndex++) {
-                  const room = floor.rooms[roomIndex];
-                  
-                  if (!room || !room.sharingOptions || room.sharingOptions.length === 0) {
-                    newErrors[
-                      `property_${index}_floor_${floorIndex}_room_${roomIndex}_sharingOptions`
-                    ] = `Room ${roomIndex + 1}: Select at least one sharing option`;
-                  }
-
-                  if (!room || !room.targetTenants) {
-                    newErrors[
-                      `property_${index}_floor_${floorIndex}_room_${roomIndex}_targetTenants`
-                    ] = `Room ${roomIndex + 1}: Target tenants is required`;
+                    if (!room || !room.targetTenants) {
+                      newErrors[
+                        `property_${index}_floor_${floorIndex}_room_${roomIndex}_targetTenants`
+                      ] = `Room ${roomIndex + 1}: Target tenants is required`;
+                    }
                   }
                 }
               }
@@ -441,7 +481,17 @@ const amenitiesList = [
       const transformedProperties = formData.properties.map(property => {
         // Process floors data to match backend schema
         const floorData = property.floors?.map(floor => {
-          // Prepare all rooms data
+          // Skip floors marked as inactive
+          if (floor.active === false) {
+            return {
+              floorId: `floor_${Math.random().toString(36).substring(2, 10)}`,
+              numberOfRooms: 0,
+              active: false,
+              rooms: []
+            };
+          }
+          
+          // Prepare all rooms data for active floors
           const roomsData = floor.rooms
             ?.slice(0, parseInt(floor.numberOfRooms))
             ?.map((room, index) => ({
@@ -455,6 +505,7 @@ const amenitiesList = [
           return {
             floorId: `floor_${Math.random().toString(36).substring(2, 10)}`,
             numberOfRooms: parseInt(floor.numberOfRooms),
+            active: true,
             rooms: roomsData
           };
         });
@@ -808,6 +859,13 @@ const amenitiesList = [
                   )}
                 </div>
 
+                {errors[`property_${index}_activeFloors`] && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-500 text-sm">{errors[`property_${index}_activeFloors`]}</p>
+                    <p className="text-gray-700 text-xs mt-1">Please make at least one floor available by toggling the switch.</p>
+                  </div>
+                )}
+
                 <AnimatePresence>
                   {property.numberOfFloors &&
                     parseInt(property.numberOfFloors) > 0 && (
@@ -829,141 +887,166 @@ const amenitiesList = [
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: floorIndex * 0.1 }}
                             >
-                              <h5 className="font-medium mb-3 text-[rgb(254,111,97)]">
-                                {floorIndex === 0 ? "Ground Floor" : `Floor ${floorIndex}`}
-                              </h5>
-
-                              <div className="mb-4">
-                                <label className="block text-gray-700 mb-1">
-                                  Number of Rooms:
-                                </label>
-                                <input
-                                  type="number"
-                                  min="1"
-                                  value={
-                                    property.floors?.[floorIndex]
-                                      ?.numberOfRooms || ""
-                                  }
-                                  onChange={(e) =>
-                                    handleFloorChange(
-                                      index,
-                                      floorIndex,
-                                      "numberOfRooms",
-                                      e.target.value
-                                    )
-                                  }
-                                  onKeyDown={handleKeyDown}
-                                  className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
-                                    errors[
-                                      `property_${index}_floor_${floorIndex}_numberOfRooms`
-                                    ]
-                                      ? "border-red-500 bg-red-50"
-                                      : "border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
-                                  }`}
-                                />
-                                {errors[
-                                  `property_${index}_floor_${floorIndex}_numberOfRooms`
-                                ] && (
-                                  <p className="text-red-500 text-sm mt-1">
-                                    {
-                                      errors[
-                                        `property_${index}_floor_${floorIndex}_numberOfRooms`
-                                      ]
-                                    }
-                                  </p>
-                                )}
+                              <div className="flex justify-between items-center mb-3">
+                                <h5 className={`font-medium text-[rgb(254,111,97)]`}>
+                                  {floorIndex === 0 ? "Ground Floor" : `Floor ${floorIndex}`}
+                                </h5>
+                                <div className="flex items-center">
+                                  <label className="inline-flex items-center cursor-pointer mr-2">
+                                    <input
+                                      type="checkbox"
+                                      className="sr-only peer"
+                                      checked={property.floors?.[floorIndex]?.active !== false}
+                                      onChange={(e) => toggleFloorActive(index, floorIndex, e.target.checked)}
+                                    />
+                                    <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[rgb(254,111,97)] rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[rgb(254,111,97)]"></div>
+                                    <span className="ms-3 text-sm font-medium text-gray-700">
+                                      {property.floors?.[floorIndex]?.active !== false ? "Available" : "Not Available"}
+                                    </span>
+                                  </label>
+                                </div>
                               </div>
 
-                              {/* Room details for this floor */}
-                              {property.floors?.[floorIndex]?.numberOfRooms > 0 && (
-                                <div className="space-y-4 mt-4">
-                                  {[...Array(parseInt(property.floors[floorIndex].numberOfRooms))].map(
-                                    (_, roomIndex) => (
-                                      <div 
-                                        key={roomIndex} 
-                                        className="p-3 border border-gray-200 rounded-lg bg-gray-50"
-                                      >
-                                        <h6 className="font-medium mb-2">Room {roomIndex + 1}</h6>
-                                        
-                                        <div className="mb-3">
-                                          <label className="block text-gray-700 mb-1">
-                                            Room Sharing Options:
-                                          </label>
-                                          <div className="flex flex-wrap gap-2">
-                                            {["Single", "Double", "Triple", "4 Sharing"].map((option) => (
-                                              <motion.div
-                                                key={option}
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                                className={`px-3 py-1 border rounded cursor-pointer transition-all duration-200 ${
-                                                  property.floors?.[floorIndex]?.rooms?.[roomIndex]?.sharingOptions?.includes(option)
-                                                    ? "bg-red-100 border-blue-300 text-blue-800"
-                                                    : "bg-white border-gray-300 hover:bg-gray-50"
-                                                }`}
-                                                onClick={() => handleRoomSharingSelection(index, floorIndex, roomIndex, option)}
-                                              >
-                                                {option}
-                                              </motion.div>
-                                            ))}
-                                          </div>
-                                          {errors[
-                                            `property_${index}_floor_${floorIndex}_room_${roomIndex}_sharingOptions`
-                                          ] && (
-                                            <p className="text-red-500 text-sm mt-1">
+                              {/* Show floor details only if it's active */}
+                              {property.floors?.[floorIndex]?.active !== false ? (
+                                <>
+                                  <div className="mb-4">
+                                    <label className="block text-gray-700 mb-1">
+                                      Number of Rooms:
+                                    </label>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      value={
+                                        property.floors?.[floorIndex]
+                                          ?.numberOfRooms || ""
+                                      }
+                                      onChange={(e) =>
+                                        handleFloorChange(
+                                          index,
+                                          floorIndex,
+                                          "numberOfRooms",
+                                          e.target.value
+                                        )
+                                      }
+                                      onKeyDown={handleKeyDown}
+                                      className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
+                                        errors[
+                                          `property_${index}_floor_${floorIndex}_numberOfRooms`
+                                        ]
+                                          ? "border-red-500 bg-red-50"
+                                          : "border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
+                                      }`}
+                                    />
+                                    {errors[
+                                      `property_${index}_floor_${floorIndex}_numberOfRooms`
+                                    ] && (
+                                      <p className="text-red-500 text-sm mt-1">
+                                        {
+                                          errors[
+                                            `property_${index}_floor_${floorIndex}_numberOfRooms`
+                                          ]
+                                        }
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  {/* Room details for this floor */}
+                                  {property.floors?.[floorIndex]?.numberOfRooms > 0 && (
+                                    <div className="space-y-4 mt-4">
+                                      {[...Array(parseInt(property.floors[floorIndex].numberOfRooms))].map(
+                                        (_, roomIndex) => (
+                                          <div 
+                                            key={roomIndex} 
+                                            className="p-3 border border-gray-200 rounded-lg bg-gray-50"
+                                          >
+                                            <h6 className="font-medium mb-2">Room {roomIndex + 1}</h6>
+                                            
+                                            <div className="mb-3">
+                                              <label className="block text-gray-700 mb-1">
+                                                Room Sharing Options:
+                                              </label>
+                                              <div className="flex flex-wrap gap-2">
+                                                {["Single", "Double", "Triple", "4 Sharing"].map((option) => (
+                                                  <motion.div
+                                                    key={option}
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                    className={`px-3 py-1 border rounded cursor-pointer transition-all duration-200 ${
+                                                      property.floors?.[floorIndex]?.rooms?.[roomIndex]?.sharingOptions?.includes(option)
+                                                        ? "bg-red-100 border-blue-300 text-blue-800"
+                                                        : "bg-white border-gray-300 hover:bg-gray-50"
+                                                    }`}
+                                                    onClick={() => handleRoomSharingSelection(index, floorIndex, roomIndex, option)}
+                                                  >
+                                                    {option}
+                                                  </motion.div>
+                                                ))}
+                                              </div>
                                               {errors[
                                                 `property_${index}_floor_${floorIndex}_room_${roomIndex}_sharingOptions`
-                                              ]}
-                                            </p>
-                                          )}
-                                        </div>
+                                              ] && (
+                                                <p className="text-red-500 text-sm mt-1">
+                                                  {errors[
+                                                    `property_${index}_floor_${floorIndex}_room_${roomIndex}_sharingOptions`
+                                                  ]}
+                                                </p>
+                                              )}
+                                            </div>
 
-                                        <div className="mb-3">
-                                          <label className="block text-gray-700 mb-1">
-                                            Target Tenants:
-                                          </label>
-                                          <select
-                                            value={
-                                              property.floors?.[floorIndex]?.rooms?.[roomIndex]?.targetTenants || ""
-                                            }
-                                            onChange={(e) =>
-                                              handleRoomConfigChange(
-                                                index,
-                                                floorIndex,
-                                                roomIndex,
-                                                "targetTenants",
-                                                e.target.value
-                                              )
-                                            }
-                                            onKeyDown={handleKeyDown}
-                                            className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
-                                              errors[
-                                                `property_${index}_floor_${floorIndex}_room_${roomIndex}_targetTenants`
-                                              ]
-                                                ? "border-red-500 bg-red-50"
-                                                : "border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
-                                            }`}
-                                          >
-                                            <option value="">Select tenant type</option>
-                                            <option value="Students">Students</option>
-                                            <option value="Working Professionals">
-                                              Working Professionals
-                                            </option>
-                                            <option value="Family">Family</option>
-                                            <option value="Any">Any</option>
-                                          </select>
-                                          {errors[
-                                            `property_${index}_floor_${floorIndex}_room_${roomIndex}_targetTenants`
-                                          ] && (
-                                            <p className="text-red-500 text-sm mt-1">
+                                            <div className="mb-3">
+                                              <label className="block text-gray-700 mb-1">
+                                                Target Tenants:
+                                              </label>
+                                              <select
+                                                value={
+                                                  property.floors?.[floorIndex]?.rooms?.[roomIndex]?.targetTenants || ""
+                                                }
+                                                onChange={(e) =>
+                                                  handleRoomConfigChange(
+                                                    index,
+                                                    floorIndex,
+                                                    roomIndex,
+                                                    "targetTenants",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                onKeyDown={handleKeyDown}
+                                                className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
+                                                  errors[
+                                                    `property_${index}_floor_${floorIndex}_room_${roomIndex}_targetTenants`
+                                                  ]
+                                                    ? "border-red-500 bg-red-50"
+                                                    : "border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
+                                                }`}
+                                              >
+                                                <option value="">Select tenant type</option>
+                                                <option value="Students">Students</option>
+                                                <option value="Working Professionals">
+                                                  Working Professionals
+                                                </option>
+                                                <option value="Family">Family</option>
+                                                <option value="Any">Any</option>
+                                              </select>
                                               {errors[
                                                 `property_${index}_floor_${floorIndex}_room_${roomIndex}_targetTenants`
-                                              ]}
-                                            </p>
-                                          )}
-                                        </div>
-                                      </div>
-                                    )
+                                              ] && (
+                                                <p className="text-red-500 text-sm mt-1">
+                                                  {errors[
+                                                    `property_${index}_floor_${floorIndex}_room_${roomIndex}_targetTenants`
+                                                  ]}
+                                                </p>
+                                              )}
+                                            </div>
+                                          </div>
+                                        )
+                                      )}
+                                    </div>
                                   )}
+                                </>
+                              ) : (
+                                <div className="p-4 bg-gray-100 rounded-lg text-center text-gray-500">
+                                  This floor is not available for rent
                                 </div>
                               )}
                             </motion.div>
