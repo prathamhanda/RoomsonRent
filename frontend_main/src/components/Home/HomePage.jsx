@@ -287,7 +287,7 @@ export default function HomePage() {
       name: "Micheal Jackson 1st Floor R2",
       location: "Vasanat Vihar, South Delhi",
       price: "7,000",
-      amenities: ["A/C", "WiFi", "Single Occupancy", "Short Stay"],
+      amenities: ["A/C", "WiFi", "Short Stay"],
       image: "/images/78c3c990590b6c112e5b5cb34f1fbfac.webp",
     },
     {
@@ -1045,36 +1045,46 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center relative group">
-            <button className="absolute left-0 md:-left-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+            <button 
+              onClick={() => {
+                const container = document.getElementById('regular-rooms-container');
+                container.scrollBy({ left: -400, behavior: 'smooth' });
+              }}
+              className="absolute left-0 md:-left-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl"
+            >
               ‹
             </button>
-            <div className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4">
+            <div 
+              id="regular-rooms-container"
+              className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4"
+            >
               {regularRooms.map((room) => (
                 <div key={room.id}>
-                  <Card className="h-[220px] w-[300px] md:w-[500px] p-3 bg-white">
-                    <div className="rounded-lg p-0 border-1 border-[#D8D8D8]">
-                      <div className="flex h-full">
-                        <img
-                          alt="room"
-                          src={room.image}
-                          width="200"
-                          height="200"
-                          className="object-cover h-full w-2/5 rounded-l-md"
-                          loading="lazy"
-                        />
-                        <div className="flex flex-col justify-between p-2 md:p-3 w-full">
-                          <div className="flex flex-col">
-                            <div>
-                              <Link
-                                to={`/property/${room.id}`}
-                                className="font-semibold hover:underline text-sm md:text-base"
-                              >
-                                {room.name}
-                              </Link>
-                              <p className="text-[10px] md:text-xs text-[#979797] ml-[2px]">
-                                {room.location}
-                              </p>
-                              <div className="h-1"></div>
+                  <Link 
+                    to={`/property/${room.id}/visit`}
+                    className="block h-full"
+                  >
+                    <Card className="h-[280px] w-[320px] md:w-[400px] p-3 bg-white hover:shadow-lg transition-shadow duration-300">
+                      <div className="rounded-lg p-0 border-1 border-[#D8D8D8] h-full">
+                        <div className="flex h-full">
+                          <img
+                            alt="room"
+                            src={room.image}
+                            width="200"
+                            height="200"
+                            className="object-cover h-full w-2/5 rounded-l-md"
+                            loading="lazy"
+                          />
+                          <div className="flex flex-col justify-between p-3 w-full">
+                            <div className="flex flex-col gap-2">
+                              <div>
+                                <span className="font-semibold text-sm md:text-base line-clamp-2">
+                                  {room.name}
+                                </span>
+                                <p className="text-[10px] md:text-xs text-[#979797] mt-1">
+                                  {room.location}
+                                </p>
+                              </div>
                               <div className="flex gap-1 flex-wrap">
                                 {room.amenities.map((amenity, index) => {
                                   let colorClass = "";
@@ -1113,39 +1123,47 @@ export default function HomePage() {
                                 })}
                               </div>
                             </div>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <p className="font-semibold text-[10px] md:text-xs">
-                              Rs.{" "}
-                              <span className="text-base md:text-lg">{room.price}/-</span>{" "}
-                              per month
-                            </p>
-                            <div className="flex gap-2 md:gap-3 mt-auto">
-                              <Button
-                                as={Link}
-                                to={`/property/${room.id}`}
-                                className="flex text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-1 px-2 md:px-3"
-                              >
-                                Book Now
-                              </Button>
-                              <Button
-                                as={Link}
-                                to={`/property/${room.id}/visit`}
-                                variant="bordered"
-                                className="flex-1 font-semibold border-[#FE6F61] text-[#FE6F61] text-xs md:text-sm py-1 px-2 md:px-3"
-                              >
-                                Site Visit
-                              </Button>
+                            <div className="flex flex-col gap-2">
+                              <p className="font-semibold text-[10px] md:text-xs">
+                                Rs.{" "}
+                                <span className="text-base md:text-lg">{room.price}/-</span>{" "}
+                                per month
+                              </p>
+                              <div className="flex gap-2">
+                                <Button
+                                  as={Link}
+                                  to={`/property/${room.id}`}
+                                  className="flex-1 text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-2"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  Book Now
+                                </Button>
+                                <Button
+                                  as={Link}
+                                  to={`/property/${room.id}/visit`}
+                                  variant="bordered"
+                                  className="flex-1 font-semibold border-[#FE6F61] text-[#FE6F61] text-xs md:text-sm py-2"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  Site Visit
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </Link>
                 </div>
               ))}
             </div>
-            <button className="absolute right-0 md:-right-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+            <button 
+              onClick={() => {
+                const container = document.getElementById('regular-rooms-container');
+                container.scrollBy({ left: 400, behavior: 'smooth' });
+              }}
+              className="absolute right-0 md:-right-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl"
+            >
               ›
             </button>
           </div>
@@ -1168,46 +1186,56 @@ export default function HomePage() {
           </p>
 
           <div className="flex items-center relative group">
-            <button className="absolute left-0 md:-left-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+            <button 
+              onClick={() => {
+                const container = document.getElementById('premium-rooms-container');
+                container.scrollBy({ left: -400, behavior: 'smooth' });
+              }}
+              className="absolute left-0 md:-left-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl"
+            >
               ‹
             </button>
-            <div className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4">
+            <div 
+              id="premium-rooms-container"
+              className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4"
+            >
               {premiumRooms.map((room) => (
                 <div key={room.id}>
-                  <Card className="h-[220px] w-[300px] md:w-[500px] p-3 border-1 border-[#C59856] bg-white">
-                    <div className="rounded-lg p-0">
-                      <div className="flex h-full">
-                        <img
-                          alt="room"
-                          src={room.image}
-                          width="200"
-                          height="200"
-                          className="object-cover h-full w-2/5 rounded-l-md"
-                          loading="lazy"
-                        />
-                        <div className="flex flex-col justify-between p-2 md:p-3 w-full">
-                          <div className="flex flex-col">
-                            <p className="flex items-center gap-2 text-[#C59856] text-[10px] md:text-xs bg-opacity-10 rounded-md px-2 py-1 self-start">
-                              <img
-                                alt="crown"
-                                src="/images/media/premium_crown.793445f4.svg"
-                                width="12"
-                                height="10"
-                                className="md:w-[14px] md:h-[12px]"
-                              />
-                              Premium
-                            </p>
-                            <div>
-                              <Link
-                                to={`/property/${room.id}`}
-                                className="font-semibold hover:underline text-sm md:text-base"
-                              >
-                                {room.name}
-                              </Link>
-                              <p className="text-[10px] md:text-xs text-[#979797] ml-[2px]">
-                                {room.location}
+                  <Link 
+                    to={`/property/${room.id}/visit`}
+                    className="block h-full"
+                  >
+                    <Card className="h-[280px] w-[320px] md:w-[400px] p-3 border-1 border-[#C59856] bg-white hover:shadow-lg transition-shadow duration-300">
+                      <div className="rounded-lg p-0 h-full">
+                        <div className="flex h-full">
+                          <img
+                            alt="room"
+                            src={room.image}
+                            width="200"
+                            height="200"
+                            className="object-cover h-full w-2/5 rounded-l-md"
+                            loading="lazy"
+                          />
+                          <div className="flex flex-col justify-between p-3 w-full">
+                            <div className="flex flex-col gap-2">
+                              <p className="flex items-center gap-2 text-[#C59856] text-[10px] md:text-xs bg-opacity-10 rounded-md px-2 py-1 self-start">
+                                <img
+                                  alt="crown"
+                                  src="/images/media/premium_crown.793445f4.svg"
+                                  width="12"
+                                  height="10"
+                                  className="md:w-[14px] md:h-[12px]"
+                                />
+                                Premium
                               </p>
-                              <div className="h-1"></div>
+                              <div>
+                                <span className="font-semibold text-sm md:text-base line-clamp-2">
+                                  {room.name}
+                                </span>
+                                <p className="text-[10px] md:text-xs text-[#979797] mt-1">
+                                  {room.location}
+                                </p>
+                              </div>
                               <div className="flex gap-1 flex-wrap">
                                 {room.amenities.map((amenity, index) => {
                                   const getAmenityIcon = (amenity) => {
@@ -1239,41 +1267,49 @@ export default function HomePage() {
                                 })}
                               </div>
                             </div>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <p className="font-semibold text-[10px] md:text-xs">
-                              Rs.{" "}
-                              <span className="text-base md:text-lg text-[#C59856]">
-                                {room.price}/-
-                              </span>{" "}
-                              per month
-                            </p>
-                            <div className="flex gap-2 md:gap-3 mt-auto">
-                              <Button
-                                as={Link}
-                                to={`/property/${room.id}`}
-                                className="flex text-white bg-[#C59856] font-semibold rounded-xl text-xs md:text-sm py-1 px-2 md:px-3"
-                              >
-                                Book Now
-                              </Button>
-                              <Button
-                                as={Link}
-                                to={`/property/${room.id}/visit`}
-                                variant="bordered"
-                                className="flex-1 font-semibold border-[#C59856] text-[#C59856] text-xs md:text-sm py-1 px-2 md:px-3"
-                              >
-                                Site Visit
-                              </Button>
+                            <div className="flex flex-col gap-2">
+                              <p className="font-semibold text-[10px] md:text-xs">
+                                Rs.{" "}
+                                <span className="text-base md:text-lg text-[#C59856]">
+                                  {room.price}/-
+                                </span>{" "}
+                                per month
+                              </p>
+                              <div className="flex gap-2">
+                                <Button
+                                  as={Link}
+                                  to={`/property/${room.id}`}
+                                  className="flex-1 text-white rounded-xl bg-[#C59856] font-semibold text-xs md:text-sm py-2"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  Book Now
+                                </Button>
+                                <Button
+                                  as={Link}
+                                  to={`/property/${room.id}/visit`}
+                                  variant="bordered"
+                                  className="flex-1 font-semibold border-[#C59856] text-[#C59856] text-xs md:text-sm py-2"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  Site Visit
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </Link>
                 </div>
               ))}
             </div>
-            <button className="absolute right-0 md:-right-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+            <button 
+              onClick={() => {
+                const container = document.getElementById('premium-rooms-container');
+                container.scrollBy({ left: 400, behavior: 'smooth' });
+              }}
+              className="absolute right-0 md:-right-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl"
+            >
               ›
             </button>
           </div>
@@ -1290,38 +1326,46 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center relative group">
-            <button className="absolute left-0 md:-left-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+            <button 
+              onClick={() => {
+                const container = document.getElementById('short-stays-container');
+                container.scrollBy({ left: -400, behavior: 'smooth' });
+              }}
+              className="absolute left-0 md:-left-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl"
+            >
               ‹
             </button>
-            <div className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4">
+            <div 
+              id="short-stays-container"
+              className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4"
+            >
               {regularRooms.filter(room => room.amenities.includes("Short Stay")).map((room) => (
                 <div key={room.id}>
-                  <Card className="h-[220px] w-[300px] md:w-[500px] p-3 bg-white">
-                    {/* Same card content as regular rooms */}
-                    <div className="rounded-lg p-0 border-1 border-[#D8D8D8]">
-                      <div className="flex h-full">
-                        <img
-                          alt="room"
-                          src={room.image}
-                          width="200"
-                          height="200"
-                          className="object-cover h-full w-2/5 rounded-l-md"
-                          loading="lazy"
-                        />
-                        <div className="flex flex-col justify-between p-2 md:p-3 w-full">
-                          {/* Same content structure as regular rooms */}
-                          <div className="flex flex-col">
-                            <div>
-                              <Link
-                                to={`/property/${room.id}`}
-                                className="font-semibold hover:underline text-sm md:text-base"
-                              >
-                                {room.name}
-                              </Link>
-                              <p className="text-[10px] md:text-xs text-[#979797] ml-[2px]">
-                                {room.location}
-                              </p>
-                              <div className="h-1"></div>
+                  <Link 
+                    to={`/property/${room.id}/visit`}
+                    className="block h-full"
+                  >
+                    <Card className="h-[280px] w-[320px] md:w-[400px] p-3 bg-white hover:shadow-lg transition-shadow duration-300">
+                      <div className="rounded-lg p-0 border-1 border-[#D8D8D8] h-full">
+                        <div className="flex h-full">
+                          <img
+                            alt="room"
+                            src={room.image}
+                            width="200"
+                            height="200"
+                            className="object-cover h-full w-2/5 rounded-l-md"
+                            loading="lazy"
+                          />
+                          <div className="flex flex-col justify-between p-3 w-full">
+                            <div className="flex flex-col gap-2">
+                              <div>
+                                <span className="font-semibold text-sm md:text-base line-clamp-2">
+                                  {room.name}
+                                </span>
+                                <p className="text-[10px] md:text-xs text-[#979797] mt-1">
+                                  {room.location}
+                                </p>
+                              </div>
                               <div className="flex gap-1 flex-wrap">
                                 {room.amenities.map((amenity, index) => {
                                   let colorClass = "";
@@ -1360,32 +1404,39 @@ export default function HomePage() {
                                 })}
                               </div>
                             </div>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <p className="font-semibold text-[10px] md:text-xs">
-                              Rs.{" "}
-                              <span className="text-base md:text-lg">{room.price}/-</span>{" "}
-                              per month
-                            </p>
-                            <div className="flex gap-2 md:gap-3 mt-auto">
-                              <Button
-                                as={Link}
-                                to={`/property/${room.id}`}
-                                className="flex text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-1 px-2 md:px-3"
-                              >
-                                Book Now
-                              </Button>
-                              <div className="flex-1 px-3 border-2 border-transparent"></div>
+                            <div className="flex flex-col gap-2">
+                              <p className="font-semibold text-[10px] md:text-xs">
+                                Rs.{" "}
+                                <span className="text-base md:text-lg">{room.price}/-</span>{" "}
+                                per month
+                              </p>
+                              <div className="flex gap-2">
+                                <Button
+                                  as={Link}
+                                  to={`/property/${room.id}`}
+                                  className="flex-1 text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-2"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  Book Now
+                                </Button>
+                                <div className="flex-1 px-3 border-2 border-transparent"></div>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </Link>
                 </div>
               ))}
             </div>
-            <button className="absolute right-0 md:-right-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+            <button 
+              onClick={() => {
+                const container = document.getElementById('short-stays-container');
+                container.scrollBy({ left: 400, behavior: 'smooth' });
+              }}
+              className="absolute right-0 md:-right-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl"
+            >
               ›
             </button>
           </div>
@@ -1402,38 +1453,46 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center relative group">
-            <button className="absolute left-0 md:-left-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+            <button 
+              onClick={() => {
+                const container = document.getElementById('flatmates-container');
+                container.scrollBy({ left: -400, behavior: 'smooth' });
+              }}
+              className="absolute left-0 md:-left-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl"
+            >
               ‹
             </button>
-            <div className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4">
+            <div 
+              id="flatmates-container"
+              className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4"
+            >
               {regularRooms.map((room) => (
                 <div key={room.id}>
-                  <Card className="h-[220px] w-[300px] md:w-[500px] p-3 bg-white">
-                    {/* Same card content structure as regular rooms */}
-                    <div className="rounded-lg p-0 border-1 border-[#D8D8D8]">
-                      <div className="flex h-full">
-                        <img
-                          alt="room"
-                          src={room.image}
-                          width="200"
-                          height="200"
-                          className="object-cover h-full w-2/5 rounded-l-md"
-                          loading="lazy"
-                        />
-                        <div className="flex flex-col justify-between p-2 md:p-3 w-full">
-                          {/* Same content structure as regular rooms */}
-                          <div className="flex flex-col">
-                            <div>
-                              <Link
-                                to={`/property/${room.id}`}
-                                className="font-semibold hover:underline text-sm md:text-base"
-                              >
-                                {room.name}
-                              </Link>
-                              <p className="text-[10px] md:text-xs text-[#979797] ml-[2px]">
-                                {room.location}
-                              </p>
-                              <div className="h-1"></div>
+                  <Link 
+                    to={`/property/${room.id}/visit`}
+                    className="block h-full"
+                  >
+                    <Card className="h-[280px] w-[320px] md:w-[400px] p-3 bg-white hover:shadow-lg transition-shadow duration-300">
+                      <div className="rounded-lg p-0 border-1 border-[#D8D8D8] h-full">
+                        <div className="flex h-full">
+                          <img
+                            alt="room"
+                            src={room.image}
+                            width="200"
+                            height="200"
+                            className="object-cover h-full w-2/5 rounded-l-md"
+                            loading="lazy"
+                          />
+                          <div className="flex flex-col justify-between p-3 w-full">
+                            <div className="flex flex-col gap-2">
+                              <div>
+                                <span className="font-semibold text-sm md:text-base line-clamp-2">
+                                  {room.name}
+                                </span>
+                                <p className="text-[10px] md:text-xs text-[#979797] mt-1">
+                                  {room.location}
+                                </p>
+                              </div>
                               <div className="flex gap-1 flex-wrap">
                                 {room.amenities.map((amenity, index) => {
                                   let colorClass = "";
@@ -1472,39 +1531,47 @@ export default function HomePage() {
                                 })}
                               </div>
                             </div>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <p className="font-semibold text-[10px] md:text-xs">
-                              Rs.{" "}
-                              <span className="text-base md:text-lg">{room.price}/-</span>{" "}
-                              per month
-                            </p>
-                            <div className="flex gap-2 md:gap-3 mt-auto">
-                              <Button
-                                as={Link}
-                                to={`/property/${room.id}`}
-                                className="flex text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-1 px-2 md:px-3"
-                              >
-                                Book Now
-                              </Button>
-                              <Button
-                                as={Link}
-                                to={`/property/${room.id}/visit`}
-                                variant="bordered"
-                                className="flex-1 font-semibold border-[#FE6F61] text-[#FE6F61] text-xs md:text-sm py-1 px-2 md:px-3"
-                              >
-                                Site Visit
-                              </Button>
+                            <div className="flex flex-col gap-2">
+                              <p className="font-semibold text-[10px] md:text-xs">
+                                Rs.{" "}
+                                <span className="text-base md:text-lg">{room.price}/-</span>{" "}
+                                per month
+                              </p>
+                              <div className="flex gap-2">
+                                <Button
+                                  as={Link}
+                                  to={`/property/${room.id}`}
+                                  className="flex-1 text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-2"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  Book Now
+                                </Button>
+                                <Button
+                                  as={Link}
+                                  to={`/property/${room.id}/visit`}
+                                  variant="bordered"
+                                  className="flex-1 font-semibold border-[#FE6F61] text-[#FE6F61] text-xs md:text-sm py-2"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  Site Visit
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </Link>
                 </div>
               ))}
             </div>
-            <button className="absolute right-0 md:-right-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl">
+            <button 
+              onClick={() => {
+                const container = document.getElementById('flatmates-container');
+                container.scrollBy({ left: 400, behavior: 'smooth' });
+              }}
+              className="absolute right-0 md:-right-4 z-10 bg-white text-gray-700 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full shadow-md hover:bg-gray-100 opacity-70 group-hover:opacity-100 transition-opacity text-xl"
+            >
               ›
             </button>
           </div>
