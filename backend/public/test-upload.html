@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        #fileInput {
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background-color: #f3f3f3;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        #fileInfo {
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        img {
+            max-width: 100%;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload Test Page</h1>
+    <p>Use this page to test uploads to the server.</p>
+    
+    <div class="form-group">
+        <label for="fileInput">Select image files to upload (up to 12MB each):</label>
+        <input type="file" id="fileInput" accept="image/*" multiple>
+        <div id="fileInfo"></div>
+        <button id="uploadButton">Upload Files</button>
+    </div>
+    
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <div id="status"></div>
+    <div id="imagePreview"></div>
+    
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const uploadButton = document.getElementById('uploadButton');
+        const status = document.getElementById('status');
+        const progressBar = document.getElementById('progressBar');
+        const imagePreview = document.getElementById('imagePreview');
+        
+        // Display file info when files are selected
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                let info = `Selected ${fileInput.files.length} file(s):\n`;
+                
+                Array.from(fileInput.files).forEach((file, index) => {
+                    const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                    info += `${index + 1}. ${file.name} (${sizeMB} MB) - ${file.type}\n`;
+                });
+                
+                fileInfo.textContent = info;
+            } else {
+                fileInfo.textContent = '';
+            }
+        });
+        
+        // Handle upload
+        uploadButton.addEventListener('click', async () => {
+            if (fileInput.files.length === 0) {
+                status.textContent = 'Please select at least one file';
+                status.className = 'error';
+                return;
+            }
+            
+            // Reset UI
+            status.textContent = 'Uploading...';
+            status.className = '';
+            progressBar.style.width = '0%';
+            imagePreview.innerHTML = '';
+            
+            const formData = new FormData();
+            
+            // Add all files to form data
+            Array.from(fileInput.files).forEach(file => {
+                formData.append('file', file);
+            });
+            
+            try {
+                // Use XMLHttpRequest for upload progress
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percent = Math.round((event.loaded / event.total) * 100);
+                        progressBar.style.width = percent + '%';
+                        status.textContent = `Uploading: ${percent}%`;
+                    }
+                };
+                
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            
+                            if (response.success) {
+                                status.textContent = 'Upload successful!';
+                                status.className = 'success';
+                                
+                                // Display uploaded images
+                                if (response.data.filePaths) {
+                                    response.data.filePaths.forEach(url => {
+                                        const img = document.createElement('img');
+                                        img.src = url;
+                                        imagePreview.appendChild(img);
+                                    });
+                                }
+                            } else {
+                                status.textContent = 'Upload failed: ' + (response.message || 'Unknown error');
+                                status.className = 'error';
+                            }
+                        } catch (e) {
+                            status.textContent = 'Error parsing server response';
+                            status.className = 'error';
+                        }
+                    } else {
+                        status.textContent = `Upload failed with status ${xhr.status}`;
+                        status.className = 'error';
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    status.textContent = 'Network error occurred';
+                    status.className = 'error';
+                };
+                
+                xhr.timeout = 300000; // 5 minute timeout
+                xhr.ontimeout = function() {
+                    status.textContent = 'Upload timed out';
+                    status.className = 'error';
+                };
+                
+                // Send the request to a test endpoint
+                xhr.open('POST', '/api/cloudinary-test/upload', true);
+                xhr.withCredentials = true;
+                xhr.send(formData);
+                
+            } catch (error) {
+                status.textContent = 'Error: ' + error.message;
+                status.className = 'error';
+            }
+        });
+    </script>
+</body>
+</html> 

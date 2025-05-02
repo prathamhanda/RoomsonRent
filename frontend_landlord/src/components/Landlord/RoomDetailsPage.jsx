@@ -73,12 +73,20 @@ const RoomDetailsPage = () => {
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
+      console.log(`Selected ${files.length} files for upload`);
+      
+      files.forEach(file => {
+        console.log(`File: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+      });
+      
       // Update file list
       setPhotoFiles([...photoFiles, ...files]);
       
       // Create preview URLs
       const newPreviewUrls = files.map(file => URL.createObjectURL(file));
       setPreviewUrls([...previewUrls, ...newPreviewUrls]);
+      
+      toast.success(`Added ${files.length} files for upload`);
     }
   };
 
@@ -206,16 +214,23 @@ const RoomDetailsPage = () => {
 
   const handleSubmit = async () => {
     setIsUploading(true);
+    const uploadToast = toast.loading('Processing your request...');
+    
     try {
       // First upload photos if any and not skipped
       let photoUrls = [...photos];
       if (!skipPhotos && photoFiles.length > 0) {
         try {
+          toast.loading('Preparing to upload images...', { id: uploadToast });
           const formData = new FormData();
+          
           // Append all files with the same field name
           photoFiles.forEach(file => {
             formData.append('file', file);
+            console.log(`Adding file to upload: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
           });
+          
+          toast.loading(`Uploading ${photoFiles.length} images...`, { id: uploadToast });
           
           const uploadResponse = await axios.post(
             `${backendURL}/api/uploads/room/${listingId.replace(/['"]/g, '')}/${floorId}/${roomId}`,
@@ -224,16 +239,38 @@ const RoomDetailsPage = () => {
               headers: {
                 'Content-Type': 'multipart/form-data'
               },
-              withCredentials: true
+              withCredentials: true,
+              timeout: 300000, // 5 minute timeout
+              onUploadProgress: (progressEvent) => {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                if (percentCompleted % 10 === 0) { // Update every 10%
+                  toast.loading(`Uploading: ${percentCompleted}%`, { id: uploadToast });
+                }
+              }
             }
           );
           
           if (uploadResponse.data.success) {
+            const uploadedCount = uploadResponse.data.data.filePaths.length;
             photoUrls = [...photoUrls, ...uploadResponse.data.data.filePaths];
+            toast.success(`Successfully uploaded ${uploadedCount} of ${photoFiles.length} images`, { id: uploadToast });
+          } else {
+            toast.error('Failed to upload images - server error', { id: uploadToast });
           }
         } catch (error) {
           console.error('Error uploading files:', error);
-          toast.error('Failed to upload some images');
+          
+          let errorMessage = 'Failed to upload images';
+          
+          if (error.code === 'ECONNABORTED') {
+            errorMessage = 'Upload timed out. Please try with fewer images or smaller files.';
+          } else if (error.response) {
+            errorMessage = error.response.data?.message || `Server error: ${error.response.status}`;
+          } else if (error.request) {
+            errorMessage = 'No response from server. Check your connection.';
+          }
+          
+          toast.error(errorMessage, { id: uploadToast });
         }
       }
       
@@ -253,6 +290,8 @@ const RoomDetailsPage = () => {
 
       // Get the current room data
       const currentRoom = updatedListing.floors[floorIndex].rooms[roomIndex];
+      
+      toast.loading('Updating room details...', { id: uploadToast });
       
       // Update room data while preserving other properties
       updatedListing.floors[floorIndex].rooms[roomIndex] = {
@@ -279,6 +318,8 @@ const RoomDetailsPage = () => {
       );
 
       if (!skipTenants && updateResponse.data.success) {
+        toast.loading('Updating tenant assignments...', { id: uploadToast });
+        
         // Update each tenant's user record
         const tenantUpdatePromises = tenants.map(tenant =>
           axios.put(
@@ -296,17 +337,17 @@ const RoomDetailsPage = () => {
       }
       
       if (updateResponse.data.success) {
-        toast.success('Room details updated successfully!');
+        toast.success('Room details updated successfully!', { id: uploadToast });
         navigate('/dashboard');
       }
     } catch (error) {
       console.error('Error updating room:', error);
       if (error.response?.data?.error) {
-        toast.error(error.response.data.error);
+        toast.error(error.response.data.error, { id: uploadToast });
       } else if (error.message) {
-        toast.error(error.message);
+        toast.error(error.message, { id: uploadToast });
       } else {
-        toast.error('Failed to update room details');
+        toast.error('Failed to update room details', { id: uploadToast });
       }
     } finally {
       setIsUploading(false);

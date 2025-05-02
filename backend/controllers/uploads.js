@@ -133,6 +133,8 @@ exports.uploadProfileImage = asyncHandler(async (req, res, next) => {
 // @route   POST /api/uploads/room/:id/:floorId/:roomId
 // @access  Private
 exports.uploadRoomImage = asyncHandler(async (req, res, next) => {
+  console.log('Upload room image request received');
+  
   const listing = await Listing.findById(req.params.id);
 
   if (!listing) {
@@ -160,31 +162,61 @@ exports.uploadRoomImage = asyncHandler(async (req, res, next) => {
 
   // Handle both single and multiple file uploads
   const files = req.files.file ? (Array.isArray(req.files.file) ? req.files.file : [req.files.file]) : [];
+  console.log(`Received ${files.length} files for upload`);
 
   if (files.length === 0) {
     return next(new ErrorResponse(`No files to upload`, 400));
   }
 
   try {
-    const uploadPromises = files.map(file => {
+    // Process files sequentially to avoid overwhelming Cloudinary
+    const uploadedUrls = [];
+    
+    for (const file of files) {
+      console.log(`Processing file: ${file.name}, size: ${file.size / 1024 / 1024}MB`);
+      
+      // Validate file type
       if (!file.mimetype.startsWith('image')) {
-        throw new Error(`File ${file.name} is not an image`);
+        console.error(`File ${file.name} is not an image`);
+        continue; // Skip this file but continue with others
       }
 
+      // Validate file size
       if (file.size > process.env.MAX_FILE_UPLOAD) {
-        throw new Error(`File ${file.name} exceeds size limit of ${process.env.MAX_FILE_UPLOAD / 1000000}MB`);
+        console.error(`File ${file.name} exceeds size limit of ${process.env.MAX_FILE_UPLOAD / 1000000}MB`);
+        continue; // Skip this file but continue with others
       }
 
-      return cloudinary.uploader.upload(file.tempFilePath, {
-        resource_type: 'image',
-        folder: `rooms/${listing._id}/${floorId}/${roomId}`,
-        public_id: `room_${Date.now()}_${Math.round(Math.random() * 1000)}`,
-        overwrite: true,
-      });
-    });
+      try {
+        // Upload to Cloudinary with extended timeout
+        const result = await cloudinary.uploader.upload(file.tempFilePath, {
+          resource_type: 'image',
+          folder: `rooms/${listing._id}/${floorId}/${roomId}`,
+          public_id: `room_${Date.now()}_${Math.round(Math.random() * 1000)}`,
+          overwrite: true,
+          timeout: 300000, // 5 minute timeout for each upload
+          use_filename: true,
+          unique_filename: true
+        });
+        
+        uploadedUrls.push(result.secure_url);
+        console.log(`Successfully uploaded ${file.name} to Cloudinary`);
+        
+        // Clean up temp file
+        if (fs.existsSync(file.tempFilePath)) {
+          fs.unlinkSync(file.tempFilePath);
+        }
+      } catch (uploadError) {
+        console.error(`Error uploading ${file.name} to Cloudinary:`, uploadError);
+        // Continue with the next file
+      }
+    }
 
-    const results = await Promise.all(uploadPromises);
-    const uploadedUrls = results.map(result => result.secure_url);
+    console.log(`Successfully uploaded ${uploadedUrls.length} of ${files.length} files`);
+    
+    if (uploadedUrls.length === 0) {
+      return next(new ErrorResponse('Failed to upload any images to Cloudinary', 500));
+    }
 
     // Add new photos to the room's photos array
     listing.floors[floorIndex].rooms[roomIndex].photos = 
@@ -192,6 +224,7 @@ exports.uploadRoomImage = asyncHandler(async (req, res, next) => {
     listing.floors[floorIndex].rooms[roomIndex].photos.push(...uploadedUrls);
 
     await listing.save();
+    console.log('Updated listing with new photos');
 
     return res.status(200).json({
       success: true,
@@ -201,7 +234,7 @@ exports.uploadRoomImage = asyncHandler(async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
+    console.error('Upload process error:', error);
     return next(new ErrorResponse(`Problem with file upload to Cloudinary: ${error.message}`, 500));
   }
 });

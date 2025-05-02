@@ -270,10 +270,15 @@ const PropertyEditPage = () => {
 
   // Handle image upload to Cloudinary
   const handleImageUpload = async (files, floorId, roomId) => {
+    const loadingToast = toast.loading(`Uploading ${files.length} images...`);
+    
     try {
       const formData = new FormData();
+      
+      // Add each file to the form data
       Array.from(files).forEach(file => {
         formData.append('file', file);
+        console.log(`Adding file to upload: ${file.name}, size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
       });
 
       const response = await axios.post(
@@ -283,19 +288,37 @@ const PropertyEditPage = () => {
           headers: {
             'Content-Type': 'multipart/form-data'
           },
-          withCredentials: true
+          withCredentials: true,
+          timeout: 300000, // 5 minute timeout
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            toast.loading(`Uploading: ${percentCompleted}%`, { id: loadingToast });
+          }
         }
       );
 
       if (response.data.success) {
-        toast.success(`Successfully uploaded ${files.length} images`);
+        const uploadedCount = response.data.data.filePaths.length;
+        toast.success(`Successfully uploaded ${uploadedCount} of ${files.length} images`, { id: loadingToast });
         return response.data.data.filePaths;
       } else {
-        throw new Error('Failed to upload images');
+        toast.error('Upload failed - server returned error', { id: loadingToast });
+        return [];
       }
     } catch (error) {
       console.error("Error uploading images:", error);
-      toast.error(error.response?.data?.message || "Error uploading images");
+      
+      let errorMessage = "Error uploading images";
+      
+      if (error.code === 'ECONNABORTED') {
+        errorMessage = 'Upload timed out. Please try again.';
+      } else if (error.response) {
+        errorMessage = error.response.data?.message || `Server error: ${error.response.status}`;
+      } else if (error.request) {
+        errorMessage = 'No response from server. Check your connection.';
+      }
+      
+      toast.error(errorMessage, { id: loadingToast });
       return [];
     }
   };

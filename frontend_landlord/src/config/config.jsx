@@ -1,12 +1,20 @@
 const backendURL = (() => {
     const currentURL = window.location.href;
     const url = new URL(currentURL);
-
-    if (url.protocol === 'http:') {
-        return `http://${url.hostname}:5000`;
-    } else if (url.protocol === 'https:') {
+    const hostname = url.hostname;
+    
+    console.log('Current hostname:', hostname);
+    
+    // Development environment
+    if (hostname === 'localhost' || hostname.includes('127.0.0.1')) {
+        return `http://${hostname}:5000`;
+    } 
+    // Production environment
+    else {
         return 'https://backend.roomsonrent.in';
     }
 })();
+
+console.log('Using backend URL:', backendURL);
 
 export default backendURL;
