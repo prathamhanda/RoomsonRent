@@ -15,6 +15,7 @@ const PropertyBookingPage = () => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeFloors, setActiveFloors] = useState([]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [bookingData, setBookingData] = useState({
     checkInDate: format(new Date(Date.now() + 86400000), "yyyy-MM-dd"), // Tomorrow
     checkOutDate: format(new Date(Date.now() + 2592000000), "yyyy-MM-dd"), // 30 days from now
@@ -108,6 +109,14 @@ const PropertyBookingPage = () => {
     }
   };
 
+  const openLightbox = () => {
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-50">
@@ -174,7 +183,8 @@ const PropertyBookingPage = () => {
                     <img 
                       src={currentPhoto} 
                       alt={`Room ${selectedRoom.roomId}`} 
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover cursor-pointer"
+                      onClick={openLightbox}
                     />
                     <button 
                       onClick={prevImage}
@@ -452,6 +462,60 @@ const PropertyBookingPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Image Lightbox */}
+      <AnimatePresence>
+        {lightboxOpen && roomPhotos.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center"
+            onClick={closeLightbox}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="relative max-w-4xl max-h-[90vh] mx-auto p-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={currentPhoto} 
+                alt={`Room ${selectedRoom.roomId} full view`} 
+                className="max-w-full max-h-[85vh] object-contain mx-auto"
+              />
+              <button 
+                onClick={prevImage}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full shadow-md transition-colors"
+              >
+                &#10094;
+              </button>
+              <button 
+                onClick={nextImage}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full shadow-md transition-colors"
+              >
+                &#10095;
+              </button>
+              <button 
+                onClick={closeLightbox} 
+                className="absolute top-4 right-4 bg-white/20 hover:bg-white/40 text-white w-10 h-10 rounded-full flex items-center justify-center"
+              >
+                ✕
+              </button>
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                {roomPhotos.map((_, index) => (
+                  <button 
+                    key={index} 
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`w-3 h-3 mx-1 rounded-full ${currentImageIndex === index ? 'bg-white' : 'bg-white/40'}`}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Add the Footer component */}
       <Footer />

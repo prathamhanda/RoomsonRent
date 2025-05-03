@@ -24,16 +24,10 @@ export const uploadImage = async (file) => {
 
 export const deleteImage = async (imageUrl) => {
   try {
-    // Extract public_id from Cloudinary URL
-    const publicId = imageUrl.split('/').slice(-1)[0].split('.')[0];
-    
+    // Use the new delete-by-url endpoint that handles Cloudinary URL parsing
     await axios.post(
-      `${backendURL}/api/cloudinary/delete`,
-      { 
-        public_id: publicId,
-        cloudName: CLOUDINARY_CLOUD_NAME,
-        apiKey: '797288255224796'
-      },
+      `${backendURL}/api/cloudinary/delete-by-url`,
+      { imageUrl },
       { withCredentials: true }
     );
     

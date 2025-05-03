@@ -33,6 +33,7 @@ const SiteVisitPage = () => {
   const [openSection, setOpenSection] = useState('description');
   const [allPhotos, setAllPhotos] = useState([]);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -124,6 +125,14 @@ const SiteVisitPage = () => {
     } catch (error) {
       toast.error('Failed to share');
     }
+  };
+
+  const openLightbox = () => {
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
   };
 
   // Animation variants
@@ -266,7 +275,8 @@ const SiteVisitPage = () => {
                     <img
                       src={allPhotos[currentPhotoIndex]}
                       alt={`Property view ${currentPhotoIndex + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover cursor-pointer"
+                      onClick={openLightbox}
                     />
                     <button
                       onClick={() => setCurrentPhotoIndex(prev => prev === 0 ? allPhotos.length - 1 : prev - 1)}
@@ -304,7 +314,10 @@ const SiteVisitPage = () => {
                 {allPhotos.slice(0, 8).map((photo, index) => (
                   <button
                     key={index}
-                    onClick={() => setCurrentPhotoIndex(index)}
+                    onClick={() => {
+                      setCurrentPhotoIndex(index);
+                      openLightbox();
+                    }}
                     className={`relative aspect-square rounded-lg overflow-hidden ${
                       currentPhotoIndex === index ? 'ring-2 ring-[#FE6F61]' : ''
                     }`}
@@ -661,6 +674,62 @@ const SiteVisitPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Image Lightbox */}
+      <AnimatePresence>
+        {lightboxOpen && allPhotos.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center"
+            onClick={closeLightbox}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="relative max-w-5xl max-h-[90vh] mx-auto p-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img 
+                src={allPhotos[currentPhotoIndex]} 
+                alt={`Property view ${currentPhotoIndex + 1} full view`} 
+                className="max-w-full max-h-[85vh] object-contain mx-auto"
+              />
+              <button 
+                onClick={() => setCurrentPhotoIndex(prev => prev === 0 ? allPhotos.length - 1 : prev - 1)}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full shadow-md transition-colors"
+              >
+                &#10094;
+              </button>
+              <button 
+                onClick={() => setCurrentPhotoIndex(prev => prev === allPhotos.length - 1 ? 0 : prev + 1)}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full shadow-md transition-colors"
+              >
+                &#10095;
+              </button>
+              <button 
+                onClick={closeLightbox} 
+                className="absolute top-4 right-4 bg-white/20 hover:bg-white/40 text-white w-10 h-10 rounded-full flex items-center justify-center"
+              >
+                ✕
+              </button>
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                {allPhotos.map((_, index) => (
+                  <button 
+                    key={index} 
+                    onClick={() => setCurrentPhotoIndex(index)}
+                    className={`w-2 h-2 mx-1 rounded-full transition-all ${
+                      currentPhotoIndex === index ? 'bg-white w-4' : 'bg-white/40'
+                    }`}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Footer />
     </div>

@@ -251,77 +251,136 @@ exports.deleteImage = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Please provide an image path`, 400));
   }
 
-  // Check if image belongs to a listing
-  if (imagePath.includes('/uploads/listings/')) {
-    const listing = await Listing.findOne({ images: imagePath });
+  try {
+    // Extract the Cloudinary public_id from the URL
+    // Cloudinary URLs typically have format: https://res.cloudinary.com/[cloud_name]/image/upload/v[version]/[folder]/[public_id].[extension]
+    const publicIdWithExtension = imagePath.split('/').slice(-1)[0];
+    const folderPath = imagePath.split('/').slice(-3, -1).join('/');
+    const publicId = `${folderPath}/${publicIdWithExtension.split('.')[0]}`;
+    
+    console.log(`Attempting to delete image from Cloudinary with public_id: ${publicId}`);
 
-    if (!listing) {
-      return next(
-        new ErrorResponse(`Listing with this image not found`, 404)
+    // Check if image belongs to a listing
+    if (imagePath.includes('cloudinary.com')) {
+      let listing = null;
+      
+      // First, check main listing images
+      listing = await Listing.findOne({ images: imagePath });
+      
+      if (!listing) {
+        // Check if it's a main image
+        listing = await Listing.findOne({ mainImage: imagePath });
+      }
+      
+      if (!listing) {
+        // Check if it's a room image
+        listing = await Listing.findOne({ 
+          'floors.rooms.photos': imagePath 
+        });
+      }
+
+      if (!listing) {
+        return next(
+          new ErrorResponse(`Listing with this image not found`, 404)
+        );
+      }
+
+      // Make sure user is listing owner
+      if (listing.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+        return next(
+          new ErrorResponse(
+            `User ${req.user.id} is not authorized to delete this image`,
+            403
+          )
+        );
+      }
+
+      // Remove image from listing main images if present
+      const imageIndex = listing.images.indexOf(imagePath);
+      if (imageIndex > -1) {
+        listing.images.splice(imageIndex, 1);
+      }
+
+      // If main image is deleted, set new main image
+      if (listing.mainImage === imagePath) {
+        listing.mainImage = listing.images.length > 0 ? listing.images[0] : '';
+      }
+
+      // Check and remove from room photos if present
+      let roomImageFound = false;
+      for (let floorIndex = 0; floorIndex < listing.floors.length; floorIndex++) {
+        const floor = listing.floors[floorIndex];
+        if (!floor.rooms) continue;
+        
+        for (let roomIndex = 0; roomIndex < floor.rooms.length; roomIndex++) {
+          const room = floor.rooms[roomIndex];
+          if (!room.photos) continue;
+          
+          const roomPhotoIndex = room.photos.indexOf(imagePath);
+          if (roomPhotoIndex > -1) {
+            room.photos.splice(roomPhotoIndex, 1);
+            roomImageFound = true;
+            break;
+          }
+        }
+        if (roomImageFound) break;
+      }
+
+      await listing.save();
+    } else if (imagePath.includes('/users/')) {
+      // Handle user avatar deletion
+      const user = await User.findOne({ avatar: imagePath });
+
+      if (!user) {
+        return next(
+          new ErrorResponse(`User with this avatar not found`, 404)
+        );
+      }
+
+      // Make sure user is deleting their own avatar
+      if (user._id.toString() !== req.user.id && req.user.role !== 'admin') {
+        return next(
+          new ErrorResponse(
+            `User ${req.user.id} is not authorized to delete this avatar`,
+            403
+          )
+        );
+      }
+
+      // Set avatar to default
+      user.avatar = '/uploads/users/default-avatar.png';
+      await user.save();
+    }
+
+    // Delete from Cloudinary if it's a Cloudinary URL
+    if (imagePath.includes('cloudinary.com')) {
+      // Delete file from Cloudinary
+      const cloudinaryResult = await cloudinary.uploader.destroy(publicId);
+      console.log('Cloudinary deletion result:', cloudinaryResult);
+      
+      if (cloudinaryResult.result !== 'ok') {
+        console.warn(`Warning: Cloudinary reported non-ok result when deleting ${publicId}: ${cloudinaryResult.result}`);
+      }
+    } else {
+      // For local file storage (legacy support)
+      const filePath = path.join(
+        __dirname,
+        '..',
+        'public',
+        imagePath.replace('/', '')
       );
+
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
 
-    // Make sure user is listing owner
-    if (listing.owner.toString() !== req.user.id && req.user.role !== 'admin') {
-      return next(
-        new ErrorResponse(
-          `User ${req.user.id} is not authorized to delete this image`,
-          403
-        )
-      );
-    }
-
-    // Remove image from listing
-    const imageIndex = listing.images.indexOf(imagePath);
-    if (imageIndex > -1) {
-      listing.images.splice(imageIndex, 1);
-    }
-
-    // If main image is deleted, set new main image
-    if (listing.mainImage === imagePath) {
-      listing.mainImage = listing.images.length > 0 ? listing.images[0] : '';
-    }
-
-    await listing.save();
-  } else if (imagePath.includes('/uploads/users/')) {
-    // Handle user avatar deletion
-    const user = await User.findOne({ avatar: imagePath });
-
-    if (!user) {
-      return next(
-        new ErrorResponse(`User with this avatar not found`, 404)
-      );
-    }
-
-    // Make sure user is deleting their own avatar
-    if (user._id.toString() !== req.user.id && req.user.role !== 'admin') {
-      return next(
-        new ErrorResponse(
-          `User ${req.user.id} is not authorized to delete this avatar`,
-          403
-        )
-      );
-    }
-
-    // Set avatar to default
-    user.avatar = '/uploads/users/default-avatar.png';
-    await user.save();
+    res.status(200).json({
+      success: true,
+      data: {}
+    });
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    return next(new ErrorResponse(`Problem with image deletion: ${error.message}`, 500));
   }
-
-  // Delete file from server
-  const filePath = path.join(
-    __dirname,
-    '..',
-    'public',
-    imagePath.replace('/', '')
-  );
-
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
-
-  res.status(200).json({
-    success: true,
-    data: {}
-  });
 }); 

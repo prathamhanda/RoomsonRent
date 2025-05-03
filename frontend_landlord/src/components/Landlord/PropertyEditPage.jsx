@@ -63,6 +63,7 @@ const PropertyEditPage = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [deletingImages, setDeletingImages] = useState({});
 
   // Property types and amenities lists
   const propertyTypes = ["PG", "Flat", "Boys PG", "Girls PG", "Other"];
@@ -326,7 +327,20 @@ const PropertyEditPage = () => {
   // Handle image deletion
   const handleImageDelete = async (imageUrl, floorId, roomId) => {
     try {
-      // First update the local state to provide immediate feedback
+      // Set loading state for this specific image
+      setDeletingImages(prev => ({ ...prev, [imageUrl]: true }));
+      
+      // First delete the image from Cloudinary
+      await axios.post(
+        `${backendURL}/api/cloudinary/delete-by-url`,
+        { imageUrl },
+        { 
+          withCredentials: true,
+          timeout: 10000 // 10 second timeout for deletion
+        }
+      );
+
+      // Then update the local state to provide immediate feedback
       const updatedFormData = { ...formData };
       const floorIndex = updatedFormData.floors.findIndex(f => f.floorId === floorId);
       if (floorIndex !== -1) {
@@ -359,6 +373,13 @@ const PropertyEditPage = () => {
       toast.error("Error deleting image. Please try again.");
       // Refresh the listing data to ensure UI is in sync with backend
       fetchListing();
+    } finally {
+      // Clear loading state
+      setDeletingImages(prev => {
+        const newState = { ...prev };
+        delete newState[imageUrl];
+        return newState;
+      });
     }
   };
 
@@ -942,15 +963,27 @@ const PropertyEditPage = () => {
                                 <img
                                   src={photo}
                                   alt={`Room ${roomIndex + 1} photo ${photoIndex + 1}`}
-                                  className="w-full h-32 object-cover rounded-lg"
+                                  className={`w-full h-32 object-cover rounded-lg ${deletingImages[photo] ? 'opacity-50' : ''}`}
                                 />
                                 <motion.button
                                   whileHover={{ scale: 1.1 }}
                                   whileTap={{ scale: 0.9 }}
                                   onClick={() => handleImageDelete(photo, floor.floorId, room.roomId)}
-                                  className="absolute top-2 right-2 p-1.5 bg-white/90 hover:bg-red-500 hover:text-white text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg"
+                                  disabled={deletingImages[photo]}
+                                  className={`absolute top-2 right-2 p-1.5 rounded-full shadow-lg 
+                                    ${deletingImages[photo] ? 
+                                      'bg-gray-400 cursor-not-allowed' : 
+                                      'bg-white/90 hover:bg-red-500 hover:text-white text-red-500 opacity-0 group-hover:opacity-100'
+                                    } transition-all duration-200`}
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  {deletingImages[photo] ? (
+                                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                  ) : (
+                                    <Trash2 className="w-4 h-4" />
+                                  )}
                                 </motion.button>
                               </div>
                             ))}
