@@ -224,25 +224,51 @@ export default function HomePage() {
     return listings.map(listing => {
       // Find an appropriate room image
       let roomImage = "/images/78c3c990590b6c112e5b5cb34f1fbfac.webp"; // Default fallback image
+      let roomPrice = null;
+      let roomDiscountedPrice = null;
 
       // First try to get image from first room of first floor
       if (listing.floors && listing.floors.length > 0 && 
-          listing.floors[0].rooms && listing.floors[0].rooms.length > 0 && 
-          listing.floors[0].rooms[0].photos && listing.floors[0].rooms[0].photos.length > 0) {
-        roomImage = listing.floors[0].rooms[0].photos[0];
+          listing.floors[0].rooms && listing.floors[0].rooms.length > 0) {
+        
+        const firstRoom = listing.floors[0].rooms[0];
+        
+        // Get image if available
+        if (firstRoom.photos && firstRoom.photos.length > 0) {
+          roomImage = firstRoom.photos[0];
+        }
+        
+        // Get price information
+        roomPrice = firstRoom.price;
+        roomDiscountedPrice = firstRoom.discountedPrice;
       } else {
-        // If not found, look through all floors and rooms for the first available image
+        // If not found, look through all floors and rooms for the first available image and price
         for (const floor of listing.floors || []) {
-          let imageFound = false;
+          let dataFound = false;
           for (const room of floor.rooms || []) {
             if (room.photos && room.photos.length > 0) {
               roomImage = room.photos[0];
-              imageFound = true;
+              
+              // Get price information
+              roomPrice = room.price;
+              roomDiscountedPrice = room.discountedPrice;
+              
+              dataFound = true;
               break;
             }
           }
-          if (imageFound) break;
+          if (dataFound) break;
         }
+      }
+
+      // If no room price was found, fall back to listing price
+      if (roomPrice === null) {
+        roomPrice = listing.price;
+      }
+      
+      // If no room discounted price was found, fall back to listing discounted price
+      if (roomDiscountedPrice === null) {
+        roomDiscountedPrice = listing.discountedPrice;
       }
 
       // Calculate distance if user location is available
@@ -268,7 +294,9 @@ export default function HomePage() {
         id: listing._id,
         name: listing.title,
         location: locationDisplay,
-        price: listing.price?.toLocaleString() || "---",
+        price: roomPrice?.toLocaleString() || "---",
+        originalPrice: roomPrice,
+        discountedPrice: roomDiscountedPrice,
         amenities: [
           ...(listing.furnishingStatus === "Furnished" ? ["A/C"] : []),
           ...(listing.amenities?.includes("Wi-Fi") ? ["WiFi"] : []),
@@ -287,6 +315,8 @@ export default function HomePage() {
       name: "Micheal Jackson 1st Floor R2",
       location: "Vasanat Vihar, South Delhi",
       price: "7,000",
+      originalPrice: 7000,
+      discountedPrice: 6300,
       amenities: ["A/C", "WiFi", "Short Stay"],
       image: "/images/78c3c990590b6c112e5b5cb34f1fbfac.webp",
     },
@@ -295,6 +325,8 @@ export default function HomePage() {
       name: "Micheal Jackson 1st Floor R3",
       location: "Vasanat Vihar, South Delhi",
       price: "8,000",
+      originalPrice: 8000,
+      discountedPrice: 6800,
       amenities: ["WiFi", "Triple Occupancy"],
       image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
     },
@@ -303,6 +335,7 @@ export default function HomePage() {
       name: "Micheal Jackson 1st Floor R3",
       location: "Vasanat Vihar, South Delhi",
       price: "8,000",
+      originalPrice: 8000,
       amenities: ["WiFi", "Triple Occupancy"],
       image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
     },
@@ -311,6 +344,8 @@ export default function HomePage() {
       name: "Micheal Jackson 1st Floor R3",
       location: "Vasanat Vihar, South Delhi",
       price: "8,000",
+      originalPrice: 8000,
+      discountedPrice: 7200,
       amenities: ["WiFi", "Triple Occupancy"],
       image: "/images/7a003bb4ff178a2ea451a316e3b92202.webp",
     },
@@ -1124,11 +1159,27 @@ export default function HomePage() {
                               </div>
                             </div>
                             <div className="flex flex-col gap-2">
-                              <p className="font-semibold text-[10px] md:text-xs">
-                                Rs.{" "}
-                                <span className="text-base md:text-lg">{room.price}/-</span>{" "}
-                                per month
-                              </p>
+                              {room.discountedPrice ? (
+                                <div>
+                                  <p className="text-gray-400 line-through text-[9px] md:text-[11px]">
+                                    Rs. {room.originalPrice || room.price}/-
+                                  </p>
+                                  <div className="flex items-center">
+                                    <p className="font-semibold text-[#FE6F61] text-base md:text-lg">
+                                      Rs. {room.discountedPrice.toLocaleString()}/-
+                                    </p>
+                                    <span className="ml-1 bg-red-100 text-red-600 text-[8px] md:text-[10px] px-1 py-0.5 rounded-full whitespace-nowrap">
+                                      {Math.round(((room.originalPrice || room.price) - room.discountedPrice) / (room.originalPrice || room.price) * 100)}% off
+                                    </span>
+                                  </div>
+                                  <p className="text-[8px] md:text-[10px] text-gray-600">per month</p>
+                                </div>
+                              ) : (
+                                <p className="font-semibold text-[10px] md:text-xs">
+                                  Rs. <span className="text-base md:text-lg">{room.price}</span>{" "}
+                                  per month
+                                </p>
+                              )}
                               <div className="flex gap-2">
                                 <Button
                                   as={Link}
@@ -1268,13 +1319,30 @@ export default function HomePage() {
                               </div>
                             </div>
                             <div className="flex flex-col gap-2">
-                              <p className="font-semibold text-[10px] md:text-xs">
-                                Rs.{" "}
-                                <span className="text-base md:text-lg text-[#C59856]">
-                                  {room.price}/-
-                                </span>{" "}
-                                per month
-                              </p>
+                              {room.discountedPrice ? (
+                                <div>
+                                  <p className="text-gray-400 line-through text-[9px] md:text-[11px]">
+                                    Rs. {room.originalPrice || room.price}/-
+                                  </p>
+                                  <div className="flex items-center">
+                                    <p className="font-semibold text-[#C59856] text-base md:text-lg">
+                                      Rs. {room.discountedPrice.toLocaleString()}/-
+                                    </p>
+                                    <span className="ml-1 bg-amber-100 text-amber-700 text-[8px] md:text-[10px] px-1 py-0.5 rounded-full whitespace-nowrap">
+                                      {Math.round(((room.originalPrice || room.price) - room.discountedPrice) / (room.originalPrice || room.price) * 100)}% off
+                                    </span>
+                                  </div>
+                                  <p className="text-[8px] md:text-[10px] text-gray-600">per month</p>
+                                </div>
+                              ) : (
+                                <p className="font-semibold text-[10px] md:text-xs">
+                                  Rs.{" "}
+                                  <span className="text-base md:text-lg text-[#C59856]">
+                                    {room.price}/-
+                                  </span>{" "}
+                                  per month
+                                </p>
+                              )}
                               <div className="flex gap-2">
                                 <Button
                                   as={Link}

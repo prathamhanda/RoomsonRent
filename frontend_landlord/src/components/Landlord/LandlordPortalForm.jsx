@@ -270,7 +270,9 @@ const amenitiesList = [
         .fill()
         .map((_, i) => updatedProperties[propertyIndex].floors[floorIndex].rooms[i] || {
           sharingOptions: [],
-          targetTenants: ''
+          targetTenants: '',
+          price: 0,
+          discountedPrice: undefined
         });
     }
 
@@ -494,13 +496,35 @@ const amenitiesList = [
           // Prepare all rooms data for active floors
           const roomsData = floor.rooms
             ?.slice(0, parseInt(floor.numberOfRooms))
-            ?.map((room, index) => ({
-              roomId: `room_${index + 1}`,
-              type: room.type || "standard",
-              sharingOptions: room.sharingOptions || [],
-              targetTenants: room.targetTenants || '',
-              photos: room.photos || []
-            })) || [];
+            ?.map((room, index) => {
+              // Ensure price values are valid numbers for the backend
+              let price = room.price;
+              if (price === '') price = null;
+              else if (typeof price === 'string') price = parseFloat(price);
+              else if (typeof price !== 'number') price = null;
+              
+              let discountedPrice = room.discountedPrice;
+              if (discountedPrice === '') discountedPrice = undefined;
+              else if (typeof discountedPrice === 'string') discountedPrice = parseFloat(discountedPrice);
+              else if (typeof discountedPrice !== 'number') discountedPrice = undefined;
+              
+              const roomData = {
+                roomId: `room_${Math.random().toString(36).substring(2, 10)}`,
+                type: room.type || "standard",
+                sharingOptions: room.sharingOptions || [],
+                targetTenants: room.targetTenants || '',
+                price: price,
+                photos: room.photos || []
+              };
+              
+              // Only include discountedPrice if it has a valid value
+              if (discountedPrice !== undefined && discountedPrice !== null) {
+                roomData.discountedPrice = discountedPrice;
+              }
+              
+              console.log(`Preparing room data:`, roomData);
+              return roomData;
+            }) || [];
 
           return {
             floorId: `floor_${Math.random().toString(36).substring(2, 10)}`,
@@ -1038,6 +1062,79 @@ const amenitiesList = [
                                                 </p>
                                               )}
                                             </div>
+
+                                            {/* Room Pricing */}
+                                            <div className="mb-3">
+                                              <label className="block text-gray-700 mb-1">
+                                                Original Price (₹/month):
+                                              </label>
+                                              <input
+                                                type="number"
+                                                min="0"
+                                                value={
+                                                  property.floors?.[floorIndex]?.rooms?.[roomIndex]?.price || ""
+                                                }
+                                                onChange={(e) => {
+                                                  // Convert to number directly when changing
+                                                  const numValue = e.target.value === '' ? '' : parseFloat(e.target.value);
+                                                  handleRoomConfigChange(
+                                                    index,
+                                                    floorIndex,
+                                                    roomIndex,
+                                                    "price",
+                                                    numValue
+                                                  );
+                                                }}
+                                                onKeyDown={handleKeyDown}
+                                                placeholder="e.g., 5000"
+                                                className={`w-full p-3 border-2 rounded-lg transition-all duration-200 ${
+                                                  errors[
+                                                    `property_${index}_floor_${floorIndex}_room_${roomIndex}_price`
+                                                  ]
+                                                    ? "border-red-500 bg-red-50"
+                                                    : "border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
+                                                }`}
+                                              />
+                                              {errors[
+                                                `property_${index}_floor_${floorIndex}_room_${roomIndex}_price`
+                                              ] && (
+                                                <p className="text-red-500 text-sm mt-1">
+                                                  {errors[
+                                                    `property_${index}_floor_${floorIndex}_room_${roomIndex}_price`
+                                                  ]}
+                                                </p>
+                                              )}
+                                            </div>
+
+                                            <div className="mb-3">
+                                              <label className="block text-gray-700 mb-1">
+                                                Discounted Price (₹/month):
+                                              </label>
+                                              <input
+                                                type="number"
+                                                min="0"
+                                                value={
+                                                  property.floors?.[floorIndex]?.rooms?.[roomIndex]?.discountedPrice || ""
+                                                }
+                                                onChange={(e) => {
+                                                  // Convert to number directly when changing
+                                                  const numValue = e.target.value === '' ? '' : parseFloat(e.target.value);
+                                                  handleRoomConfigChange(
+                                                    index,
+                                                    floorIndex,
+                                                    roomIndex,
+                                                    "discountedPrice",
+                                                    numValue
+                                                  );
+                                                }}
+                                                onKeyDown={handleKeyDown}
+                                                placeholder="e.g., 4500 (optional)"
+                                                className="w-full p-3 border-2 rounded-lg transition-all duration-200 border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
+                                              />
+                                              <p className="text-gray-500 text-xs mt-1">
+                                                Leave empty if no discount is offered
+                                              </p>
+                                            </div>
                                           </div>
                                         )
                                       )}
@@ -1120,6 +1217,14 @@ const amenitiesList = [
                                   <p className="text-sm">
                                     Target Tenants:{" "}
                                     {room.targetTenants || "Not specified"}
+                                  </p>
+                                  <p className="text-sm">
+                                    Price: ₹{room.price || "Not specified"}
+                                    {room.discountedPrice && (
+                                      <span className="text-green-600 ml-2">
+                                        Discounted: ₹{room.discountedPrice}
+                                      </span>
+                                    )}
                                   </p>
                                 </div>
                               ))}

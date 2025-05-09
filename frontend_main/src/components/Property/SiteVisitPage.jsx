@@ -629,12 +629,37 @@ const SiteVisitPage = () => {
             <div className="md:w-1/3 p-6">
               <div className="sticky top-24">
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                  <div className="text-2xl font-bold text-primary mb-4">
-                    ₹{listing.price?.toLocaleString()}/month
-                  </div>
-                  {listing.discountedPrice && (
-                    <div className="text-sm text-gray-500 line-through mb-4">
-                      ₹{listing.discountedPrice?.toLocaleString()}/month
+                  <h3 className="text-lg font-bold text-gray-800 mb-2">Pricing</h3>
+                  {selectedFloor?.rooms && selectedFloor.rooms.length > 0 && selectedFloor.rooms[0].discountedPrice ? (
+                    <div>
+                      <p className="text-gray-400 line-through text-sm">₹ {selectedFloor.rooms[0].price?.toLocaleString() || 0}/month</p>
+                      <div className="flex items-center">
+                        <p className="font-bold text-2xl text-[#FE6F61]">₹ {selectedFloor.rooms[0].discountedPrice.toLocaleString()}/month</p>
+                        {selectedFloor.rooms[0].price && selectedFloor.rooms[0].discountedPrice && (
+                          <span className="ml-2 bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">
+                            {Math.round(((selectedFloor.rooms[0].price - selectedFloor.rooms[0].discountedPrice) / selectedFloor.rooms[0].price) * 100)}% off
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">Best price guaranteed</p>
+                    </div>
+                  ) : listing.discountedPrice ? (
+                    <div>
+                      <p className="text-gray-400 line-through text-sm">₹ {listing.price?.toLocaleString() || 0}/month</p>
+                      <div className="flex items-center">
+                        <p className="font-bold text-2xl text-[#FE6F61]">₹ {listing.discountedPrice.toLocaleString()}/month</p>
+                        {listing.price && listing.discountedPrice && (
+                          <span className="ml-2 bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">
+                            {Math.round(((listing.price - listing.discountedPrice) / listing.price) * 100)}% off
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">Best price guaranteed</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="font-bold text-2xl text-gray-800">₹ {selectedFloor?.rooms?.[0]?.price?.toLocaleString() || listing.price?.toLocaleString() || "Price on request"}/month</p>
+                      <p className="text-sm text-gray-500 mt-1">Best price guaranteed</p>
                     </div>
                   )}
                 </div>

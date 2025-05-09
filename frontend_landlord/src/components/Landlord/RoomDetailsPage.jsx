@@ -298,6 +298,7 @@ const RoomDetailsPage = () => {
       updatedListing.floors[floorIndex].rooms[roomIndex] = {
         ...currentRoom, // Preserve all existing room properties
         photos: skipPhotos ? currentRoom.photos : photoUrls,
+        price: currentRoom.price || 0, // Ensure price has a default value
         tenants: skipTenants ? currentRoom.tenants : tenants.map(tenant => ({
           userId: tenant.userId,
           name: tenant.name,
@@ -642,6 +643,23 @@ const RoomDetailsPage = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Selected Room Info */}
+            {selectedRoom && (
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h3 className="font-bold text-lg mb-2">Room Information</h3>
+                <div className="space-y-2">
+                  <p><span className="text-gray-500">Type:</span> {selectedRoom.type}</p>
+                  <p><span className="text-gray-500">Sharing Options:</span> {selectedRoom.sharingOptions.join(", ")}</p>
+                  <p><span className="text-gray-500">Target Tenants:</span> {selectedRoom.targetTenants}</p>
+                  <p><span className="text-gray-500">Price:</span> ₹{selectedRoom.price || "N/A"}</p>
+                  {selectedRoom.discountedPrice && (
+                    <p><span className="text-gray-500">Discounted Price:</span> ₹{selectedRoom.discountedPrice}</p>
+                  )}
+                  <p><span className="text-gray-500">Available Photos:</span> {selectedRoom.photos ? selectedRoom.photos.length : 0}</p>
+                </div>
               </div>
             )}
           </div>

@@ -20,6 +20,14 @@ const RoomSchema = new mongoose.Schema({
     required: [true, 'Please specify target tenants'],
     enum: ['Students', 'Working Professionals', 'Family', 'Any']
   },
+  price: {
+    type: Number,
+    min: [0, 'Price cannot be negative']
+  },
+  discountedPrice: {
+    type: Number,
+    min: [0, 'Discounted price cannot be negative']
+  },
   photos: {
     type: [String],
     default: []

@@ -233,7 +233,21 @@ const PropertyBookingPage = () => {
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <p className="text-gray-500 text-sm">Price</p>
-                    <p className="font-semibold">₹ {listing.price?.toLocaleString() || "Price on request"}/month</p>
+                    {selectedRoom?.discountedPrice ? (
+                      <div>
+                        <p className="text-gray-400 line-through text-sm">₹ {selectedRoom.price?.toLocaleString() || 0}/month</p>
+                        <div className="flex items-center">
+                          <p className="font-bold text-lg text-[#FE6F61]">₹ {selectedRoom.discountedPrice.toLocaleString()}/month</p>
+                          {selectedRoom.price && selectedRoom.discountedPrice && (
+                            <span className="ml-2 bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">
+                              {Math.round(((selectedRoom.price - selectedRoom.discountedPrice) / selectedRoom.price) * 100)}% off
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="font-semibold">₹ {selectedRoom?.price?.toLocaleString() || "Price on request"}/month</p>
+                    )}
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <p className="text-gray-500 text-sm">Availability</p>
@@ -342,6 +356,24 @@ const PropertyBookingPage = () => {
                     <p><span className="text-gray-500">Sharing Options:</span> {selectedRoom.sharingOptions.join(", ")}</p>
                     <p><span className="text-gray-500">Target Tenants:</span> {selectedRoom.targetTenants}</p>
                     <p><span className="text-gray-500">Available Photos:</span> {selectedRoom.photos ? selectedRoom.photos.length : 0}</p>
+                    <div className="pt-2 border-t border-gray-200 mt-2">
+                      <p className="text-gray-500 mb-1">Price:</p>
+                      {selectedRoom.discountedPrice ? (
+                        <div>
+                          <p className="text-gray-400 line-through text-sm">₹ {selectedRoom.price?.toLocaleString() || 0}/month</p>
+                          <div className="flex items-center">
+                            <p className="font-bold text-xl text-[#FE6F61]">₹ {selectedRoom.discountedPrice.toLocaleString()}/month</p>
+                            {selectedRoom.price && selectedRoom.discountedPrice && (
+                              <span className="ml-2 bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">
+                                {Math.round(((selectedRoom.price - selectedRoom.discountedPrice) / selectedRoom.price) * 100)}% off
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="font-bold text-xl">₹ {selectedRoom.price?.toLocaleString() || "Price on request"}/month</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

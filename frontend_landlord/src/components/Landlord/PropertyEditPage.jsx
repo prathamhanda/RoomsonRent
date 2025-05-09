@@ -41,6 +41,8 @@ const PropertyEditPage = () => {
     type: 'standard',
     sharingOptions: [],
     targetTenants: '',
+    price: '',
+    discountedPrice: '',
     photos: []
   });
 
@@ -152,6 +154,8 @@ const PropertyEditPage = () => {
       type: room.type || 'standard',
       sharingOptions: room.sharingOptions || [],
       targetTenants: room.targetTenants || '',
+      price: room.price || '',
+      discountedPrice: room.discountedPrice || '',
       photos: room.photos || []
     });
   };
@@ -236,9 +240,33 @@ const PropertyEditPage = () => {
         const roomIndex = updatedFloors[floorIndex].rooms.findIndex(r => r.roomId === selectedRoom.roomId);
         
         if (roomIndex !== -1) {
+          // Format roomDetails for update - ensure price values are valid numbers
+          let price = roomDetails.price;
+          if (price === '') price = null;
+          else if (typeof price === 'string') price = parseFloat(price);
+          else if (typeof price !== 'number') price = null;
+          
+          let discountedPrice = roomDetails.discountedPrice;
+          if (discountedPrice === '') discountedPrice = undefined;
+          else if (typeof discountedPrice === 'string') discountedPrice = parseFloat(discountedPrice);
+          else if (typeof discountedPrice !== 'number') discountedPrice = undefined;
+          
+          const formattedRoomDetails = {
+            ...roomDetails,
+            price: price,
+            discountedPrice: discountedPrice
+          };
+          
+          // If discountedPrice is undefined or null, remove it from the object
+          if (formattedRoomDetails.discountedPrice === undefined || formattedRoomDetails.discountedPrice === null) {
+            delete formattedRoomDetails.discountedPrice;
+          }
+          
+          console.log("Updating room with data:", formattedRoomDetails);
+          
           updatedFloors[floorIndex].rooms[roomIndex] = {
             ...updatedFloors[floorIndex].rooms[roomIndex],
-            ...roomDetails
+            ...formattedRoomDetails
           };
 
           const response = await axios.put(
@@ -478,7 +506,25 @@ const PropertyEditPage = () => {
     if (!updatedFloors[floorIndex].rooms[roomIndex]) {
       updatedFloors[floorIndex].rooms[roomIndex] = {};
     }
-    updatedFloors[floorIndex].rooms[roomIndex][field] = value;
+    
+    // Special handling for price fields to ensure they're stored correctly
+    if (field === 'price' || field === 'discountedPrice') {
+      if (value === '') {
+        // For empty string, just store it as is
+        updatedFloors[floorIndex].rooms[roomIndex][field] = value;
+      } else if (typeof value === 'number') {
+        // If it's already a number, store it directly
+        updatedFloors[floorIndex].rooms[roomIndex][field] = value;
+      } else {
+        // Try to parse as a number
+        const numValue = parseFloat(value);
+        updatedFloors[floorIndex].rooms[roomIndex][field] = isNaN(numValue) ? 0 : numValue;
+      }
+    } else {
+      // For non-price fields, store the value as-is
+      updatedFloors[floorIndex].rooms[roomIndex][field] = value;
+    }
+    
     setFormData({ ...formData, floors: updatedFloors });
   };
 
@@ -955,6 +1001,48 @@ const PropertyEditPage = () => {
                           </select>
                         </div>
 
+                        {/* Room Pricing */}
+                        <div className="mb-4">
+                          <label className="block text-gray-700 mb-2">Original Price (₹/month):</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={room.price || ""}
+                            onChange={(e) => {
+                              const numValue = e.target.value === '' ? '' : parseFloat(e.target.value);
+                              handleRoomConfigChange(
+                                floorIndex,
+                                roomIndex,
+                                "price",
+                                numValue
+                              );
+                            }}
+                            placeholder="e.g., 5000"
+                            className="w-full p-3 border-2 rounded-lg transition-all duration-200 border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
+                          />
+                        </div>
+
+                        <div className="mb-4">
+                          <label className="block text-gray-700 mb-2">Discounted Price (₹/month):</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={room.discountedPrice || ""}
+                            onChange={(e) => {
+                              const numValue = e.target.value === '' ? '' : parseFloat(e.target.value);
+                              handleRoomConfigChange(
+                                floorIndex,
+                                roomIndex,
+                                "discountedPrice",
+                                numValue
+                              );
+                            }}
+                            placeholder="e.g., 4500 (optional)"
+                            className="w-full p-3 border-2 rounded-lg transition-all duration-200 border-gray-200 focus:border-[rgb(254,111,97)] focus:ring-2 focus:ring-[rgb(254,111,97)]"
+                          />
+                          <p className="text-gray-500 text-xs mt-1">Leave empty if no discount is offered</p>
+                        </div>
+
                         <div className="mb-4">
                           <label className="block text-gray-700 mb-2">Room Photos:</label>
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -1084,6 +1172,7 @@ const PropertyEditPage = () => {
                           <h5 className="font-medium">Room {roomIndex + 1}</h5>
                           <p>Sharing: {room.sharingOptions?.join(", ")}</p>
                           <p>Target: {room.targetTenants}</p>
+                          <p>Price: ₹{room.price} {room.discountedPrice && <span className="text-green-600">( Discounted: ₹{room.discountedPrice} )</span>}</p>
                           <p>Photos: {room.photos?.length || 0}</p>
                           <p>Tenants: {room.tenants?.length || 0}</p>
                         </div>

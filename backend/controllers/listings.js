@@ -210,13 +210,30 @@ exports.createListing = asyncHandler(async (req, res, next) => {
 
       // Process rooms for this floor
       if (floor.rooms && Array.isArray(floor.rooms)) {
-        floorObj.rooms = floor.rooms.map(room => ({
-          roomId: room.roomId || `room_${Math.random().toString(36).substring(2, 10)}`,
-          type: room.type || 'standard',
-          sharingOptions: room.sharingOptions || [],
-          targetTenants: room.targetTenants || '',
-          photos: room.photos || []
-        }));
+        floorObj.rooms = floor.rooms.map(room => {
+          // Process price fields ensuring they are numbers
+          let price = null;
+          if (room.price !== undefined && room.price !== null) {
+            price = parseFloat(room.price);
+            if (isNaN(price)) price = null;
+          }
+          
+          let discountedPrice = null;
+          if (room.discountedPrice !== undefined && room.discountedPrice !== null) {
+            discountedPrice = parseFloat(room.discountedPrice);
+            if (isNaN(discountedPrice)) discountedPrice = null;
+          }
+          
+          return {
+            roomId: room.roomId || `room_${Math.random().toString(36).substring(2, 10)}`,
+            type: room.type || 'standard',
+            sharingOptions: room.sharingOptions || [],
+            targetTenants: room.targetTenants || '',
+            price: price,
+            discountedPrice: discountedPrice,
+            photos: room.photos || []
+          };
+        });
       }
 
       return floorObj;
@@ -317,6 +334,38 @@ exports.updateListing = asyncHandler(async (req, res, next) => {
       state: req.body.state || listing.location.state,
       country: 'India'
     };
+  }
+
+  // Process floors data if provided
+  if (req.body.floors) {
+    req.body.floors = req.body.floors.map(floor => {
+      // Process rooms array if it exists
+      if (floor.rooms && Array.isArray(floor.rooms)) {
+        floor.rooms = floor.rooms.map(room => {
+          // Process price fields ensuring they are numbers
+          if (room.price !== undefined) {
+            const price = parseFloat(room.price);
+            if (!isNaN(price)) {
+              room.price = price;
+            }
+          }
+          
+          if (room.discountedPrice !== undefined) {
+            const discountedPrice = parseFloat(room.discountedPrice);
+            if (!isNaN(discountedPrice)) {
+              room.discountedPrice = discountedPrice;
+            } else {
+              // If not a valid number, remove the field
+              delete room.discountedPrice;
+            }
+          }
+          
+          return room;
+        });
+      }
+      
+      return floor;
+    });
   }
 
   // Update listing
