@@ -80,13 +80,56 @@ export default function HomePage() {
         (error) => {
           console.error("Error getting location:", error);
           setLocationError(true);
+          // Even if location fails, we should still fetch listings
+          fetchListings();
         }
       );
     } else {
       console.error("Geolocation not available");
       setLocationError(true);
+      // Even if geolocation isn't available, we should still fetch listings
+      fetchListings();
     }
   }, []);
+
+  // useEffect to fetch listings when userLocation changes
+  useEffect(() => {
+    if (userLocation) {
+      fetchListings();
+    }
+  }, [userLocation]);
+
+  const fetchListings = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        limit: 10,
+        sort: userLocation ? 'distance' : '-createdAt'
+      };
+      
+      // Add location parameters if available
+      if (userLocation) {
+        params.lat = userLocation.latitude;
+        params.lng = userLocation.longitude;
+      }
+      
+      const response = await axios.get(
+        process.env.NODE_ENV === 'production' 
+          ? 'https://backend.roomsonrent.in/api/listings' 
+          : 'http://localhost:5000/api/listings', 
+        { params }
+      );
+      
+      if (response.data.success) {
+        setListings(response.data.data);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching listings:', err);
+      setError('Failed to fetch listings');
+      setLoading(false);
+    }
+  };
 
   const colleges = [
     "Zakir Husain College Delhi",
@@ -192,36 +235,9 @@ export default function HomePage() {
     setShowSuggestions(false);
   };
 
-  useEffect(() => {
-    const fetchListings = async () => {
-      try {
-        const response = await axios.get(
-          process.env.NODE_ENV === 'production' 
-            ? 'https://backend.roomsonrent.in/api/listings' 
-            : 'http://localhost:5000/api/listings', {
-          params: {
-            limit: 10,
-            sort: '-createdAt'
-          }
-        });
-        
-        if (response.data.success) {
-          setListings(response.data.data);
-        }
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching listings:', err);
-        setError('Failed to fetch listings');
-        setLoading(false);
-      }
-    };
-
-    fetchListings();
-  }, []);
-
   // Replace mock regularRooms with transformed listings data
   const regularRooms = useMemo(() => {
-    return listings.map(listing => {
+    const transformedListings = listings.map(listing => {
       // Find an appropriate room image
       let roomImage = "/images/78c3c990590b6c112e5b5cb34f1fbfac.webp"; // Default fallback image
       let roomPrice = null;
@@ -273,8 +289,10 @@ export default function HomePage() {
 
       // Calculate distance if user location is available
       let locationDisplay = `${listing.address}, ${listing.location?.city || ''}`;
+      let distance = null;
+      
       if (userLocation && listing.location?.coordinates) {
-        const distance = calculateDistance(
+        distance = calculateDistance(
           userLocation.latitude,
           userLocation.longitude,
           listing.location.coordinates[1], // MongoDB stores coordinates as [longitude, latitude]
@@ -304,9 +322,21 @@ export default function HomePage() {
           ...(listing.propertyType === "PG" ? ["Triple Occupancy"] : []),
           ...(listing.available ? ["Short Stay"] : [])
         ],
-        image: roomImage
+        image: roomImage,
+        distance: distance  // Save the distance for sorting
       };
     });
+
+    // Sort by distance if userLocation is available
+    if (userLocation) {
+      return transformedListings.sort((a, b) => {
+        if (a.distance === null) return 1;
+        if (b.distance === null) return -1;
+        return a.distance - b.distance;
+      });
+    }
+    
+    return transformedListings;
   }, [listings, userLocation]); // Added userLocation as dependency
 
   const premiumRooms = [
@@ -1077,6 +1107,15 @@ export default function HomePage() {
             <p className="font-bold text-2xl md:text-4xl">
               Your <span className="text-[#fe6f61]">Perfect</span> Accommodation
             </p>
+            {userLocation ? (
+              <p className="text-[#979797] text-sm md:text-base font-medium">
+                Showing nearest properties first based on your location
+              </p>
+            ) : (
+              <p className="text-[#979797] text-sm md:text-base font-medium">
+                Explore our recently added properties
+              </p>
+            )}
           </div>
 
           <div className="flex items-center relative group">
@@ -1391,6 +1430,15 @@ export default function HomePage() {
             <p className="font-bold text-2xl md:text-4xl">
               <span className="text-[#fe6f61]">Short</span> Stays
             </p>
+            {userLocation ? (
+              <p className="text-[#979797] text-sm md:text-base font-medium">
+                Showing nearest short-term accommodations first
+              </p>
+            ) : (
+              <p className="text-[#979797] text-sm md:text-base font-medium">
+                Flexible accommodation options for short-term stays
+              </p>
+            )}
           </div>
 
           <div className="flex items-center relative group">
@@ -1407,6 +1455,7 @@ export default function HomePage() {
               id="short-stays-container"
               className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4"
             >
+              {/* Filter short stays from regularRooms which is already sorted by distance when userLocation is available */}
               {regularRooms.filter(room => room.amenities.includes("Short Stay")).map((room) => (
                 <div key={room.id}>
                   <Link 
@@ -1518,6 +1567,15 @@ export default function HomePage() {
             <p className="font-bold text-2xl md:text-4xl">
               Flatmate <span className="text-[#fe6f61]">Needed</span>
             </p>
+            {userLocation ? (
+              <p className="text-[#979797] text-sm md:text-base font-medium">
+                Showing nearest shared accommodation options first
+              </p>
+            ) : (
+              <p className="text-[#979797] text-sm md:text-base font-medium">
+                Find flatmates and shared living spaces near you
+              </p>
+            )}
           </div>
 
           <div className="flex items-center relative group">
@@ -1534,6 +1592,7 @@ export default function HomePage() {
               id="flatmates-container"
               className="flex overflow-x-scroll scroll-smooth gap-4 md:gap-6 p-2 md:p-4 w-full scrollbar-hide pl-8 md:pl-4 pr-8 md:pr-4"
             >
+              {/* Display regularRooms which is already sorted by distance when userLocation is available */}
               {regularRooms.map((room) => (
                 <div key={room.id}>
                   <Link 
