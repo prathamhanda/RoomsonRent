@@ -433,7 +433,6 @@ export default function HomePage() {
       toast.error('Failed to log out. Please try again.');
     }
   };
-
   return (
     <div className="overflow-x-hidden">
       <Toaster position="top-center" reverseOrder={false} />
@@ -1134,116 +1133,111 @@ export default function HomePage() {
             >
               {regularRooms.map((room) => (
                 <div key={room.id}>
-                  <Link 
-                    to={`/property/${room.id}/visit`}
-                    className="block h-full"
-                  >
-                    <Card className="h-[280px] w-[320px] md:w-[400px] p-3 bg-white hover:shadow-lg transition-shadow duration-300">
-                      <div className="rounded-lg p-0 border-1 border-[#D8D8D8] h-full">
-                        <div className="flex h-full">
-                          <img
-                            alt="room"
-                            src={room.image}
-                            width="200"
-                            height="200"
-                            className="object-cover h-full w-2/5 rounded-l-md"
-                            loading="lazy"
-                          />
-                          <div className="flex flex-col justify-between p-3 w-full">
-                            <div className="flex flex-col gap-2">
-                              <div>
-                                <span className="font-semibold text-sm md:text-base line-clamp-2">
-                                  {room.name}
-                                </span>
-                                <p className="text-[10px] md:text-xs text-[#979797] mt-1">
-                                  {room.location}
-                                </p>
-                              </div>
-                              <div className="flex gap-1 flex-wrap">
-                                {room.amenities.map((amenity, index) => {
-                                  let colorClass = "";
-                                  let iconSrc = "";
-
-                                  if (amenity === "A/C" || amenity === "WiFi") {
-                                    colorClass = "bg-[#F0FFF0] text-[#3EAF3F]";
-                                    iconSrc = amenity === "A/C" 
-                                      ? "/images/media/ac.0f94ec49.svg"
-                                      : "/images/media/wifi.b765d654.svg";
-                                  } else if (amenity === "Single Occupancy" || amenity === "Triple Occupancy") {
-                                    colorClass = "bg-[#FFFCF0] text-[#FFC130]";
-                                    iconSrc = amenity === "Single Occupancy"
-                                      ? "/images/media/single_occu.2c89da93.svg"
-                                      : "/images/media/multi_occu.83dd5276.svg";
-                                  } else if (amenity === "Short Stay") {
-                                    colorClass = "bg-[#ffeaee] text-[#ed3a56]";
-                                    iconSrc = "/images/media/short_stay_pink.5c3b7b9d.svg";
-                                  }
-
-                                  return (
-                                    <div
-                                      key={index}
-                                      className={`rounded-[0.3rem] flex gap-1 text-[8px] md:text-[10px] items-center justify-between p-[5px] font-semibold ${colorClass}`}
-                                    >
-                                      <img
-                                        alt={amenity}
-                                        src={iconSrc}
-                                        width="16"
-                                        height="16"
-                                        className="object-cover w-3 h-3 md:w-4 md:h-4"
-                                      />
-                                      {amenity}
-                                    </div>
-                                  );
-                                })}
-                              </div>
+                  <Card className="h-[280px] w-[320px] md:w-[400px] p-3 bg-white hover:shadow-lg transition-shadow duration-300">
+                    <div className="rounded-lg p-0 border-1 border-[#D8D8D8] h-full">
+                      <div className="flex h-full">
+                        <img
+                          alt="room"
+                          src={room.image}
+                          width="200"
+                          height="200"
+                          className="object-cover h-full w-2/5 rounded-l-md"
+                          loading="lazy"
+                        />
+                        <div className="flex flex-col justify-between p-3 w-full">
+                          <div className="flex flex-col gap-2">
+                            <div>
+                              <span className="font-semibold text-sm md:text-base line-clamp-2">
+                                {room.name}
+                              </span>
+                              <p className="text-[10px] md:text-xs text-[#979797] mt-1">
+                                {room.location}
+                              </p>
                             </div>
-                            <div className="flex flex-col gap-2">
-                              {room.discountedPrice ? (
-                                <div>
-                                  <p className="text-gray-400 line-through text-[9px] md:text-[11px]">
-                                    Rs. {room.originalPrice || room.price}/-
-                                  </p>
-                                  <div className="flex items-center">
-                                    <p className="font-semibold text-[#FE6F61] text-base md:text-lg">
-                                      Rs. {room.discountedPrice.toLocaleString()}/-
-                                    </p>
-                                    <span className="ml-1 bg-red-100 text-red-600 text-[8px] md:text-[10px] px-1 py-0.5 rounded-full whitespace-nowrap">
-                                      {Math.round(((room.originalPrice || room.price) - room.discountedPrice) / (room.originalPrice || room.price) * 100)}% off
-                                    </span>
+                            <div className="flex gap-1 flex-wrap">
+                              {room.amenities.map((amenity, index) => {
+                                let colorClass = "";
+                                let iconSrc = "";
+
+                                if (amenity === "A/C" || amenity === "WiFi") {
+                                  colorClass = "bg-[#F0FFF0] text-[#3EAF3F]";
+                                  iconSrc = amenity === "A/C" 
+                                    ? "/images/media/ac.0f94ec49.svg"
+                                    : "/images/media/wifi.b765d654.svg";
+                                } else if (amenity === "Single Occupancy" || amenity === "Triple Occupancy") {
+                                  colorClass = "bg-[#FFFCF0] text-[#FFC130]";
+                                  iconSrc = amenity === "Single Occupancy"
+                                    ? "/images/media/single_occu.2c89da93.svg"
+                                    : "/images/media/multi_occu.83dd5276.svg";
+                                } else if (amenity === "Short Stay") {
+                                  colorClass = "bg-[#ffeaee] text-[#ed3a56]";
+                                  iconSrc = "/images/media/short_stay_pink.5c3b7b9d.svg";
+                                }
+
+                                return (
+                                  <div
+                                    key={index}
+                                    className={`rounded-[0.3rem] flex gap-1 text-[8px] md:text-[10px] items-center justify-between p-[5px] font-semibold ${colorClass}`}
+                                  >
+                                    <img
+                                      alt={amenity}
+                                      src={iconSrc}
+                                      width="16"
+                                      height="16"
+                                      className="object-cover w-3 h-3 md:w-4 md:h-4"
+                                    />
+                                    {amenity}
                                   </div>
-                                  <p className="text-[8px] md:text-[10px] text-gray-600">per month</p>
-                                </div>
-                              ) : (
-                                <p className="font-semibold text-[10px] md:text-xs">
-                                  Rs. <span className="text-base md:text-lg">{room.price}</span>{" "}
-                                  per month
+                                );
+                              })}
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            {room.discountedPrice ? (
+                              <div>
+                                <p className="text-gray-400 line-through text-[9px] md:text-[11px]">
+                                  Rs. {room.originalPrice || room.price}/-
                                 </p>
-                              )}
-                              <div className="flex gap-2">
-                                <Button
-                                  as={Link}
-                                  to={`/property/${room.id}`}
-                                  className="flex-1 text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-2"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Book Now
-                                </Button>
-                                <Button
-                                  as={Link}
-                                  to={`/property/${room.id}/visit`}
-                                  variant="bordered"
-                                  className="flex-1 font-semibold border-[#FE6F61] text-[#FE6F61] text-xs md:text-sm py-2"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Site Visit
-                                </Button>
+                                <div className="flex items-center">
+                                  <p className="font-semibold text-[#FE6F61] text-base md:text-lg">
+                                    Rs. {room.discountedPrice.toLocaleString()}/-
+                                  </p>
+                                  <span className="ml-1 bg-red-100 text-red-600 text-[8px] md:text-[10px] px-1 py-0.5 rounded-full whitespace-nowrap">
+                                    {Math.round(((room.originalPrice || room.price) - room.discountedPrice) / (room.originalPrice || room.price) * 100)}% off
+                                  </span>
+                                </div>
+                                <p className="text-[8px] md:text-[10px] text-gray-600">per month</p>
                               </div>
+                            ) : (
+                              <p className="font-semibold text-[10px] md:text-xs">
+                                Rs. <span className="text-base md:text-lg">{room.price}</span>{" "}
+                                per month
+                              </p>
+                            )}
+                            <div className="flex gap-2">
+                              <Button
+                                as={Link}
+                                to={`/property/${room.id}`}
+                                className="flex-1 text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-2"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Book Now
+                              </Button>
+                              <Button
+                                as={Link}
+                                to={`/property/${room.id}/visit`}
+                                variant="bordered"
+                                className="flex-1 font-semibold border-[#FE6F61] text-[#FE6F61] text-xs md:text-sm py-2"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Site Visit
+                              </Button>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </Card>
-                  </Link>
+                    </div>
+                  </Card>
                 </div>
               ))}
             </div>
@@ -1291,122 +1285,117 @@ export default function HomePage() {
             >
               {premiumRooms.map((room) => (
                 <div key={room.id}>
-                  <Link 
-                    to={`/property/${room.id}/visit`}
-                    className="block h-full"
-                  >
-                    <Card className="h-[280px] w-[320px] md:w-[400px] p-3 border-1 border-[#C59856] bg-white hover:shadow-lg transition-shadow duration-300">
-                      <div className="rounded-lg p-0 h-full">
-                        <div className="flex h-full">
-                          <img
-                            alt="room"
-                            src={room.image}
-                            width="200"
-                            height="200"
-                            className="object-cover h-full w-2/5 rounded-l-md"
-                            loading="lazy"
-                          />
-                          <div className="flex flex-col justify-between p-3 w-full">
-                            <div className="flex flex-col gap-2">
-                              <p className="flex items-center gap-2 text-[#C59856] text-[10px] md:text-xs bg-opacity-10 rounded-md px-2 py-1 self-start">
-                                <img
-                                  alt="crown"
-                                  src="/images/media/premium_crown.793445f4.svg"
-                                  width="12"
-                                  height="10"
-                                  className="md:w-[14px] md:h-[12px]"
-                                />
-                                Premium
+                  <Card className="h-[280px] w-[320px] md:w-[400px] p-3 border-1 border-[#C59856] bg-white hover:shadow-lg transition-shadow duration-300">
+                    <div className="rounded-lg p-0 h-full">
+                      <div className="flex h-full">
+                        <img
+                          alt="room"
+                          src={room.image}
+                          width="200"
+                          height="200"
+                          className="object-cover h-full w-2/5 rounded-l-md"
+                          loading="lazy"
+                        />
+                        <div className="flex flex-col justify-between p-3 w-full">
+                          <div className="flex flex-col gap-2">
+                            <p className="flex items-center gap-2 text-[#C59856] text-[10px] md:text-xs bg-opacity-10 rounded-md px-2 py-1 self-start">
+                              <img
+                                alt="crown"
+                                src="/images/media/premium_crown.793445f4.svg"
+                                width="12"
+                                height="10"
+                                className="md:w-[14px] md:h-[12px]"
+                              />
+                              Premium
+                            </p>
+                            <div>
+                              <span className="font-semibold text-sm md:text-base line-clamp-2">
+                                {room.name}
+                              </span>
+                              <p className="text-[10px] md:text-xs text-[#979797] mt-1">
+                                {room.location}
                               </p>
-                              <div>
-                                <span className="font-semibold text-sm md:text-base line-clamp-2">
-                                  {room.name}
-                                </span>
-                                <p className="text-[10px] md:text-xs text-[#979797] mt-1">
-                                  {room.location}
-                                </p>
-                              </div>
-                              <div className="flex gap-1 flex-wrap">
-                                {room.amenities.map((amenity, index) => {
-                                  const getAmenityIcon = (amenity) => {
-                                    switch(amenity) {
-                                      case "A/C": return "/images/media/ac_premium.f83072a3.svg";
-                                      case "WiFi": return "/images/media/wifi_premium.b7a33161.svg";
-                                      case "Single Occupancy": return "/images/media/single_occu_premium.5b2527bc.svg";
-                                      case "Triple Occupancy": return "/images/media/multi_occu_premium.87ea45bc.svg";
-                                      case "Short Stay": return "/images/media/short_stay_premium.469c496c.svg";
-                                      default: return "";
-                                    }
-                                  };
-
-                                  return (
-                                    <div
-                                      key={index}
-                                      className="rounded-[0.3rem] flex gap-1 text-[8px] md:text-[10px] items-center justify-between p-[5px] font-semibold border-1 border-[#C59856] text-[#C59856]"
-                                    >
-                                      <img
-                                        alt={amenity}
-                                        src={getAmenityIcon(amenity)}
-                                        width="16"
-                                        height="16"
-                                        className="object-cover w-3 h-3 md:w-4 md:h-4"
-                                      />
-                                      {amenity}
-                                    </div>
-                                  );
-                                })}
-                              </div>
                             </div>
-                            <div className="flex flex-col gap-2">
-                              {room.discountedPrice ? (
-                                <div>
-                                  <p className="text-gray-400 line-through text-[9px] md:text-[11px]">
-                                    Rs. {room.originalPrice || room.price}/-
-                                  </p>
-                                  <div className="flex items-center">
-                                    <p className="font-semibold text-[#C59856] text-base md:text-lg">
-                                      Rs. {room.discountedPrice.toLocaleString()}/-
-                                    </p>
-                                    <span className="ml-1 bg-amber-100 text-amber-700 text-[8px] md:text-[10px] px-1 py-0.5 rounded-full whitespace-nowrap">
-                                      {Math.round(((room.originalPrice || room.price) - room.discountedPrice) / (room.originalPrice || room.price) * 100)}% off
-                                    </span>
+                            <div className="flex gap-1 flex-wrap">
+                              {room.amenities.map((amenity, index) => {
+                                const getAmenityIcon = (amenity) => {
+                                  switch(amenity) {
+                                    case "A/C": return "/images/media/ac_premium.f83072a3.svg";
+                                    case "WiFi": return "/images/media/wifi_premium.b7a33161.svg";
+                                    case "Single Occupancy": return "/images/media/single_occu_premium.5b2527bc.svg";
+                                    case "Triple Occupancy": return "/images/media/multi_occu_premium.87ea45bc.svg";
+                                    case "Short Stay": return "/images/media/short_stay_premium.469c496c.svg";
+                                    default: return "";
+                                  }
+                                };
+
+                                return (
+                                  <div
+                                    key={index}
+                                    className="rounded-[0.3rem] flex gap-1 text-[8px] md:text-[10px] items-center justify-between p-[5px] font-semibold border-1 border-[#C59856] text-[#C59856]"
+                                  >
+                                    <img
+                                      alt={amenity}
+                                      src={getAmenityIcon(amenity)}
+                                      width="16"
+                                      height="16"
+                                      className="object-cover w-3 h-3 md:w-4 md:h-4"
+                                    />
+                                    {amenity}
                                   </div>
-                                  <p className="text-[8px] md:text-[10px] text-gray-600">per month</p>
-                                </div>
-                              ) : (
-                                <p className="font-semibold text-[10px] md:text-xs">
-                                  Rs.{" "}
-                                  <span className="text-base md:text-lg text-[#C59856]">
-                                    {room.price}/-
-                                  </span>{" "}
-                                  per month
+                                );
+                              })}
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            {room.discountedPrice ? (
+                              <div>
+                                <p className="text-gray-400 line-through text-[9px] md:text-[11px]">
+                                  Rs. {room.originalPrice || room.price}/-
                                 </p>
-                              )}
-                              <div className="flex gap-2">
-                                <Button
-                                  as={Link}
-                                  to={`/property/${room.id}`}
-                                  className="flex-1 text-white rounded-xl bg-[#C59856] font-semibold text-xs md:text-sm py-2"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Book Now
-                                </Button>
-                                <Button
-                                  as={Link}
-                                  to={`/property/${room.id}/visit`}
-                                  variant="bordered"
-                                  className="flex-1 font-semibold border-[#C59856] text-[#C59856] text-xs md:text-sm py-2"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Site Visit
-                                </Button>
+                                <div className="flex items-center">
+                                  <p className="font-semibold text-[#C59856] text-base md:text-lg">
+                                    Rs. {room.discountedPrice.toLocaleString()}/-
+                                  </p>
+                                  <span className="ml-1 bg-amber-100 text-amber-700 text-[8px] md:text-[10px] px-1 py-0.5 rounded-full whitespace-nowrap">
+                                    {Math.round(((room.originalPrice || room.price) - room.discountedPrice) / (room.originalPrice || room.price) * 100)}% off
+                                  </span>
+                                </div>
+                                <p className="text-[8px] md:text-[10px] text-gray-600">per month</p>
                               </div>
+                            ) : (
+                              <p className="font-semibold text-[10px] md:text-xs">
+                                Rs.{" "}
+                                <span className="text-base md:text-lg text-[#C59856]">
+                                  {room.price}/-
+                                </span>{" "}
+                                per month
+                              </p>
+                            )}
+                            <div className="flex gap-2">
+                              <Button
+                                as={Link}
+                                to={`/property/${room.id}`}
+                                className="flex-1 text-white rounded-xl bg-[#C59856] font-semibold text-xs md:text-sm py-2"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Book Now
+                              </Button>
+                              <Button
+                                as={Link}
+                                to={`/property/${room.id}/visit`}
+                                variant="bordered"
+                                className="flex-1 font-semibold border-[#C59856] text-[#C59856] text-xs md:text-sm py-2"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Site Visit
+                              </Button>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </Card>
-                  </Link>
+                    </div>
+                  </Card>
                 </div>
               ))}
             </div>
@@ -1458,92 +1447,87 @@ export default function HomePage() {
               {/* Filter short stays from regularRooms which is already sorted by distance when userLocation is available */}
               {regularRooms.filter(room => room.amenities.includes("Short Stay")).map((room) => (
                 <div key={room.id}>
-                  <Link 
-                    to={`/property/${room.id}/visit`}
-                    className="block h-full"
-                  >
-                    <Card className="h-[280px] w-[320px] md:w-[400px] p-3 bg-white hover:shadow-lg transition-shadow duration-300">
-                      <div className="rounded-lg p-0 border-1 border-[#D8D8D8] h-full">
-                        <div className="flex h-full">
-                          <img
-                            alt="room"
-                            src={room.image}
-                            width="200"
-                            height="200"
-                            className="object-cover h-full w-2/5 rounded-l-md"
-                            loading="lazy"
-                          />
-                          <div className="flex flex-col justify-between p-3 w-full">
-                            <div className="flex flex-col gap-2">
-                              <div>
-                                <span className="font-semibold text-sm md:text-base line-clamp-2">
-                                  {room.name}
-                                </span>
-                                <p className="text-[10px] md:text-xs text-[#979797] mt-1">
-                                  {room.location}
-                                </p>
-                              </div>
-                              <div className="flex gap-1 flex-wrap">
-                                {room.amenities.map((amenity, index) => {
-                                  let colorClass = "";
-                                  let iconSrc = "";
-
-                                  if (amenity === "A/C" || amenity === "WiFi") {
-                                    colorClass = "bg-[#F0FFF0] text-[#3EAF3F]";
-                                    iconSrc = amenity === "A/C" 
-                                      ? "/images/media/ac.0f94ec49.svg"
-                                      : "/images/media/wifi.b765d654.svg";
-                                  } else if (amenity === "Single Occupancy" || amenity === "Triple Occupancy") {
-                                    colorClass = "bg-[#FFFCF0] text-[#FFC130]";
-                                    iconSrc = amenity === "Single Occupancy"
-                                      ? "/images/media/single_occu.2c89da93.svg"
-                                      : "/images/media/multi_occu.83dd5276.svg";
-                                  } else if (amenity === "Short Stay") {
-                                    colorClass = "bg-[#ffeaee] text-[#ed3a56]";
-                                    iconSrc = "/images/media/short_stay_pink.5c3b7b9d.svg";
-                                  }
-
-                                  return (
-                                    <div
-                                      key={index}
-                                      className={`rounded-[0.3rem] flex gap-1 text-[8px] md:text-[10px] items-center justify-between p-[5px] font-semibold ${colorClass}`}
-                                    >
-                                      <img
-                                        alt={amenity}
-                                        src={iconSrc}
-                                        width="16"
-                                        height="16"
-                                        className="object-cover w-3 h-3 md:w-4 md:h-4"
-                                      />
-                                      {amenity}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <p className="font-semibold text-[10px] md:text-xs">
-                                Rs.{" "}
-                                <span className="text-base md:text-lg">{room.price}/-</span>{" "}
-                                per month
+                  <Card className="h-[280px] w-[320px] md:w-[400px] p-3 bg-white hover:shadow-lg transition-shadow duration-300">
+                    <div className="rounded-lg p-0 border-1 border-[#D8D8D8] h-full">
+                      <div className="flex h-full">
+                        <img
+                          alt="room"
+                          src={room.image}
+                          width="200"
+                          height="200"
+                          className="object-cover h-full w-2/5 rounded-l-md"
+                          loading="lazy"
+                        />
+                        <div className="flex flex-col justify-between p-3 w-full">
+                          <div className="flex flex-col gap-2">
+                            <div>
+                              <span className="font-semibold text-sm md:text-base line-clamp-2">
+                                {room.name}
+                              </span>
+                              <p className="text-[10px] md:text-xs text-[#979797] mt-1">
+                                {room.location}
                               </p>
-                              <div className="flex gap-2">
-                                <Button
-                                  as={Link}
-                                  to={`/property/${room.id}`}
-                                  className="flex-1 text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-2"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Book Now
-                                </Button>
-                                <div className="flex-1 px-3 border-2 border-transparent"></div>
-                              </div>
+                            </div>
+                            <div className="flex gap-1 flex-wrap">
+                              {room.amenities.map((amenity, index) => {
+                                let colorClass = "";
+                                let iconSrc = "";
+
+                                if (amenity === "A/C" || amenity === "WiFi") {
+                                  colorClass = "bg-[#F0FFF0] text-[#3EAF3F]";
+                                  iconSrc = amenity === "A/C" 
+                                    ? "/images/media/ac.0f94ec49.svg"
+                                    : "/images/media/wifi.b765d654.svg";
+                                } else if (amenity === "Single Occupancy" || amenity === "Triple Occupancy") {
+                                  colorClass = "bg-[#FFFCF0] text-[#FFC130]";
+                                  iconSrc = amenity === "Single Occupancy"
+                                    ? "/images/media/single_occu.2c89da93.svg"
+                                    : "/images/media/multi_occu.83dd5276.svg";
+                                } else if (amenity === "Short Stay") {
+                                  colorClass = "bg-[#ffeaee] text-[#ed3a56]";
+                                  iconSrc = "/images/media/short_stay_pink.5c3b7b9d.svg";
+                                }
+
+                                return (
+                                  <div
+                                    key={index}
+                                    className={`rounded-[0.3rem] flex gap-1 text-[8px] md:text-[10px] items-center justify-between p-[5px] font-semibold ${colorClass}`}
+                                  >
+                                    <img
+                                      alt={amenity}
+                                      src={iconSrc}
+                                      width="16"
+                                      height="16"
+                                      className="object-cover w-3 h-3 md:w-4 md:h-4"
+                                    />
+                                    {amenity}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <p className="font-semibold text-[10px] md:text-xs">
+                              Rs.{" "}
+                              <span className="text-base md:text-lg">{room.price}/-</span>{" "}
+                              per month
+                            </p>
+                            <div className="flex gap-2">
+                              <Button
+                                as={Link}
+                                to={`/property/${room.id}`}
+                                className="flex-1 text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-2"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Book Now
+                              </Button>
+                              <div className="flex-1 px-3 border-2 border-transparent"></div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </Card>
-                  </Link>
+                    </div>
+                  </Card>
                 </div>
               ))}
             </div>
@@ -1595,100 +1579,95 @@ export default function HomePage() {
               {/* Display regularRooms which is already sorted by distance when userLocation is available */}
               {regularRooms.map((room) => (
                 <div key={room.id}>
-                  <Link 
-                    to={`/property/${room.id}/visit`}
-                    className="block h-full"
-                  >
-                    <Card className="h-[280px] w-[320px] md:w-[400px] p-3 bg-white hover:shadow-lg transition-shadow duration-300">
-                      <div className="rounded-lg p-0 border-1 border-[#D8D8D8] h-full">
-                        <div className="flex h-full">
-                          <img
-                            alt="room"
-                            src={room.image}
-                            width="200"
-                            height="200"
-                            className="object-cover h-full w-2/5 rounded-l-md"
-                            loading="lazy"
-                          />
-                          <div className="flex flex-col justify-between p-3 w-full">
-                            <div className="flex flex-col gap-2">
-                              <div>
-                                <span className="font-semibold text-sm md:text-base line-clamp-2">
-                                  {room.name}
-                                </span>
-                                <p className="text-[10px] md:text-xs text-[#979797] mt-1">
-                                  {room.location}
-                                </p>
-                              </div>
-                              <div className="flex gap-1 flex-wrap">
-                                {room.amenities.map((amenity, index) => {
-                                  let colorClass = "";
-                                  let iconSrc = "";
-
-                                  if (amenity === "A/C" || amenity === "WiFi") {
-                                    colorClass = "bg-[#F0FFF0] text-[#3EAF3F]";
-                                    iconSrc = amenity === "A/C" 
-                                      ? "/images/media/ac.0f94ec49.svg"
-                                      : "/images/media/wifi.b765d654.svg";
-                                  } else if (amenity === "Single Occupancy" || amenity === "Triple Occupancy") {
-                                    colorClass = "bg-[#FFFCF0] text-[#FFC130]";
-                                    iconSrc = amenity === "Single Occupancy"
-                                      ? "/images/media/single_occu.2c89da93.svg"
-                                      : "/images/media/multi_occu.83dd5276.svg";
-                                  } else if (amenity === "Short Stay") {
-                                    colorClass = "bg-[#ffeaee] text-[#ed3a56]";
-                                    iconSrc = "/images/media/short_stay_pink.5c3b7b9d.svg";
-                                  }
-
-                                  return (
-                                    <div
-                                      key={index}
-                                      className={`rounded-[0.3rem] flex gap-1 text-[8px] md:text-[10px] items-center justify-between p-[5px] font-semibold ${colorClass}`}
-                                    >
-                                      <img
-                                        alt={amenity}
-                                        src={iconSrc}
-                                        width="16"
-                                        height="16"
-                                        className="object-cover w-3 h-3 md:w-4 md:h-4"
-                                      />
-                                      {amenity}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <p className="font-semibold text-[10px] md:text-xs">
-                                Rs.{" "}
-                                <span className="text-base md:text-lg">{room.price}/-</span>{" "}
-                                per month
+                  <Card className="h-[280px] w-[320px] md:w-[400px] p-3 bg-white hover:shadow-lg transition-shadow duration-300">
+                    <div className="rounded-lg p-0 border-1 border-[#D8D8D8] h-full">
+                      <div className="flex h-full">
+                        <img
+                          alt="room"
+                          src={room.image}
+                          width="200"
+                          height="200"
+                          className="object-cover h-full w-2/5 rounded-l-md"
+                          loading="lazy"
+                        />
+                        <div className="flex flex-col justify-between p-3 w-full">
+                          <div className="flex flex-col gap-2">
+                            <div>
+                              <span className="font-semibold text-sm md:text-base line-clamp-2">
+                                {room.name}
+                              </span>
+                              <p className="text-[10px] md:text-xs text-[#979797] mt-1">
+                                {room.location}
                               </p>
-                              <div className="flex gap-2">
-                                <Button
-                                  as={Link}
-                                  to={`/property/${room.id}`}
-                                  className="flex-1 text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-2"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Book Now
-                                </Button>
-                                <Button
-                                  as={Link}
-                                  to={`/property/${room.id}/visit`}
-                                  variant="bordered"
-                                  className="flex-1 font-semibold border-[#FE6F61] text-[#FE6F61] text-xs md:text-sm py-2"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Site Visit
-                                </Button>
-                              </div>
+                            </div>
+                            <div className="flex gap-1 flex-wrap">
+                              {room.amenities.map((amenity, index) => {
+                                let colorClass = "";
+                                let iconSrc = "";
+
+                                if (amenity === "A/C" || amenity === "WiFi") {
+                                  colorClass = "bg-[#F0FFF0] text-[#3EAF3F]";
+                                  iconSrc = amenity === "A/C" 
+                                    ? "/images/media/ac.0f94ec49.svg"
+                                    : "/images/media/wifi.b765d654.svg";
+                                } else if (amenity === "Single Occupancy" || amenity === "Triple Occupancy") {
+                                  colorClass = "bg-[#FFFCF0] text-[#FFC130]";
+                                  iconSrc = amenity === "Single Occupancy"
+                                    ? "/images/media/single_occu.2c89da93.svg"
+                                    : "/images/media/multi_occu.83dd5276.svg";
+                                } else if (amenity === "Short Stay") {
+                                  colorClass = "bg-[#ffeaee] text-[#ed3a56]";
+                                  iconSrc = "/images/media/short_stay_pink.5c3b7b9d.svg";
+                                }
+
+                                return (
+                                  <div
+                                    key={index}
+                                    className={`rounded-[0.3rem] flex gap-1 text-[8px] md:text-[10px] items-center justify-between p-[5px] font-semibold ${colorClass}`}
+                                  >
+                                    <img
+                                      alt={amenity}
+                                      src={iconSrc}
+                                      width="16"
+                                      height="16"
+                                      className="object-cover w-3 h-3 md:w-4 md:h-4"
+                                    />
+                                    {amenity}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <p className="font-semibold text-[10px] md:text-xs">
+                              Rs.{" "}
+                              <span className="text-base md:text-lg">{room.price}/-</span>{" "}
+                              per month
+                            </p>
+                            <div className="flex gap-2">
+                              <Button
+                                as={Link}
+                                to={`/property/${room.id}`}
+                                className="flex-1 text-white rounded-xl bg-[#FE6F61] font-semibold text-xs md:text-sm py-2"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Book Now
+                              </Button>
+                              <Button
+                                as={Link}
+                                to={`/property/${room.id}/visit`}
+                                variant="bordered"
+                                className="flex-1 font-semibold border-[#FE6F61] text-[#FE6F61] text-xs md:text-sm py-2"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Site Visit
+                              </Button>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </Card>
-                  </Link>
+                    </div>
+                  </Card>
                 </div>
               ))}
             </div>

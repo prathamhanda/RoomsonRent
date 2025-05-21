@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import { Search } from 'lucide-react';
+import { Search, Navigation } from 'lucide-react';
 import axios from 'axios';
 
 const containerStyle = {
@@ -13,6 +13,7 @@ const LocationPicker = ({ propertyIndex, initialPosition, onSelectLocation }) =>
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [address, setAddress] = useState('');
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   const handleMapClick = async (event) => {
     const lat = event.latLng.lat();
@@ -86,6 +87,53 @@ const LocationPicker = ({ propertyIndex, initialPosition, onSelectLocation }) =>
     setSearchQuery('');
   };
 
+  const handleUseMyLocation = () => {
+    setIsLoadingLocation(true);
+    
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      setIsLoadingLocation(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setPosition({ lat: latitude, lng: longitude });
+        
+        try {
+          const response = await axios.get(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyCcHrOBJ_7BpFNATBavw_8b3EtggNzkL2s`
+          );
+          const addressResult = response.data.results[0];
+          if (addressResult) {
+            const formattedAddress = addressResult.formatted_address;
+            let city = '';
+            let state = '';
+            addressResult.address_components.forEach(component => {
+              if (component.types.includes('locality')) {
+                city = component.long_name;
+              } else if (component.types.includes('administrative_area_level_1')) {
+                state = component.long_name;
+              }
+            });
+            setAddress(formattedAddress);
+            onSelectLocation(latitude, longitude, formattedAddress, city, state);
+          }
+        } catch (error) {
+          console.error('Error getting address:', error);
+        } finally {
+          setIsLoadingLocation(false);
+        }
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        alert('Unable to retrieve your location. Please make sure location services are enabled.');
+        setIsLoadingLocation(false);
+      }
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
@@ -102,6 +150,16 @@ const LocationPicker = ({ propertyIndex, initialPosition, onSelectLocation }) =>
           className="p-2 bg-[rgb(254,111,97)] text-white rounded hover:bg-[rgb(234,91,77)]"
         >
           <Search className="w-5 h-5" />
+        </button>
+        <button
+          onClick={handleUseMyLocation}
+          disabled={isLoadingLocation}
+          className={`p-2 bg-[rgb(254,111,97)] text-white rounded hover:bg-[rgb(234,91,77)] flex items-center gap-2 ${
+            isLoadingLocation ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        >
+          <Navigation className="w-5 h-5" />
+          <span className="hidden sm:inline">Use my Location</span>
         </button>
       </div>
 
