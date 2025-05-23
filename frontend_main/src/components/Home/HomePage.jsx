@@ -289,16 +289,22 @@ export default function HomePage() {
 
       // Calculate distance if user location is available
       let locationDisplay = `${listing.address}, ${listing.location?.city || ''}`;
-      let distance = null;
+      let distance = listing.distance; // First try to use the backend-calculated distance
       
-      if (userLocation && listing.location?.coordinates) {
-        distance = calculateDistance(
-          userLocation.latitude,
-          userLocation.longitude,
-          listing.location.coordinates[1], // MongoDB stores coordinates as [longitude, latitude]
-          listing.location.coordinates[0]
-        );
-        
+      // If backend didn't provide a distance or it's null, calculate it here
+      if (distance === undefined || distance === null) {
+        if (userLocation && listing.location?.coordinates) {
+          distance = calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            listing.location.coordinates[1], // MongoDB stores coordinates as [longitude, latitude]
+            listing.location.coordinates[0]
+          );
+        }
+      }
+      
+      // Now format the location display if we have a distance
+      if (distance !== null && distance !== undefined) {
         if (distance < 1) {
           // If less than 1 km, show in meters
           locationDisplay = `${Math.round(distance * 1000)} meters away`;
@@ -329,10 +335,12 @@ export default function HomePage() {
 
     // Sort by distance if userLocation is available
     if (userLocation) {
+      // First use backend distances if provided, otherwise use frontend calculated distances
       return transformedListings.sort((a, b) => {
-        if (a.distance === null) return 1;
-        if (b.distance === null) return -1;
-        return a.distance - b.distance;
+        // Try to use backend-calculated distances first, if they exist
+        const aDistance = a.distance || Infinity;
+        const bDistance = b.distance || Infinity;
+        return aDistance - bDistance;
       });
     }
     

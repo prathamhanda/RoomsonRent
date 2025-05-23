@@ -90,34 +90,34 @@ exports.getListings = asyncHandler(async (req, res, next) => {
 
   // Add distance if user location is provided
   if (userLocation) {
+    // First convert all mongoose documents to plain objects
+    listings = listings.map(listing => listing.toObject());
+    
+    // Then calculate distances for all listings
     listings = listings.map(listing => {
-      const listingObj = listing.toObject();
-      
       if (listing.location && listing.location.coordinates && listing.location.coordinates.length === 2) {
         const listingCoords = {
           lat: listing.location.coordinates[1],
           lng: listing.location.coordinates[0]
         };
         
-        listingObj.distance = calculateDistance(
+        listing.distance = calculateDistance(
           userLocation.lat,
           userLocation.lng,
           listingCoords.lat,
           listingCoords.lng
         );
       } else {
-        listingObj.distance = null;
+        listing.distance = Infinity; // Use Infinity instead of null for better sorting
       }
       
-      return listingObj;
+      return listing;
     });
 
     // Sort by distance if requested
     if (req.query.sort === 'distance') {
       listings.sort((a, b) => {
-        if (a.distance === null) return 1;
-        if (b.distance === null) return -1;
-        return a.distance - b.distance;
+        return a.distance - b.distance; // Infinity will always be sorted last
       });
     }
   }
