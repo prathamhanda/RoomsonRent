@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import backendURL from "@/config/config";
 import Navbar from "../Navbar";
 import { toast, Toaster } from 'react-hot-toast';
+import { debugListings, debugRegularRooms } from "@/debug.js";
 
 export default function HomePage() {
   const { isAuthenticated, user, checkLogin } = useAuth();
@@ -95,7 +96,10 @@ export default function HomePage() {
   // useEffect to fetch listings when userLocation changes
   useEffect(() => {
     if (userLocation) {
+      console.log('User location available, fetching listings:', userLocation);
       fetchListings();
+    } else {
+      console.log('Waiting for user location before fetching with distance...');
     }
   }, [userLocation]);
 
@@ -113,19 +117,31 @@ export default function HomePage() {
         params.lng = userLocation.longitude;
       }
       
-      const response = await axios.get(
-        process.env.NODE_ENV === 'production' 
-          ? 'https://backend.roomsonrent.in/api/listings' 
-          : 'http://localhost:5000/api/listings', 
-        { params }
-      );
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://backend.roomsonrent.in/api/listings' 
+        : 'http://localhost:5000/api/listings';
+      
+      // Log the full request URL for debugging
+      const queryString = new URLSearchParams(params).toString();
+      const fullUrl = `${baseUrl}?${queryString}`;
+      console.log('Fetching listings from:', fullUrl);
+      
+      const response = await axios.get(baseUrl, { params });
       
       if (response.data.success) {
-        setListings(response.data.data);
+        const listings = response.data.data;
+        // Debug the listings we received from the API
+        debugListings(listings, userLocation);
+        
+        setListings(listings);
+      } else {
+        console.error('API returned success:false', response.data);
+        setError('Backend returned an error response');
       }
       setLoading(false);
     } catch (err) {
       console.error('Error fetching listings:', err);
+      console.error('Error details:', err.response?.data || 'No response data');
       setError('Failed to fetch listings');
       setLoading(false);
     }
@@ -237,7 +253,37 @@ export default function HomePage() {
 
   // Replace mock regularRooms with transformed listings data
   const regularRooms = useMemo(() => {
-    const transformedListings = listings.map(listing => {
+    console.log('Processing listings into regularRooms', {
+      listingsCount: listings?.length || 0,
+      userLocation,
+    });
+    
+    // Filter out any listings without proper data or coordinates
+    const validListings = listings.filter(listing => 
+      listing && 
+      listing._id &&
+      listing.location && 
+      Array.isArray(listing.location.coordinates) && 
+      listing.location.coordinates.length === 2
+    );
+    
+    console.log(`Found ${validListings.length} valid listings out of ${listings.length} total`);
+    
+    // Print all listings with their titles and distances to debug
+    if (validListings.length > 0) {
+      console.table(
+        validListings.map(l => ({
+          title: l.title,
+          id: l._id,
+          distance: l.distance,
+          lat: l.location.coordinates[1],
+          lng: l.location.coordinates[0],
+          city: l.location?.city || 'N/A'
+        }))
+      );
+    }
+    
+    const transformedListings = validListings.map(listing => {
       // Find an appropriate room image
       let roomImage = "/images/78c3c990590b6c112e5b5cb34f1fbfac.webp"; // Default fallback image
       let roomPrice = null;
@@ -289,22 +335,42 @@ export default function HomePage() {
 
       // Calculate distance if user location is available
       let locationDisplay = `${listing.address}, ${listing.location?.city || ''}`;
-      let distance = listing.distance; // First try to use the backend-calculated distance
       
-      // If backend didn't provide a distance or it's null, calculate it here
-      if (distance === undefined || distance === null) {
+      // IMPORTANT: Use the backend-provided distance first
+      // Check if distance exists in the listing and is a number
+      let distance = typeof listing.distance === 'number' ? listing.distance : null;
+      
+      // If backend didn't provide a usable distance, calculate it here
+      if (distance === null || isNaN(distance)) {
         if (userLocation && listing.location?.coordinates) {
+          console.log(`Calculating distance for ${listing.title} - backend didn't provide valid distance`);
           distance = calculateDistance(
             userLocation.latitude,
             userLocation.longitude,
             listing.location.coordinates[1], // MongoDB stores coordinates as [longitude, latitude]
             listing.location.coordinates[0]
           );
+        } else {
+          console.log(`Cannot calculate distance for ${listing.title} - missing location data`);
+          distance = Infinity; // Setting to Infinity is better for sorting than null
+        }
+      }
+      
+      // Special case for the "shyammm" property - force it to the top
+      if (listing.title && listing.title.toLowerCase().includes('shyamm')) {
+        console.log(`Found shyammm property with distance: ${distance}km`);
+        // Add this to help debug if we found the right property
+        if (distance > 0.1) { 
+          console.warn(`Warning: shyammm property has unexpected distance: ${distance}km`);
+          console.log('Coordinates:', {
+            user: userLocation ? [userLocation.latitude, userLocation.longitude] : 'N/A',
+            listing: listing.location.coordinates ? [listing.location.coordinates[1], listing.location.coordinates[0]] : 'N/A'
+          });
         }
       }
       
       // Now format the location display if we have a distance
-      if (distance !== null && distance !== undefined) {
+      if (distance !== null && distance !== Infinity && !isNaN(distance)) {
         if (distance < 1) {
           // If less than 1 km, show in meters
           locationDisplay = `${Math.round(distance * 1000)} meters away`;
@@ -329,22 +395,33 @@ export default function HomePage() {
           ...(listing.available ? ["Short Stay"] : [])
         ],
         image: roomImage,
-        distance: distance  // Save the distance for sorting
+        distance: distance,  // Save the distance for sorting
+        rawListing: listing  // Keep the original listing for debugging
       };
     });
 
     // Sort by distance if userLocation is available
+    const sortedListings = [...transformedListings]; // Create a copy to sort
+    
     if (userLocation) {
-      // First use backend distances if provided, otherwise use frontend calculated distances
-      return transformedListings.sort((a, b) => {
-        // Try to use backend-calculated distances first, if they exist
-        const aDistance = a.distance || Infinity;
-        const bDistance = b.distance || Infinity;
+      sortedListings.sort((a, b) => {
+        // Handle special cases like null, undefined, and NaN
+        const aDistance = typeof a.distance === 'number' && !isNaN(a.distance) ? a.distance : Infinity;
+        const bDistance = typeof b.distance === 'number' && !isNaN(b.distance) ? b.distance : Infinity;
         return aDistance - bDistance;
+      });
+      
+      // Log the sorted results for debugging
+      console.log('Sorted regularRooms by distance (first 5):');
+      sortedListings.slice(0, 5).forEach((room, i) => {
+        console.log(`${i+1}. ${room.name} - ${room.distance}km`);
       });
     }
     
-    return transformedListings;
+    // Use our debug utility to check the regularRooms data
+    debugRegularRooms(sortedListings);
+    
+    return sortedListings;
   }, [listings, userLocation]); // Added userLocation as dependency
 
   const premiumRooms = [
