@@ -34,7 +34,7 @@ RoomsonRent bridges this gap by creating a centralized platform specifically des
 - **Tenant Verification**: Review student applications including college information
 - **WhatsApp Integration**: Direct communication with student tenants for faster responses
 
-## � Target Market & Opportunity
+## Target Market & Opportunity
 
 ### Total Addressable Market (TAM)
 - **Delhi NCR Student Population**: Over 500,000 students enrolled in 70+ colleges and universities
@@ -53,7 +53,7 @@ RoomsonRent bridges this gap by creating a centralized platform specifically des
 - **End-to-End Solution**: From property discovery to booking confirmation and ongoing management
 - **Transparency**: Clear pricing, no hidden fees, and authentic student reviews
 
-## �🛠️ Technology Stack
+## 🛠️ Technology Stack
 
 ### Backend
 - **Node.js & Express**: RESTful API architecture
@@ -151,22 +151,6 @@ RoomsonRent/
 ## 🔒 Security Note
 
 The `config.env` file contains sensitive information and should never be committed to version control. It is included in the `.gitignore` file to prevent accidental commits.
-
-## 📄 API Documentation
-
-The API documentation is available at `/api/v1/docs` when running the backend server.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 📞 Contact
-
-For any inquiries, please reach out through the project's issue tracker or contact the maintainers directly.
 
 ## 🌟 Impact & Vision
 
