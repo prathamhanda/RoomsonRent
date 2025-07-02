@@ -3,10 +3,11 @@ const colors = require("colors");
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(
-      process.env.MONGO_URI ||
-        "mongodb+srv://prathamhanda10:hostelnet@roomsonrent.ic0mj.mongodb.net/roomsonrent?retryWrites=true&w=majority"
-    );
+    if (!process.env.MONGO_URI) {
+      throw new Error('MongoDB connection URI is not defined in environment variables');
+    }
+    
+    const conn = await mongoose.connect(process.env.MONGO_URI);
     console.log(
       `MongoDB Connected: ${conn.connection.host}`.cyan.underline.bold
     );
