@@ -2,7 +2,7 @@
 
 RoomsonRent is a comprehensive platform designed to solve the critical challenge of finding quality student housing near educational institutions. Focusing primarily on the Delhi college market, this platform connects students with suitable accommodations while helping landlords efficiently manage their rental properties.
 
-![RoomsonRent Platform](https://i.ibb.co/placeholder-image/roomsonrent-banner.jpg)
+![RoomsonRent Platform](https://res.cloudinary.com/dglcgpley/image/upload/v1751450380/banner_fl8pva.png)
 
 ## 📊 Market Overview
 
