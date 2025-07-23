@@ -2,9 +2,22 @@
 
 RoomsonRent is a comprehensive platform designed to solve the critical challenge of finding quality student housing near educational institutions. Focusing primarily on the Delhi college market, this platform connects students with suitable accommodations while helping landlords efficiently manage their rental properties.
 
-![RoomsonRent Platform](https://res.cloudinary.com/dglcgpley/image/upload/v1751450380/banner_fl8pva.png)
+<div align="center" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+
+  <div style="flex: 1; min-width: 280px; max-width: 500px; text-align: center;">
+    <h3>CLIENT SIDE</h3>
+    <img src="https://res.cloudinary.com/dglcgpley/image/upload/v1753263550/client_p7n0ii.gif" alt="Client Side GIF" style="width: 100%; height: auto; border-radius: 10px;" />
+  </div>
+
+  <div style="flex: 1; min-width: 280px; max-width: 500px; text-align: center;">
+    <h3>LANDLORD SIDE</h3>
+    <img src="https://res.cloudinary.com/dglcgpley/image/upload/v1753263538/landlord_wthvfk.gif" alt="Landlord Side GIF" style="width: 100%; height: auto; border-radius: 10px;" />
+  </div>
+
+</div>
 
 ## 📊 Market Overview
+
 
 ### The Problem
 College students face significant challenges finding safe, affordable housing near their educational institutions. The traditional housing search process is fragmented, time-consuming, and often leads to suboptimal living situations that affect academic performance.
