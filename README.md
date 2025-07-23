@@ -6,17 +6,24 @@ RoomsonRent is a comprehensive platform designed to solve the critical challenge
 
   <div style="flex: 1; min-width: 280px; max-width: 500px; text-align: center;">
     <h3>CLIENT SIDE</h3>
-    <img src="https://res.cloudinary.com/dglcgpley/image/upload/v1753263550/client_p7n0ii.gif" alt="Client Side GIF" style="width: 100%; height: auto; border-radius: 10px;" />
+    <video controls style="width: 100%; border-radius: 10px;">
+      <source src="https://res.cloudinary.com/dglcgpley/video/upload/v1753264134/client_side_online-video-cutter.com_td61tc.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
   </div>
 
   <div style="flex: 1; min-width: 280px; max-width: 500px; text-align: center;">
     <h3>LANDLORD SIDE</h3>
-    <img src="https://res.cloudinary.com/dglcgpley/image/upload/v1753263538/landlord_wthvfk.gif" alt="Landlord Side GIF" style="width: 100%; height: auto; border-radius: 10px;" />
+    <video controls style="width: 100%; border-radius: 10px;">
+      <source src="https://res.cloudinary.com/dglcgpley/video/upload/v1753264232/landlord_side_online-video-cutter.com_p5j24q.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
   </div>
 
 </div>
 
 ## 📊 Market Overview
+
 
 
 ### The Problem
