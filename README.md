@@ -2,25 +2,13 @@
 
 RoomsonRent is a comprehensive platform designed to solve the critical challenge of finding quality student housing near educational institutions. Focusing primarily on the Delhi college market, this platform connects students with suitable accommodations while helping landlords efficiently manage their rental properties.
 
-<div align="center" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+| CLIENT SIDE | LANDLORD SIDE |
+|-------------|---------------|
+| [![Client Side Video](https://res.cloudinary.com/dglcgpley/image/upload/v1751450380/banner_fl8pva.png)](https://res.cloudinary.com/dglcgpley/video/upload/v1753264134/client_side_online-video-cutter.com_td61tc.mp4) | [![Landlord Side Video](https://res.cloudinary.com/dglcgpley/image/upload/v1753264586/preivew_jfekhm.png)](https://res.cloudinary.com/dglcgpley/video/upload/v1753264232/landlord_side_online-video-cutter.com_p5j24q.mp4) |
 
-  <div style="flex: 1; min-width: 280px; max-width: 500px; text-align: center;">
-    <h3>CLIENT SIDE</h3>
-    <video controls style="width: 100%; border-radius: 10px;">
-      <source src="https://res.cloudinary.com/dglcgpley/video/upload/v1753264134/client_side_online-video-cutter.com_td61tc.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-  </div>
+> 🔗 Click on the thumbnails above to watch the demo videos.
 
-  <div style="flex: 1; min-width: 280px; max-width: 500px; text-align: center;">
-    <h3>LANDLORD SIDE</h3>
-    <video controls style="width: 100%; border-radius: 10px;">
-      <source src="https://res.cloudinary.com/dglcgpley/video/upload/v1753264232/landlord_side_online-video-cutter.com_p5j24q.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-  </div>
-
-</div>
+---
 
 ## 📊 Market Overview
 
