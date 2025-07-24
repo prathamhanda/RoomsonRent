@@ -69,7 +69,7 @@ RoomsonRent bridges this gap by creating a centralized platform specifically des
 - **JWT Authentication**: Secure user authentication and authorization
 - **Cloudinary API**: Cloud-based image storage and manipulation
 - **WhatsApp Business API**: Integrated messaging capabilities
-- **Email Services**: Automated notifications and communications
+- **Email Services**: Automated notifications and communications.
 
 ### Frontend
 - **React**: Component-based UI development
