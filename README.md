@@ -59,7 +59,7 @@ RoomsonRent bridges this gap by creating a centralized platform specifically des
 - **College-Specific Focus**: Direct targeting of housing needs around specific institutions
 - **Verification System**: All properties and landlords undergo a verification process
 - **End-to-End Solution**: From property discovery to booking confirmation and ongoing management
-- **Transparency**: Clear pricing, no hidden fees, and authentic student reviews
+- **Transparency**: Clear pricing, no hidden fees, and authentic student reviews.
 
 ## 🛠️ Technology Stack
 
