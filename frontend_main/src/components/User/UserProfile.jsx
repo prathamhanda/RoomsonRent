@@ -46,15 +46,25 @@ const UserProfile = () => {
   useEffect(() => {
     // Redirect to login if not authenticated
     if (!isAuthenticated) {
+      console.log('Not authenticated, redirecting to login');
       navigate('/login');
+      return;
+    }
+
+    // Don't fetch if authUser is not ready yet
+    if (!authUser?.id) {
+      console.log('Auth user not ready yet, waiting...');
       return;
     }
 
     const fetchUserDetails = async () => {
       try {
+        console.log('Fetching user details for ID:', authUser.id);
+        console.log('Backend URL:', backendURL);
         const response = await axios.get(`${backendURL}/api/users/${authUser.id}`, {
           withCredentials: true
         });
+        console.log('User API Response:', response.data);
         if (response.data.success) {
           setUserData(response.data.data);
         } else {
@@ -270,7 +280,7 @@ const UserProfile = () => {
                   </span>
                 </div>
                 <p className="text-gray-600">
-                  Your account has been successfully verified. This verification helps in building trust with landlords and ensures a smoother booking experience.
+                  Welcome to your profile! Here you can manage your account and view your activity.
                 </p>
               </Card>
             </motion.div>

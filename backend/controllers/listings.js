@@ -148,6 +148,268 @@ exports.getListings = asyncHandler(async (req, res, next) => {
   });
 });
 
+// ============================================
+// NEW ENDPOINTS - MongoDB Topics Demonstration
+// ============================================
+
+// @desc    Get nearby listings using MongoDB geospatial queries
+// @route   GET /api/listings/nearby
+// @access  Public
+// 
+// Topics Demonstrated:
+// - Topic #21: Geospatial Indexes (2dsphere)
+// - Topic #22: $geoNear Query Operator
+// - More efficient than client-side Haversine calculation
+exports.getNearbyListings = asyncHandler(async (req, res, next) => {
+  const { lng, lat, maxDistance = 5000, limit = 20 } = req.query;
+
+  if (!lng || !lat) {
+    return next(new ErrorResponse('Please provide longitude and latitude', 400));
+  }
+
+  const longitude = parseFloat(lng);
+  const latitude = parseFloat(lat);
+
+  // Topic #22: $geoNear operator uses 2dsphere index (Topic #21)
+  // Benefits:
+  // - Automatically sorted by distance
+  // - Efficient with index
+  // - Returns distance field automatically
+  // - More efficient than client-side calculation
+  
+  const nearbyListings = await Listing.aggregate([
+    {
+      // Topic #22: $geoNear stage - Geospatial near query
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [longitude, latitude]
+        },
+        distanceField: 'distance',      // Add distance field to results
+        maxDistance: parseInt(maxDistance),  // Max distance in meters
+        spherical: true                  // Use spherical geometry
+      }
+    },
+    // Topic #26: $match - Filter active listings only
+    {
+      $match: { active: true }
+    },
+    // Topic #26: $limit - Limit results
+    {
+      $limit: parseInt(limit)
+    },
+    // Populate owner details
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'owner',
+        foreignField: '_id',
+        as: 'owner'
+      }
+    },
+    {
+      $unwind: {
+        path: '$owner',
+        preserveNullAndEmptyArrays: true
+      }
+    }
+  ]);
+
+  res.status(200).json({
+    success: true,
+    count: nearbyListings.length,
+    data: nearbyListings
+  });
+});
+
+// @desc    Advanced search with multiple query operators
+// @route   GET /api/listings/search/advanced
+// @access  Public
+// 
+// Topics Demonstrated:
+// - Topic #8: Comparison Operators ($gt, $lt, $gte, $lte, $eq, $in)
+// - Topic #10: Logical Operators ($and, $or)
+// - Topic #11: Element Operators ($exists, $ne)
+// - Topic #12: Array Operators ($elemMatch)
+// - Topic #16: Text Indexes with $text operator
+// - Topic #26: Pagination with $skip and $limit
+exports.advancedSearch = asyncHandler(async (req, res, next) => {
+  let {
+    minPrice,
+    maxPrice,
+    propertyType,
+    sharing,
+    city,
+    verified,
+    furnished,
+    hasAmenity,
+    gender,
+    page = 1,
+    limit = 10,
+    sort = '-createdAt',
+    searchText,
+    lat,
+    lng,
+    maxDistance = 5000
+  } = req.query;
+
+  let locationAutoResolved = false;
+  // Auto-resolve location if searchText is provided but lat/lng are not
+  if (searchText && (!lat || !lng)) {
+    const Location = require('../models/Location');
+    const matchedLoc = await Location.findOne({
+      $or: [
+        { name: { $regex: searchText, $options: 'i' } },
+        { city: { $regex: searchText, $options: 'i' } }
+      ]
+    });
+    
+    if (matchedLoc && matchedLoc.geometry && matchedLoc.geometry.coordinates) {
+      lng = matchedLoc.geometry.coordinates[0];
+      lat = matchedLoc.geometry.coordinates[1];
+      locationAutoResolved = true;
+    }
+  }
+
+  const query = {};
+
+  // Topic #21 & #22: $near for Location-based search (College / Area suggestions)
+  if (lat && lng) {
+    query['location.coordinates'] = {
+      $near: {
+        $geometry: {
+          type: 'Point',
+          coordinates: [parseFloat(lng), parseFloat(lat)]
+        },
+        $maxDistance: parseInt(maxDistance)
+      }
+    };
+  }
+
+  // Topic #11: $exists - Check if field exists
+  query.active = true;
+
+  // Topic #8: Comparison operators - Price range
+  if (minPrice || maxPrice) {
+    query.price = {};
+    if (minPrice) query.price.$gte = parseInt(minPrice);  // Topic #8: $gte
+    if (maxPrice) query.price.$lte = parseInt(maxPrice);  // Topic #8: $lte
+  }
+
+  // Topic #8: $in operator - Multiple property types
+  if (propertyType) {
+    const types = propertyType.split(',');
+    query.propertyType = { $in: types };  // Topic #8: $in
+  }
+
+  // Topic #10: $or operator - Multiple cities
+  if (city) {
+    const cities = city.split(',');
+    query.$or = cities.map(c => ({ 'location.city': c }));  // Topic #10: $or
+  }
+
+  // Topic #11: Element operators
+  if (verified === 'true') {
+    query.verified = { $eq: true };  // Topic #8: $eq (explicit)
+  }
+
+  if (furnished) {
+    query.furnishingStatus = { $in: furnished.split(',') };
+  }
+
+  // Topic #12: $elemMatch - Query array of embedded documents
+  if (sharing) {
+    const sharingOptions = sharing.split(',');
+    query.floors = {
+      $elemMatch: {
+        rooms: {
+          $elemMatch: {
+            sharingOptions: { $in: sharingOptions }  // Topic #8: $in within $elemMatch
+          }
+        }
+      }
+    };
+  }
+
+  // Topic #11: $exists - Check for amenities
+  if (hasAmenity) {
+    query.amenities = {
+      $exists: true,  // Topic #11: $exists
+      $ne: []         // Not empty array
+    };
+  }
+
+  // Topic #16: Text search with $text operator (Replaced with $regex for fuzzy sub-string matching)
+  let textQuery = null;
+  // If we auto-resolved the searchText to a geographic location, we don't strictly filter by text anymore 
+  // to allow all nearby properties to show up regardless of their names.
+  if (searchText && !locationAutoResolved && !req.query.lat) {
+    textQuery = {
+      $or: [
+        { title: { $regex: searchText, $options: 'i' } },
+        { description: { $regex: searchText, $options: 'i' } },
+        { 'location.city': { $regex: searchText, $options: 'i' } },
+        { 'address': { $regex: searchText, $options: 'i' } }
+      ]
+    };
+  }
+
+  // Combine with text search if present
+  let searchQuery = Listing.find(query);
+  if (textQuery) {
+    searchQuery = searchQuery.find(textQuery);
+  }
+
+  // Topic #26: Pagination with $skip and $limit
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+  
+  // Disable explicit sorting if geospatial $near is used, as $near implicitly sorts by distance
+  const isGeoQuery = !!(lat && lng);
+  
+  let listingsQuery = searchQuery
+    .populate('owner', 'name email phone')
+    .skip(skip)
+    .limit(parseInt(limit));
+
+  if (!isGeoQuery) {
+    listingsQuery = listingsQuery.sort(sort);
+  }
+
+  const listings = await listingsQuery;
+
+  // Handle total count - countDocuments doesn't support $near
+  let total;
+  if (isGeoQuery) {
+    const countQuery = { ...query };
+    // Replace $near with $geoWithin for counting
+    countQuery['location.coordinates'] = {
+      $geoWithin: {
+        $centerSphere: [[parseFloat(lng), parseFloat(lat)], parseInt(maxDistance) / 6378100] // Distance converted to radians
+      }
+    };
+    total = await Listing.countDocuments(countQuery);
+  } else {
+    total = await Listing.countDocuments(query);
+  }
+
+  // Pagination info
+  const pagination = {};
+  if (skip + parseInt(limit) < total) {
+    pagination.next = { page: parseInt(page) + 1, limit: parseInt(limit) };
+  }
+  if (skip > 0) {
+    pagination.prev = { page: parseInt(page) - 1, limit: parseInt(limit) };
+  }
+
+  res.status(200).json({
+    success: true,
+    count: listings.length,
+    total,
+    pagination,
+    data: listings
+  });
+});
+
 // @desc    Get single listing
 // @route   GET /api/listings/:id
 // @access  Public

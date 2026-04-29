@@ -21,12 +21,12 @@ connectDB();
 const auth = require('./routes/auth');
 const users = require('./routes/users');
 const listings = require('./routes/listings');
-const bookings = require('./routes/bookings');
 const locations = require('./routes/locations');
-const reviews = require('./routes/reviews');
 const uploads = require('./routes/uploads');
 const cloudinaryTest = require('./routes/cloudinary-test');
 const cloudinary = require('./routes/cloudinary');
+const analytics = require('./routes/analytics');
+const admin = require('./routes/admin');
 
 const app = express();
 
@@ -69,12 +69,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', auth);
 app.use('/api/users', users);
 app.use('/api/listings', listings);
-app.use('/api/bookings', bookings);
 app.use('/api/locations', locations);
-app.use('/api/reviews', reviews);
 app.use('/api/uploads', uploads);
 app.use('/api/cloudinary-test', cloudinaryTest);
 app.use('/api/cloudinary', cloudinary);
+app.use('/api/analytics', analytics);
+app.use('/api/admin', admin);
 
 const midd = (req,res,next)=>{
     if (req.query.id==5){

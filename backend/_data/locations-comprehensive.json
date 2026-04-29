@@ -1,0 +1,554 @@
+[
+  {
+    "name": "Koramangala",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.6294, 12.9351]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Indiranagar",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.6408, 12.9784]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "HSR Layout",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.6476, 12.9081]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Whitefield",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.7499, 12.9698]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Electronic City",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.6770, 12.8399]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Bandra",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [72.8295, 19.0596]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Andheri",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [72.8697, 19.1136]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Powai",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [72.9097, 19.1136]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Churchgate",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [72.8228, 18.9674]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Dadar",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [72.8336, 19.0176]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Connaught Place",
+    "city": "New Delhi",
+    "state": "Delhi",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.1905, 28.6315]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "South Delhi",
+    "city": "New Delhi",
+    "state": "Delhi",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.2099, 28.5355]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Vasant Kunj",
+    "city": "New Delhi",
+    "state": "Delhi",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.1990, 28.5244]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Gurugram",
+    "city": "Gurgaon",
+    "state": "Haryana",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.0369, 28.4595]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Sector 31",
+    "city": "Gurgaon",
+    "state": "Haryana",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.0671, 28.4089]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Noida",
+    "city": "Noida",
+    "state": "Uttar Pradesh",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.3910, 28.5355]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Sector 62",
+    "city": "Noida",
+    "state": "Uttar Pradesh",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.3767, 28.5801]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Hyderabad",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [78.4711, 17.3850]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "HITEC City",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [78.3785, 17.3604]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Banjara Hills",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [78.4419, 17.3723]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Pune",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [73.8567, 18.5204]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Kalyani Nagar",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [73.9034, 18.5595]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Hinjewadi",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [73.7997, 18.5912]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Camp",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [73.8623, 18.5296]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Colombo",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [80.2809, 13.0499]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Nungambakkam",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [80.2348, 13.0627]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Anna Nagar",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [80.2077, 13.0843]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Kochi",
+    "city": "Kochi",
+    "state": "Kerala",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [76.2673, 9.9312]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Kalamassery",
+    "city": "Kochi",
+    "state": "Kerala",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [76.3231, 10.0108]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Jaipur",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [75.7873, 26.9124]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "C-Scheme",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [75.8245, 26.9124]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Bani Park",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [75.8167, 26.9090]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Lucknow",
+    "city": "Lucknow",
+    "state": "Uttar Pradesh",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [80.9862, 26.8467]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Gomti Nagar",
+    "city": "Lucknow",
+    "state": "Uttar Pradesh",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [80.9977, 26.8313]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Chandigarh",
+    "city": "Chandigarh",
+    "state": "Chandigarh",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [76.7794, 30.7333]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Sector 35",
+    "city": "Chandigarh",
+    "state": "Chandigarh",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [76.7672, 30.7444]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Ahmedabad",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [72.5243, 23.0225]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Thaltej",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [72.5555, 23.1815]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Ludhiana",
+    "city": "Ludhiana",
+    "state": "Punjab",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [75.8572, 30.9010]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Ferozepur Road",
+    "city": "Ludhiana",
+    "state": "Punjab",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [75.7860, 30.8905]
+    },
+    "popular": false,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Amritsar",
+    "city": "Amritsar",
+    "state": "Punjab",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [74.8723, 31.6340]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Indore",
+    "city": "Indore",
+    "state": "Madhya Pradesh",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [75.8577, 22.7196]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Visakhapatnam",
+    "city": "Visakhapatnam",
+    "state": "Andhra Pradesh",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [83.2185, 17.6869]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Surat",
+    "city": "Surat",
+    "state": "Gujarat",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [72.8479, 21.1458]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Nagpur",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [79.0882, 21.1458]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  },
+  {
+    "name": "Bhopal",
+    "city": "Bhopal",
+    "state": "Madhya Pradesh",
+    "country": "India",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [77.4126, 23.1815]
+    },
+    "popular": true,
+    "image": "no-photo.jpg"
+  }
+]

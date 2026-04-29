@@ -701,9 +701,6 @@ export default function HomePage() {
                     <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       Your Profile
                     </Link>
-                    <Link to="/bookings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Your Bookings
-                    </Link>
                     <button
                       onClick={() => {
                         setMenuOpen(false);
@@ -929,12 +926,6 @@ export default function HomePage() {
                           >
                             Your Profile
                           </Link>
-                          <Link 
-                            to="/bookings" 
-                            className="w-full text-center py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50"
-                          >
-                            Your Bookings
-                          </Link>
                           <Button 
                             onClick={() => {
                               setMenuOpen(false);
@@ -977,7 +968,7 @@ export default function HomePage() {
           </span>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar (clickable - navigates to /search) */}
         <div className="flex justify-center relative px-4 w-full pb-12 md:pb-16">
           <form className="flex gap-2 w-full max-w-xl mx-auto" style={{ marginTop: "80px", marginBottom: "20px" }} onSubmit={(e) => e.preventDefault()}>
             <div className="flex w-full flex-col relative">
@@ -988,40 +979,23 @@ export default function HomePage() {
                 className="w-full"
               >
                 <motion.div
-                  className="bg-white rounded-full p-2 flex items-center shadow-lg"
-                  whileHover={{ boxShadow: "0px 8px 20px rgba(0,0,0,0.15)" }}
-                  animate={searchFocus ? { scale: 1.02 } : { scale: 1 }}
+                  className="bg-white rounded-full p-2 flex items-center shadow-lg cursor-pointer"
+                  whileHover={{ boxShadow: "0px 12px 28px rgba(0,0,0,0.18)" }}
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  onClick={() => navigate(`/search?q=${encodeURIComponent(searchQuery || '')}`)}
                 >
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    placeholder="Search college or location"
-                    className="w-full px-4 py-2 rounded-full focus:outline-none text-sm md:text-base"
-                    onFocus={() => {
-                      setSearchFocus(true);
-                      setShowSuggestions(true);
-                    }}
-                    onBlur={() => {
-                      setSearchFocus(false);
-                      // Delay hiding suggestions to allow for clicks
-                      setTimeout(() => setShowSuggestions(false), 200);
-                    }}
-                  />
-                  <motion.button
-                    className="p-2 rounded-full text-white"
+                  <div className="w-full px-4 py-3 rounded-full text-sm md:text-base text-gray-600">
+                    {searchQuery ? searchQuery : 'Search college or location'}
+                  </div>
+                  <motion.div
+                    className="p-3 rounded-full text-white mr-1"
                     style={{ backgroundColor: "#fe6f61" }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      // Handle search submission here
-                    }}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
+                      width="18"
+                      height="18"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -1032,33 +1006,8 @@ export default function HomePage() {
                       <circle cx="11" cy="11" r="8"></circle>
                       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                  </motion.button>
-                </motion.div>
-                
-                {/* Search Suggestions */}
-                {showSuggestions && filteredColleges.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-lg border border-gray-200 max-h-48 md:max-h-60 overflow-y-auto z-50"
-                    style={{
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: '#fe6f61 #f1f1f1'
-                    }}
-                  >
-                    {filteredColleges.map((college, index) => (
-                      <motion.div
-                        key={index}
-                        className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-left text-xs md:text-sm"
-                        onClick={() => handleSuggestionClick(college)}
-                        whileHover={{ x: 5, backgroundColor: "rgba(254, 111, 97, 0.1)" }}
-                      >
-                        {college}
-                      </motion.div>
-                    ))}
                   </motion.div>
-                )}
+                </motion.div>
               </motion.div>
             </div>
           </form>

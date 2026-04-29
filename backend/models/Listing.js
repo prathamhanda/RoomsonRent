@@ -182,15 +182,6 @@ const ListingSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'User'
   }],
-  ratings: {
-    type: Number,
-    min: [1, 'Rating must be at least 1'],
-    max: [5, 'Rating cannot be more than 5']
-  },
-  numReviews: {
-    type: Number,
-    default: 0
-  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -200,32 +191,63 @@ const ListingSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
+// ============================================
+// INDEXES - Topic #15-24: MongoDB Indexing
+// ============================================
+
+// Topic #16: Text Index for full-text search
+// Enables: db.find({ $text: { $search: "keyword" } })
+// Covers: title, description, amenities for keyword matching
+ListingSchema.index({ 
+  title: 'text', 
+  description: 'text', 
+  amenities: 'text' 
+});
+
+// Topic #19: Compound Index for common query patterns
+// Optimizes: Finding listings by owner, filtered by active status, sorted by date
+// Covers: Landlord dashboard queries
+ListingSchema.index({ 
+  owner: 1, 
+  active: 1, 
+  createdAt: -1 
+});
+
+// Topic #19: Compound Index for featured listings
+// Optimizes: Getting featured active listings sorted by date
+// Covers: Homepage featured section queries
+ListingSchema.index({ 
+  featured: 1, 
+  active: 1, 
+  createdAt: -1 
+});
+
+// Topic #23: Partial Index - only for active listings
+// Benefit: Smaller index size, faster queries on active subset
+// Optimizes: Common queries filtering only active listings
+ListingSchema.index(
+  { createdAt: -1 },
+  { partialFilterExpression: { active: true } }
+);
+
+// Topic #19: Compound Index for city and property type
+// Optimizes: Filtering by location and property type in search
+ListingSchema.index({ 
+  'location.city': 1, 
+  propertyType: 1 
+});
+
 // Create listing slug from the title
 ListingSchema.pre('save', function(next) {
   this.slug = slugify(this.title, { lower: true });
   next();
 });
 
-// Cascade delete reviews when a listing is deleted
+// No cascading deletes needed
 ListingSchema.pre('remove', async function(next) {
-  await this.model('Review').deleteMany({ listing: this._id });
   next();
 });
 
-// Reverse populate with virtuals
-ListingSchema.virtual('reviews', {
-  ref: 'Review',
-  localField: '_id',
-  foreignField: 'listing',
-  justOne: false
-});
-
-// Reverse populate with virtuals
-ListingSchema.virtual('bookings', {
-  ref: 'Booking',
-  localField: '_id',
-  foreignField: 'listing',
-  justOne: false
-});
+// No virtual references needed
 
 module.exports = mongoose.model('Listing', ListingSchema);

@@ -59,7 +59,7 @@ const Footer = () => {
         </div>
 
         <div className="py-4 text-center text-sm bg-[#e55a4d] bg-opacity-50">
-          <p>© 2025 Rooms On Rent. | <Link to="/privacy" className="hover:underline">Privacy Policy</Link> | <Link to="/terms" className="hover:underline">Terms of Use</Link></p>
+          <p>© 2026 Rooms On Rent. | <Link to="/privacy" className="hover:underline">Privacy Policy</Link> | <Link to="/terms" className="hover:underline">Terms of Use</Link></p>
         </div>
       </div>
     </footer>

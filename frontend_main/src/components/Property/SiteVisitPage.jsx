@@ -21,6 +21,7 @@ import {
   Key
 } from 'lucide-react';
 import Footer from "../shared/Footer";
+import backendURL from '@/config/config';
 
 const SiteVisitPage = () => {
   const { id } = useParams();
@@ -39,7 +40,7 @@ const SiteVisitPage = () => {
     const fetchListing = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`https://backend.roomsonrent.in/api/listings/${id}`);
+        const response = await axios.get(`${backendURL}/api/listings/${id}`);
         if (response.data.success) {
           setListing(response.data.data);
           // Set default selected floor if available
