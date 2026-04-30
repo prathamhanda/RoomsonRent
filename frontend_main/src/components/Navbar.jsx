@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import backendURL from "@/config/config";
 import { toast, Toaster } from 'react-hot-toast';
 
-const Navbar = ({ textClass = "text-white" }) => {
+const Navbar = () => {
   const [supportOpen, setSupportOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const location = useLocation();
@@ -35,13 +35,10 @@ const Navbar = ({ textClass = "text-white" }) => {
   };
 
   return (
-    <div className={`w-full flex justify-between items-center border-b border-gray-100 ${textClass} py-6 px-10 md:px-20 z-50 absolute top-0`}>
+    <div className="w-full flex justify-between items-center text-white py-8 px-20">
       <Toaster position="top-center" reverseOrder={false} />
-      <Link to="/" className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-        {textClass.includes('text-[#1a2b4c]') ? (
-          <span className="text-green-500">Rooms</span>
-        ) : null}
-        {textClass.includes('text-[#1a2b4c]') ? ' On Rent' : 'Rooms On Rent'}
+      <Link to="/" className="text-3xl font-bold">
+        Rooms On Rent
       </Link>
       <div className="flex gap-7 items-center">
         <div className="relative">

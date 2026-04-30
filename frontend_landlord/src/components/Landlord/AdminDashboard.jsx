@@ -3,7 +3,6 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import NavbarMain from '../Navbar';
 import { Footer } from '../Footer';
-import { backendURL } from '../../config/config';
 
 const AdminDashboard = () => {
   const [dashboardStats, setDashboardStats] = useState(null);
@@ -22,11 +21,11 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const [stats, cities, prices, rooms, locations] = await Promise.all([
-        axios.get(`${backendURL}/api/analytics/dashboard`, { withCredentials: true }),
-        axios.get(`${backendURL}/api/analytics/listings-by-city`, { withCredentials: true }),
-        axios.get(`${backendURL}/api/analytics/price-distribution`, { withCredentials: true }),
-        axios.get(`${backendURL}/api/analytics/room-sharing-stats`, { withCredentials: true }),
-        axios.get(`${backendURL}/api/analytics/popular-locations`, { withCredentials: true })
+        axios.get('/api/analytics/dashboard'),
+        axios.get('/api/analytics/listings-by-city'),
+        axios.get('/api/analytics/price-distribution'),
+        axios.get('/api/analytics/room-sharing-stats'),
+        axios.get('/api/analytics/popular-locations')
       ]);
 
       setDashboardStats(stats.data);

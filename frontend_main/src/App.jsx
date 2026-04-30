@@ -21,7 +21,6 @@ function App() {
             <Route path="/search" element={<SearchPage/>} />
             <Route path="/schema" element={<SchemaExplorer/>} />
             <Route path="/landlord" element={<LandlordPage/>} />
-            <Route path="/property/:id" element={<SiteVisitPage/>} />
             <Route path="/property/:id/visit" element={<SiteVisitPage/>} />
             <Route path="/login" element={<LoginPage/>} />
             <Route path="/register" element={<RegisterPage/>} />

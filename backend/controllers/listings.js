@@ -234,7 +234,7 @@ exports.getNearbyListings = asyncHandler(async (req, res, next) => {
 // - Topic #16: Text Indexes with $text operator
 // - Topic #26: Pagination with $skip and $limit
 exports.advancedSearch = asyncHandler(async (req, res, next) => {
-  let {
+  const {
     minPrice,
     maxPrice,
     propertyType,
@@ -247,44 +247,10 @@ exports.advancedSearch = asyncHandler(async (req, res, next) => {
     page = 1,
     limit = 10,
     sort = '-createdAt',
-    searchText,
-    lat,
-    lng,
-    maxDistance = 5000
+    searchText
   } = req.query;
 
-  let locationAutoResolved = false;
-  // Auto-resolve location if searchText is provided but lat/lng are not
-  if (searchText && (!lat || !lng)) {
-    const Location = require('../models/Location');
-    const matchedLoc = await Location.findOne({
-      $or: [
-        { name: { $regex: searchText, $options: 'i' } },
-        { city: { $regex: searchText, $options: 'i' } }
-      ]
-    });
-    
-    if (matchedLoc && matchedLoc.geometry && matchedLoc.geometry.coordinates) {
-      lng = matchedLoc.geometry.coordinates[0];
-      lat = matchedLoc.geometry.coordinates[1];
-      locationAutoResolved = true;
-    }
-  }
-
   const query = {};
-
-  // Topic #21 & #22: $near for Location-based search (College / Area suggestions)
-  if (lat && lng) {
-    query['location.coordinates'] = {
-      $near: {
-        $geometry: {
-          type: 'Point',
-          coordinates: [parseFloat(lng), parseFloat(lat)]
-        },
-        $maxDistance: parseInt(maxDistance)
-      }
-    };
-  }
 
   // Topic #11: $exists - Check if field exists
   query.active = true;
@@ -339,19 +305,10 @@ exports.advancedSearch = asyncHandler(async (req, res, next) => {
     };
   }
 
-  // Topic #16: Text search with $text operator (Replaced with $regex for fuzzy sub-string matching)
+  // Topic #16: Text search with $text operator
   let textQuery = null;
-  // If we auto-resolved the searchText to a geographic location, we don't strictly filter by text anymore 
-  // to allow all nearby properties to show up regardless of their names.
-  if (searchText && !locationAutoResolved && !req.query.lat) {
-    textQuery = {
-      $or: [
-        { title: { $regex: searchText, $options: 'i' } },
-        { description: { $regex: searchText, $options: 'i' } },
-        { 'location.city': { $regex: searchText, $options: 'i' } },
-        { 'address': { $regex: searchText, $options: 'i' } }
-      ]
-    };
+  if (searchText) {
+    textQuery = { $text: { $search: searchText } };  // Topic #16: $text operator
   }
 
   // Combine with text search if present
@@ -363,34 +320,13 @@ exports.advancedSearch = asyncHandler(async (req, res, next) => {
   // Topic #26: Pagination with $skip and $limit
   const skip = (parseInt(page) - 1) * parseInt(limit);
   
-  // Disable explicit sorting if geospatial $near is used, as $near implicitly sorts by distance
-  const isGeoQuery = !!(lat && lng);
-  
-  let listingsQuery = searchQuery
+  const listings = await searchQuery
     .populate('owner', 'name email phone')
+    .sort(sort)
     .skip(skip)
     .limit(parseInt(limit));
 
-  if (!isGeoQuery) {
-    listingsQuery = listingsQuery.sort(sort);
-  }
-
-  const listings = await listingsQuery;
-
-  // Handle total count - countDocuments doesn't support $near
-  let total;
-  if (isGeoQuery) {
-    const countQuery = { ...query };
-    // Replace $near with $geoWithin for counting
-    countQuery['location.coordinates'] = {
-      $geoWithin: {
-        $centerSphere: [[parseFloat(lng), parseFloat(lat)], parseInt(maxDistance) / 6378100] // Distance converted to radians
-      }
-    };
-    total = await Listing.countDocuments(countQuery);
-  } else {
-    total = await Listing.countDocuments(query);
-  }
+  const total = await Listing.countDocuments(query);
 
   // Pagination info
   const pagination = {};
