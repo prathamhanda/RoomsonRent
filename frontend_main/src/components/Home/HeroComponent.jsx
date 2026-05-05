@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const HeroComponent = () => {
   const [showSupport, setShowSupport] = useState(false);
   const [searchFocus, setSearchFocus] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
   
   return (
     <div className="relative w-full h-screen">
@@ -292,14 +295,28 @@ const HeroComponent = () => {
             <input 
               type="text" 
               placeholder="Search for your desired college, location or PG" 
-              className="w-full px-4 py-2 rounded-full focus:outline-none"
+              className="w-full px-4 py-2 rounded-full focus:outline-none text-black"
               onFocus={() => setSearchFocus(true)}
               onBlur={() => setSearchFocus(false)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && searchQuery.trim()) {
+                  navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+                }
+              }}
             />
             <motion.button 
               className="p-2 rounded-full text-white" 
-              style={{ backgroundColor: '#4169E1' }}
+              style={{ backgroundColor: '#FF7F61' }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                if (searchQuery.trim()) {
+                  navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+                } else {
+                  navigate('/search');
+                }
+              }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>

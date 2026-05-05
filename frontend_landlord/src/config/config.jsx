@@ -1,4 +1,4 @@
-const backendURL = (() => {
+export const backendURL = (() => {
     const currentURL = window.location.href;
     const url = new URL(currentURL);
     const hostname = url.hostname;

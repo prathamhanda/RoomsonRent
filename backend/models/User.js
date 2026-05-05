@@ -196,6 +196,20 @@ UserSchema.pre('save', async function(next) {
   next();
 });
 
+// ============================================
+// INDEXES - Topic #15-24: MongoDB Indexing
+// ============================================
+
+// Topic #19: Compound Index for role-based queries
+// Optimizes: Finding all verified landlords or admins
+UserSchema.index({ 
+  role: 1, 
+  verified: 1 
+});
+
+// Note: Email has unique constraint from field definition (unique: true)
+// This provides global uniqueness enforcement
+
 // Sign JWT and return
 UserSchema.methods.getSignedJwtToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {

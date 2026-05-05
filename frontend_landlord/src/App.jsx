@@ -6,12 +6,13 @@ import LandlordPage from "./components/Landlord/LandlordPage";
 import NavbarMain from "./components/Navbar";
 import LoginPage from "./components/Landlord/LoginPage";
 import RegisterPage from "./components/Landlord/RegisterPage";
-import { AuthProvider, useAuth } from "./context/AuthContext"; // Import Auth
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import LandlordPortalForm from "./components/Landlord/LandlordPortalForm";
 import RoomDetailsPage from "./components/Landlord/RoomDetailsPage";
 import PropertyEditPage from "./components/Landlord/PropertyEditPage";
 import TenantProfile from "./pages/TenantProfile";
+import AdminDashboard from "./components/Landlord/AdminDashboard";
 import { Footer } from "./components/Footer";
 import { Toaster } from 'react-hot-toast';
 
@@ -45,6 +46,11 @@ function App() {
               <LandlordPage/>
             </ProtectedRoute>
             } />
+          <Route path="/analytics" element={
+            <ProtectedRoute>
+              <AdminDashboard/>
+            </ProtectedRoute>
+          } />
           <Route path="/login" element={<LoginPage/>} />
           <Route path="/register" element={<RegisterPage/>} />
           <Route path="/add-listing" element={

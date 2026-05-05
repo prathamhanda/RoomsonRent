@@ -701,9 +701,6 @@ export default function HomePage() {
                     <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       Your Profile
                     </Link>
-                    <Link to="/bookings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Your Bookings
-                    </Link>
                     <button
                       onClick={() => {
                         setMenuOpen(false);
@@ -929,12 +926,6 @@ export default function HomePage() {
                           >
                             Your Profile
                           </Link>
-                          <Link 
-                            to="/bookings" 
-                            className="w-full text-center py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50"
-                          >
-                            Your Bookings
-                          </Link>
                           <Button 
                             onClick={() => {
                               setMenuOpen(false);
@@ -997,12 +988,10 @@ export default function HomePage() {
                     type="text"
                     value={searchQuery}
                     onChange={handleSearchChange}
-                    placeholder="Search college or location"
+                    placeholder="Search area, PG or location"
                     className="w-full px-4 py-2 rounded-full focus:outline-none text-sm md:text-base"
-                    onFocus={() => {
-                      setSearchFocus(true);
-                      setShowSuggestions(true);
-                    }}
+                    onFocus={() => { window.location.href = '/search'; }}
+                    onClick={() => { window.location.href = '/search'; }}
                     onBlur={() => {
                       setSearchFocus(false);
                       // Delay hiding suggestions to allow for clicks
@@ -1281,7 +1270,7 @@ export default function HomePage() {
                             {room.discountedPrice ? (
                               <div>
                                 <p className="text-gray-400 line-through text-[9px] md:text-[11px]">
-                                  Rs. {room.originalPrice || room.price}/-
+                                  Rs. {room.originalPrice?.toLocaleString() || room.price}/-
                                 </p>
                                 <div className="flex items-center">
                                   <p className="font-semibold text-[#FE6F61] text-base md:text-lg">
@@ -1295,7 +1284,7 @@ export default function HomePage() {
                               </div>
                             ) : (
                               <p className="font-semibold text-[10px] md:text-xs">
-                                Rs. <span className="text-base md:text-lg">{room.price}</span>{" "}
+                                Rs. <span className="text-base md:text-lg">{room.originalPrice?.toLocaleString() || room.price}</span>{" "}
                                 per month
                               </p>
                             )}
@@ -2329,7 +2318,7 @@ export default function HomePage() {
       <div className="px-4 md:px-20 gap-8 md:gap-16 flex flex-col">
         <div className="flex flex-col md:flex-row w-full gap-6 md:gap-20">
           <motion.div 
-            onClick={() => window.location.href = 'https://landlord.roomsonrent.in'}
+            onClick={() => window.location.href = 'http://localhost:5174/'}
             className="border-2 border-[#D8D8D8] rounded-2xl h-auto md:h-60 flex-1 flex flex-col md:flex-row gap-4 md:gap-10 cursor-pointer p-4 md:p-0"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}

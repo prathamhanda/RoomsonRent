@@ -10,10 +10,38 @@ const jwt = require('jsonwebtoken');
 
 
 exports.checkLogin = asyncHandler(async (req, res, next) => {
-  checkAuthMiddleWare(req, res, () => {
-    console.log(req.user.id);
-    return res.status(200).json({  status: true, message: 'Authorized',user:req.user });
-  });
+  const token = req.cookies?.token;
+
+  if (!token) {
+    return res.status(200).json({ 
+      status: false, 
+      message: 'Not authenticated' 
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      return res.status(200).json({
+        status: false,
+        message: 'User not found'
+      });
+    }
+    
+    console.log(user.id);
+    return res.status(200).json({ 
+      status: true, 
+      message: 'Authorized',
+      user: user 
+    });
+  } catch (error) {
+    return res.status(200).json({ 
+      status: false, 
+      message: 'Token verification failed: ' + error.message 
+    });
+  }
 });
 
 // GET Request for fetching

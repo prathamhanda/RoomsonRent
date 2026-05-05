@@ -7,8 +7,6 @@ const dotenv = require('dotenv');
 dotenv.config({ path: './config/config.env' });
 
 // Load models
-const User = require('./models/User');
-const Listing = require('./models/Listing');
 const Location = require('./models/Location');
 
 // Connect to DB
@@ -17,27 +15,22 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true
 });
 
-// Read JSON files
-const users = JSON.parse(
-  fs.readFileSync(`${__dirname}/_data/users.json`, 'utf-8')
-);
-
-const listings = JSON.parse(
-  fs.readFileSync(`${__dirname}/_data/listings.json`, 'utf-8')
-);
-
+// Read JSON file
 const locations = JSON.parse(
-  fs.readFileSync(`${__dirname}/_data/locations.json`, 'utf-8')
+  fs.readFileSync(`${__dirname}/_data/locations-comprehensive.json`, 'utf-8')
 );
 
 // Import into DB
 const importData = async () => {
   try {
-    await User.create(users);
-    await Location.create(locations);
-    await Listing.create(listings);
+    await Location.deleteMany(); // Clear existing locations first
+    const result = await Location.create(locations);
     
-    console.log('Data Imported...'.green.inverse);
+    console.log(`${result.length} locations imported successfully...`.green.inverse);
+    console.log('Locations:'.yellow);
+    result.forEach(loc => {
+      console.log(`  ✓ ${loc.name}, ${loc.city}, ${loc.state}`);
+    });
     process.exit();
   } catch (err) {
     console.error(err);
@@ -48,11 +41,8 @@ const importData = async () => {
 // Delete data
 const deleteData = async () => {
   try {
-    await User.deleteMany();
-    await Listing.deleteMany();
-    await Location.deleteMany();
-    
-    console.log('Data Destroyed...'.red.inverse);
+    const result = await Location.deleteMany();
+    console.log(`${result.deletedCount} locations deleted...`.red.inverse);
     process.exit();
   } catch (err) {
     console.error(err);
@@ -65,6 +55,9 @@ if (process.argv[2] === '-i') {
 } else if (process.argv[2] === '-d') {
   deleteData();
 } else {
-  console.log('Please provide proper command'.yellow);
-  process.exit(1);
-} 
+  console.log('Locations Seeder'.yellow.bold);
+  console.log('Usage:'.cyan);
+  console.log('  node locations-seeder.js -i  (import data)'.green);
+  console.log('  node locations-seeder.js -d  (delete data)'.red);
+  process.exit();
+}

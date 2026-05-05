@@ -148,6 +148,210 @@ exports.getListings = asyncHandler(async (req, res, next) => {
   });
 });
 
+
+// @desc    Get nearby listings using MongoDB geospatial queries
+// @route   GET /api/listings/nearby
+// @access  Public
+// 
+// - Geospatial Indexes (2dsphere)
+// -  $geoNear Query Operator
+exports.getNearbyListings = asyncHandler(async (req, res, next) => {
+  const { lng, lat, maxDistance = 5000, limit = 20 } = req.query;
+
+  if (!lng || !lat) {
+    return next(new ErrorResponse('Please provide longitude and latitude', 400));
+  }
+
+  const longitude = parseFloat(lng);
+  const latitude = parseFloat(lat);
+
+  // Topic #22: $geoNear operator uses 2dsphere index (Topic #21)
+  // Benefits:
+  // - Automatically sorted by distance
+  // - Efficient with index
+  // - Returns distance field automatically
+  // - More efficient than client-side calculation
+  
+  const nearbyListings = await Listing.aggregate([
+    {
+      // Topic #22: $geoNear stage - Geospatial near query
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [longitude, latitude]
+        },
+        distanceField: 'distance',      // Add distance field to results
+        maxDistance: parseInt(maxDistance),  // Max distance in meters
+        spherical: true                  // Use spherical geometry
+      }
+    },
+    {
+      $match: { active: true }
+    },
+    {
+      $limit: parseInt(limit)
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'owner',
+        foreignField: '_id',
+        as: 'owner'
+      }
+    },
+    {
+      $unwind: {
+        path: '$owner',
+        preserveNullAndEmptyArrays: true
+      }
+    }
+  ]);
+
+  res.status(200).json({
+    success: true,
+    count: nearbyListings.length,
+    data: nearbyListings
+  });
+});
+
+// @desc    Advanced search with multiple query operators
+// @route   GET /api/listings/search/advanced
+// @access  Public
+// 
+// Topics Demonstrated:
+// Comparison Operators ($gt, $lt, $gte, $lte, $eq, $in)
+//  Logical Operators ($and, $or)
+// - Element Operators ($exists, $ne)
+// - Array Operators ($elemMatch)
+// - Text Indexes with $text operator
+// - Pagination with $skip and $limit
+exports.advancedSearch = asyncHandler(async (req, res, next) => {
+  const {
+    minPrice,
+    maxPrice,
+    propertyType,
+    sharing,
+    city,
+    verified,
+    furnished,
+    hasAmenity,
+    gender,
+    page = 1,
+    limit = 10,
+    sort = '-createdAt',
+    searchText
+  } = req.query;
+
+  // Build query object properly - start with active listings
+  const query = { active: true };
+
+  // Topic #8: Comparison operators - Price range filter
+  if (minPrice || maxPrice) {
+    query.price = {};
+    if (minPrice) {
+      const minVal = parseInt(minPrice);
+      if (!isNaN(minVal)) query.price.$gte = minVal;
+    }
+    if (maxPrice) {
+      const maxVal = parseInt(maxPrice);
+      if (!isNaN(maxVal)) query.price.$lte = maxVal;
+    }
+  }
+
+  //  $in operator - Multiple property types
+  if (propertyType) {
+    const types = propertyType.split(',').map(t => t.trim()).filter(t => t);
+    if (types.length > 0) {
+      query.propertyType = { $in: types };
+    }
+  }
+
+  //  City filter - properly handle multiple cities
+  if (city) {
+    const cities = city.split(',').map(c => c.trim()).filter(c => c);
+    if (cities.length > 0) {
+      if (cities.length === 1) {
+        // Single city - direct match
+        query['location.city'] = cities[0];
+      } else {
+        // Multiple cities - use $in operator
+        query['location.city'] = { $in: cities };
+      }
+    }
+  }
+
+  //  Element operators - Verified filter
+  if (verified === 'true') {
+    query.verified = true;
+  }
+
+  // Furnished filter
+  if (furnished) {
+    const statuses = furnished.split(',').map(f => f.trim()).filter(f => f);
+    if (statuses.length > 0) {
+      query.furnishingStatus = { $in: statuses };
+    }
+  }
+
+  //  $elemMatch - Query array of embedded documents (Sharing options)
+  // Simplified approach: check if any room has the sharing option
+  if (sharing) {
+    const sharingOptions = sharing.split(',').map(s => s.trim()).filter(s => s);
+    if (sharingOptions.length > 0) {
+      query['floors.rooms.sharingOptions'] = { $in: sharingOptions };
+    }
+  }
+
+  // Topic #11: $exists - Check for amenities
+  if (hasAmenity === 'true') {
+    query.amenities = { $exists: true, $ne: [] };
+  }
+
+  // Topic #16: Text search with $text operator - add to main query object
+  if (searchText && searchText.trim()) {
+    query.$text = { $search: searchText };
+  }
+
+  console.log('Advanced Search Query:', JSON.stringify(query, null, 2));
+
+  const pageNum = parseInt(page) || 1;
+  const pageLimit = parseInt(limit) || 10;
+  const skip = (pageNum - 1) * pageLimit;
+
+  try {
+    const listings = await Listing.find(query)
+      .populate('owner', 'name email phone')
+      .populate('location', 'name city state')
+      .sort(sort)
+      .skip(skip)
+      .limit(pageLimit)
+      .lean();
+
+    // Get total count for pagination
+    const total = await Listing.countDocuments(query);
+
+    // Pagination info
+    const pagination = {};
+    if (skip + pageLimit < total) {
+      pagination.next = { page: pageNum + 1, limit: pageLimit };
+    }
+    if (skip > 0) {
+      pagination.prev = { page: pageNum - 1, limit: pageLimit };
+    }
+
+    res.status(200).json({
+      success: true,
+      count: listings.length,
+      total,
+      pagination,
+      data: listings
+    });
+  } catch (error) {
+    console.error('Advanced search error:', error);
+    return next(new ErrorResponse(`Search error: ${error.message}`, 500));
+  }
+});
+
 // @desc    Get single listing
 // @route   GET /api/listings/:id
 // @access  Public
@@ -250,7 +454,6 @@ exports.createListing = asyncHandler(async (req, res, next) => {
 
 // Helper function to sync tenants
 const syncTenantsWithUsers = async (listing) => {
-  // Get all existing tenant assignments from the listing
   const existingTenantAssignments = new Map();
   listing.floors.forEach(floor => {
     floor.rooms.forEach(room => {
