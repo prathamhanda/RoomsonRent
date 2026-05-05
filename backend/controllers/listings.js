@@ -250,71 +250,81 @@ exports.advancedSearch = asyncHandler(async (req, res, next) => {
     searchText
   } = req.query;
 
-  const query = {};
+  // Build query conditions array for $and
+  const queryConditions = [];
 
   // Topic #11: $exists - Check if field exists
-  query.active = true;
+  queryConditions.push({ active: true });
 
   // Topic #8: Comparison operators - Price range
   if (minPrice || maxPrice) {
-    query.price = {};
-    if (minPrice) query.price.$gte = parseInt(minPrice);  // Topic #8: $gte
-    if (maxPrice) query.price.$lte = parseInt(maxPrice);  // Topic #8: $lte
+    const priceQuery = {};
+    if (minPrice) priceQuery.$gte = parseInt(minPrice);
+    if (maxPrice) priceQuery.$lte = parseInt(maxPrice);
+    queryConditions.push({ price: priceQuery });
   }
 
   // Topic #8: $in operator - Multiple property types
   if (propertyType) {
     const types = propertyType.split(',');
-    query.propertyType = { $in: types };  // Topic #8: $in
+    queryConditions.push({ propertyType: { $in: types } });
   }
 
   // Topic #10: $or operator - Multiple cities
   if (city) {
-    const cities = city.split(',');
-    query.$or = cities.map(c => ({ 'location.city': c }));  // Topic #10: $or
+    const cities = city.split(',').map(c => c.trim());
+    queryConditions.push({
+      $or: cities.map(c => ({ 'location.city': c }))
+    });
   }
 
   // Topic #11: Element operators
   if (verified === 'true') {
-    query.verified = { $eq: true };  // Topic #8: $eq (explicit)
+    queryConditions.push({ verified: { $eq: true } });
   }
 
   if (furnished) {
-    query.furnishingStatus = { $in: furnished.split(',') };
+    queryConditions.push({
+      furnishingStatus: { $in: furnished.split(',') }
+    });
   }
 
   // Topic #12: $elemMatch - Query array of embedded documents
   if (sharing) {
-    const sharingOptions = sharing.split(',');
-    query.floors = {
-      $elemMatch: {
-        rooms: {
-          $elemMatch: {
-            sharingOptions: { $in: sharingOptions }  // Topic #8: $in within $elemMatch
+    const sharingOptions = sharing.split(',').map(s => s.trim());
+    queryConditions.push({
+      floors: {
+        $elemMatch: {
+          rooms: {
+            $elemMatch: {
+              sharingOptions: { $in: sharingOptions }
+            }
           }
         }
       }
-    };
+    });
   }
 
   // Topic #11: $exists - Check for amenities
   if (hasAmenity) {
-    query.amenities = {
-      $exists: true,  // Topic #11: $exists
-      $ne: []         // Not empty array
-    };
+    queryConditions.push({
+      amenities: {
+        $exists: true,
+        $ne: []
+      }
+    });
   }
+
+  // Combine all conditions with $and
+  const query = queryConditions.length > 0 ? { $and: queryConditions } : {};
+
+  console.log('Advanced Search Query:', JSON.stringify(query, null, 2));
 
   // Topic #16: Text search with $text operator
-  let textQuery = null;
-  if (searchText) {
-    textQuery = { $text: { $search: searchText } };  // Topic #16: $text operator
-  }
-
-  // Combine with text search if present
   let searchQuery = Listing.find(query);
-  if (textQuery) {
-    searchQuery = searchQuery.find(textQuery);
+  
+  if (searchText) {
+    searchQuery = searchQuery.find({ $text: { $search: searchText } });
   }
 
   // Topic #26: Pagination with $skip and $limit
@@ -322,6 +332,7 @@ exports.advancedSearch = asyncHandler(async (req, res, next) => {
   
   const listings = await searchQuery
     .populate('owner', 'name email phone')
+    .populate('location', 'name city state')
     .sort(sort)
     .skip(skip)
     .limit(parseInt(limit));

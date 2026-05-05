@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./components/Home/HomePage";
 import LandlordPage from "./components/Landlord/LandlordPage";
+import PropertyDetailsPage from "./components/Property/PropertyDetailsPage";
 import SiteVisitPage from "./components/Property/SiteVisitPage";
 import LoginPage from "./components/Auth/LoginPage";
 import RegisterPage from "./components/Auth/RegisterPage";
@@ -21,6 +22,7 @@ function App() {
             <Route path="/search" element={<SearchPage/>} />
             <Route path="/schema" element={<SchemaExplorer/>} />
             <Route path="/landlord" element={<LandlordPage/>} />
+            <Route path="/property/:id" element={<PropertyDetailsPage/>} />
             <Route path="/property/:id/visit" element={<SiteVisitPage/>} />
             <Route path="/login" element={<LoginPage/>} />
             <Route path="/register" element={<RegisterPage/>} />

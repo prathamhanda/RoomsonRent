@@ -988,12 +988,10 @@ export default function HomePage() {
                     type="text"
                     value={searchQuery}
                     onChange={handleSearchChange}
-                    placeholder="Search college or location"
+                    placeholder="Search area, PG or location"
                     className="w-full px-4 py-2 rounded-full focus:outline-none text-sm md:text-base"
-                    onFocus={() => {
-                      setSearchFocus(true);
-                      setShowSuggestions(true);
-                    }}
+                    onFocus={() => { window.location.href = '/search'; }}
+                    onClick={() => { window.location.href = '/search'; }}
                     onBlur={() => {
                       setSearchFocus(false);
                       // Delay hiding suggestions to allow for clicks
@@ -1272,7 +1270,7 @@ export default function HomePage() {
                             {room.discountedPrice ? (
                               <div>
                                 <p className="text-gray-400 line-through text-[9px] md:text-[11px]">
-                                  Rs. {room.originalPrice || room.price}/-
+                                  Rs. {room.originalPrice?.toLocaleString() || room.price}/-
                                 </p>
                                 <div className="flex items-center">
                                   <p className="font-semibold text-[#FE6F61] text-base md:text-lg">
@@ -1286,7 +1284,7 @@ export default function HomePage() {
                               </div>
                             ) : (
                               <p className="font-semibold text-[10px] md:text-xs">
-                                Rs. <span className="text-base md:text-lg">{room.price}</span>{" "}
+                                Rs. <span className="text-base md:text-lg">{room.originalPrice?.toLocaleString() || room.price}</span>{" "}
                                 per month
                               </p>
                             )}
