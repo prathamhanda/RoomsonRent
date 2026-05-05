@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Card } from "@heroui/react"; // Assuming this is the correct Card import
 import FinancialCard from "./FinancialCard"; // Assuming this component exists and is styled
@@ -51,6 +51,7 @@ const sectionVariants = {
 export default function LandlordPage() {
   const [searchFocus, setSearchFocus] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [capacityStats, setCapacityStats] = useState({ 
     totalCapacity: 0,
     currentOccupancy: 0
@@ -230,6 +231,7 @@ export default function LandlordPage() {
                 emoji="🏠" 
                 title="Total Tenants (Current)" 
                 value={capacityLoading ? "Loading..." : capacityStats.currentOccupancy.toString()} 
+                onClick={() => navigate('/analytics')}
               />
             </motion.div>
             <motion.div variants={itemVariants}>
@@ -237,6 +239,7 @@ export default function LandlordPage() {
                 emoji="🏢" 
                 title="Total Capacity (Maximum)" 
                 value={capacityLoading ? "Loading..." : capacityStats.totalCapacity.toString()} 
+                onClick={() => navigate('/analytics')}
               />
             </motion.div>
             <motion.div variants={itemVariants}>
@@ -247,10 +250,11 @@ export default function LandlordPage() {
                   ? "Loading..." 
                   : `${capacityStats.floorCount} Floors, ${capacityStats.roomCount} Rooms`
                 } 
+                onClick={() => navigate('/analytics')}
               />
             </motion.div>
             <motion.div variants={itemVariants}>
-              <FinancialCard emoji="🌟" title="Potential Floor Mapping" value="6 Floors, 20 Rooms" />
+              <FinancialCard emoji="🌟" title="Potential Floor Mapping" value="6 Floors, 20 Rooms" onClick={() => navigate('/analytics')} />
             </motion.div>
           </motion.div>
         </div>

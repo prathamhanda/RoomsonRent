@@ -148,18 +148,13 @@ exports.getListings = asyncHandler(async (req, res, next) => {
   });
 });
 
-// ============================================
-// NEW ENDPOINTS - MongoDB Topics Demonstration
-// ============================================
 
 // @desc    Get nearby listings using MongoDB geospatial queries
 // @route   GET /api/listings/nearby
 // @access  Public
 // 
-// Topics Demonstrated:
-// - Topic #21: Geospatial Indexes (2dsphere)
-// - Topic #22: $geoNear Query Operator
-// - More efficient than client-side Haversine calculation
+// - Geospatial Indexes (2dsphere)
+// -  $geoNear Query Operator
 exports.getNearbyListings = asyncHandler(async (req, res, next) => {
   const { lng, lat, maxDistance = 5000, limit = 20 } = req.query;
 
@@ -190,15 +185,12 @@ exports.getNearbyListings = asyncHandler(async (req, res, next) => {
         spherical: true                  // Use spherical geometry
       }
     },
-    // Topic #26: $match - Filter active listings only
     {
       $match: { active: true }
     },
-    // Topic #26: $limit - Limit results
     {
       $limit: parseInt(limit)
     },
-    // Populate owner details
     {
       $lookup: {
         from: 'users',
@@ -227,12 +219,12 @@ exports.getNearbyListings = asyncHandler(async (req, res, next) => {
 // @access  Public
 // 
 // Topics Demonstrated:
-// - Topic #8: Comparison Operators ($gt, $lt, $gte, $lte, $eq, $in)
-// - Topic #10: Logical Operators ($and, $or)
-// - Topic #11: Element Operators ($exists, $ne)
-// - Topic #12: Array Operators ($elemMatch)
-// - Topic #16: Text Indexes with $text operator
-// - Topic #26: Pagination with $skip and $limit
+// Comparison Operators ($gt, $lt, $gte, $lte, $eq, $in)
+//  Logical Operators ($and, $or)
+// - Element Operators ($exists, $ne)
+// - Array Operators ($elemMatch)
+// - Text Indexes with $text operator
+// - Pagination with $skip and $limit
 exports.advancedSearch = asyncHandler(async (req, res, next) => {
   const {
     minPrice,
@@ -250,111 +242,114 @@ exports.advancedSearch = asyncHandler(async (req, res, next) => {
     searchText
   } = req.query;
 
-  // Build query conditions array for $and
-  const queryConditions = [];
+  // Build query object properly - start with active listings
+  const query = { active: true };
 
-  // Topic #11: $exists - Check if field exists
-  queryConditions.push({ active: true });
-
-  // Topic #8: Comparison operators - Price range
+  // Topic #8: Comparison operators - Price range filter
   if (minPrice || maxPrice) {
-    const priceQuery = {};
-    if (minPrice) priceQuery.$gte = parseInt(minPrice);
-    if (maxPrice) priceQuery.$lte = parseInt(maxPrice);
-    queryConditions.push({ price: priceQuery });
+    query.price = {};
+    if (minPrice) {
+      const minVal = parseInt(minPrice);
+      if (!isNaN(minVal)) query.price.$gte = minVal;
+    }
+    if (maxPrice) {
+      const maxVal = parseInt(maxPrice);
+      if (!isNaN(maxVal)) query.price.$lte = maxVal;
+    }
   }
 
-  // Topic #8: $in operator - Multiple property types
+  //  $in operator - Multiple property types
   if (propertyType) {
-    const types = propertyType.split(',');
-    queryConditions.push({ propertyType: { $in: types } });
+    const types = propertyType.split(',').map(t => t.trim()).filter(t => t);
+    if (types.length > 0) {
+      query.propertyType = { $in: types };
+    }
   }
 
-  // Topic #10: $or operator - Multiple cities
+  //  City filter - properly handle multiple cities
   if (city) {
-    const cities = city.split(',').map(c => c.trim());
-    queryConditions.push({
-      $or: cities.map(c => ({ 'location.city': c }))
-    });
-  }
-
-  // Topic #11: Element operators
-  if (verified === 'true') {
-    queryConditions.push({ verified: { $eq: true } });
-  }
-
-  if (furnished) {
-    queryConditions.push({
-      furnishingStatus: { $in: furnished.split(',') }
-    });
-  }
-
-  // Topic #12: $elemMatch - Query array of embedded documents
-  if (sharing) {
-    const sharingOptions = sharing.split(',').map(s => s.trim());
-    queryConditions.push({
-      floors: {
-        $elemMatch: {
-          rooms: {
-            $elemMatch: {
-              sharingOptions: { $in: sharingOptions }
-            }
-          }
-        }
+    const cities = city.split(',').map(c => c.trim()).filter(c => c);
+    if (cities.length > 0) {
+      if (cities.length === 1) {
+        // Single city - direct match
+        query['location.city'] = cities[0];
+      } else {
+        // Multiple cities - use $in operator
+        query['location.city'] = { $in: cities };
       }
-    });
+    }
+  }
+
+  //  Element operators - Verified filter
+  if (verified === 'true') {
+    query.verified = true;
+  }
+
+  // Furnished filter
+  if (furnished) {
+    const statuses = furnished.split(',').map(f => f.trim()).filter(f => f);
+    if (statuses.length > 0) {
+      query.furnishingStatus = { $in: statuses };
+    }
+  }
+
+  //  $elemMatch - Query array of embedded documents (Sharing options)
+  // Simplified approach: check if any room has the sharing option
+  if (sharing) {
+    const sharingOptions = sharing.split(',').map(s => s.trim()).filter(s => s);
+    if (sharingOptions.length > 0) {
+      query['floors.rooms.sharingOptions'] = { $in: sharingOptions };
+    }
   }
 
   // Topic #11: $exists - Check for amenities
-  if (hasAmenity) {
-    queryConditions.push({
-      amenities: {
-        $exists: true,
-        $ne: []
-      }
-    });
+  if (hasAmenity === 'true') {
+    query.amenities = { $exists: true, $ne: [] };
   }
 
-  // Combine all conditions with $and
-  const query = queryConditions.length > 0 ? { $and: queryConditions } : {};
+  // Topic #16: Text search with $text operator - add to main query object
+  if (searchText && searchText.trim()) {
+    query.$text = { $search: searchText };
+  }
 
   console.log('Advanced Search Query:', JSON.stringify(query, null, 2));
 
-  // Topic #16: Text search with $text operator
-  let searchQuery = Listing.find(query);
-  
-  if (searchText) {
-    searchQuery = searchQuery.find({ $text: { $search: searchText } });
+  const pageNum = parseInt(page) || 1;
+  const pageLimit = parseInt(limit) || 10;
+  const skip = (pageNum - 1) * pageLimit;
+
+  try {
+    const listings = await Listing.find(query)
+      .populate('owner', 'name email phone')
+      .populate('location', 'name city state')
+      .sort(sort)
+      .skip(skip)
+      .limit(pageLimit)
+      .lean();
+
+    // Get total count for pagination
+    const total = await Listing.countDocuments(query);
+
+    // Pagination info
+    const pagination = {};
+    if (skip + pageLimit < total) {
+      pagination.next = { page: pageNum + 1, limit: pageLimit };
+    }
+    if (skip > 0) {
+      pagination.prev = { page: pageNum - 1, limit: pageLimit };
+    }
+
+    res.status(200).json({
+      success: true,
+      count: listings.length,
+      total,
+      pagination,
+      data: listings
+    });
+  } catch (error) {
+    console.error('Advanced search error:', error);
+    return next(new ErrorResponse(`Search error: ${error.message}`, 500));
   }
-
-  // Topic #26: Pagination with $skip and $limit
-  const skip = (parseInt(page) - 1) * parseInt(limit);
-  
-  const listings = await searchQuery
-    .populate('owner', 'name email phone')
-    .populate('location', 'name city state')
-    .sort(sort)
-    .skip(skip)
-    .limit(parseInt(limit));
-
-  const total = await Listing.countDocuments(query);
-
-  // Pagination info
-  const pagination = {};
-  if (skip + parseInt(limit) < total) {
-    pagination.next = { page: parseInt(page) + 1, limit: parseInt(limit) };
-  }
-  if (skip > 0) {
-    pagination.prev = { page: parseInt(page) - 1, limit: parseInt(limit) };
-  }
-
-  res.status(200).json({
-    success: true,
-    count: listings.length,
-    total,
-    pagination,
-    data: listings
-  });
 });
 
 // @desc    Get single listing
@@ -459,7 +454,6 @@ exports.createListing = asyncHandler(async (req, res, next) => {
 
 // Helper function to sync tenants
 const syncTenantsWithUsers = async (listing) => {
-  // Get all existing tenant assignments from the listing
   const existingTenantAssignments = new Map();
   listing.floors.forEach(floor => {
     floor.rooms.forEach(room => {

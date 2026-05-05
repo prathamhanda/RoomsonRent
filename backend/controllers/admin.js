@@ -9,27 +9,24 @@ const mongoose = require('mongoose');
  * ADMIN CONTROLLER - MongoDB Schema & Index Information
  * 
  * Topics Demonstrated:
- * - Topic #1: MongoDB Data Hierarchy (Databases, Collections, Documents)
- * - Topic #1: Data Types and Schema Design
- * - Topic #15-24: Index Management and Types
- * - Topic #6: MongoDB Architecture (scaling, replication)
- * - Topic #6: CAP Theorem (Consistency, Availability, Partition Tolerance)
+ * -  MongoDB Data Hierarchy (Databases, Collections, Documents)
+ * -  Data Types and Schema Design
+ *  Index Management and Types
+ * -  MongoDB Architecture (scaling, replication)
+ * -  CAP Theorem (Consistency, Availability, Partition Tolerance)
  */
 
-// ============================================
-// Endpoint 1: Schema Information
-// Topics: #1 (Hierarchy, Data types), #11 (Validation)
-// ============================================
+
 /**
  * @desc    Get detailed schema information for all collections
  * @route   GET /api/admin/schema-info
  * @access  Private/Admin
  * 
  * Demonstrates:
- * - Topic #1: Database → Collection → Document → Fields hierarchy
- * - Topic #1: Various data types (String, Number, ObjectId, Array, Object, Boolean, Date)
- * - Topic #1: Schema validation rules
- * - Topic #3: Referenced documents (relationships)
+ * -  Database → Collection → Document → Fields hierarchy
+ * -  Various data types (String, Number, ObjectId, Array, Object, Boolean, Date)
+ * -  Schema validation rules
+ * -  Referenced documents (relationships)
  */
 exports.getSchemaInfo = asyncHandler(async (req, res, next) => {
   const schemas = {
@@ -255,23 +252,20 @@ exports.getSchemaInfo = asyncHandler(async (req, res, next) => {
   });
 });
 
-// ============================================
-// Endpoint 2: Index Information
-// Topics: #15-24 (Index types and management)
-// ============================================
+
 /**
  * @desc    Get all indexes across collections
  * @route   GET /api/admin/indexes
  * @access  Private/Admin
  * 
  * Demonstrates:
- * - Topic #15: Index concept and B-tree structure
- * - Topic #17: Default _id index
- * - Topic #18: Single field indexes
- * - Topic #19: Compound indexes (multi-field)
- * - Topic #16: Text indexes for search
- * - Topic #21: Geospatial 2dsphere indexes
- * - Topic #23: Partial indexes with filtering
+ * -  Index concept and B-tree structure
+ * -  Default _id index
+ * -  Single field indexes
+ * -  Compound indexes (multi-field)
+ * -  Text indexes for search
+ * -  Geospatial 2dsphere indexes
+ * -  Partial indexes with filtering
  */
 exports.getIndexInfo = asyncHandler(async (req, res, next) => {
   try {

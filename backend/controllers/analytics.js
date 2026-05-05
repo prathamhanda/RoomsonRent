@@ -7,10 +7,10 @@ const ErrorResponse = require('../utils/errorResponse');
  * ANALYTICS CONTROLLER - MongoDB Aggregation Framework Demonstrations
  * 
  * Topics Demonstrated:
- * - Topic #25: Aggregation Framework - db.collection.aggregate()
- * - Topic #26: Pipeline Stages - $match, $sort, $limit, $skip
- * - Topic #27: Data Structuring - $group, $unwind, $bucket
- * - Topic #28: Accumulators - $sum, $avg, $max, $min, $push, $count
+ * - Aggregation Framework - db.collection.aggregate()
+ * - Pipeline Stages - $match, $sort, $limit, $skip
+ * - Data Structuring - $group, $unwind, $bucket
+ * - Accumulators - $sum, $avg, $max, $min, $push, $count
  */
 
 // ============================================
@@ -23,26 +23,26 @@ const ErrorResponse = require('../utils/errorResponse');
  * @access  Private/Admin
  * 
  * Demonstrates:
- * - $match stage: Filter active listings (Topic #26)
- * - $group stage: Group by property type (Topic #27)
- * - $sum accumulator: Count listings (Topic #28)
- * - $avg accumulator: Calculate average price (Topic #28)
- * - $min, $max: Price range (Topic #28)
+ * - $match stage: Filter active listings
+ * - $group stage: Group by property type
+ * - $sum accumulator: Count listings
+ * - $avg accumulator: Calculate average price
+ * - $min, $max: Price range
  */
 exports.getDashboardStats = asyncHandler(async (req, res, next) => {
   const pipeline = [
-    // Topic #26: $match - Filter only active listings
+    //  $match - Filter only active listings
     {
       $match: {
         active: true
       }
     },
-    // Topic #27: $group - Group by property type with multiple accumulators
+    //  $group - Group by property type with multiple accumulators
     {
       $group: {
         _id: '$propertyType',                    // Group by property type
         
-        // Topic #28: Accumulator Operators
+        // Accumulator Operators
         totalListings: { $sum: 1 },              // Count: Sum of 1 for each document
         avgPrice: { $avg: '$price' },            // Average: Calculate mean price
         minPrice: { $min: '$price' },            // Min: Minimum price
@@ -53,7 +53,7 @@ exports.getDashboardStats = asyncHandler(async (req, res, next) => {
         titles: { $push: '$title' }
       }
     },
-    // Topic #26: $sort - Sort by count descending
+    // $sort - Sort by count descending
     {
       $sort: { totalListings: -1 }
     }
@@ -85,7 +85,7 @@ exports.getDashboardStats = asyncHandler(async (req, res, next) => {
 
 // ============================================
 // Endpoint 2: Listings by City Breakdown
-// Topics: $group (nested), $sort, $limit, $skip
+//  $group (nested), $sort, $limit, $skip
 // ============================================
 /**
  * @desc    Get listing count and price stats grouped by city
@@ -104,30 +104,30 @@ exports.getListingsByCity = asyncHandler(async (req, res, next) => {
     {
       $match: {
         active: true,
-        'location.city': { $exists: true }  // Topic #11: $exists operator
+        'location.city': { $exists: true }  // $exists operator
       }
     },
     // Topic #27: $group - Group by city (nested field access)
     {
       $group: {
         _id: '$location.city',               // Group by city (nested field)
-        totalListings: { $sum: 1 },          // Topic #28: $sum accumulator
-        avgPrice: { $avg: '$price' },        // Topic #28: $avg accumulator
+        totalListings: { $sum: 1 },          // $sum accumulator
+        avgPrice: { $avg: '$price' },        // $avg accumulator
         minPrice: { $min: '$price' },
         maxPrice: { $max: '$price' },
         
-        // Topic #28: $push - Collect property types
+        // $push - Collect property types
         propertyTypes: { $push: '$propertyType' },
         
-        // Topic #28: $first - Get first listing title
+        // $first - Get first listing title
         sampleListing: { $first: '$title' }
       }
     },
-    // Topic #26: $sort - Sort by count descending
+    // $sort - Sort by count descending
     {
       $sort: { totalListings: -1 }
     },
-    // Topic #26: $limit - Top 10 cities
+    // $limit - Top 10 cities
     {
       $limit: 10
     }
@@ -156,7 +156,7 @@ exports.getListingsByCity = asyncHandler(async (req, res, next) => {
  * @access  Private/Admin
  * 
  * Demonstrates:
- * - $bucket stage: Categorize prices into ranges (Topic #27)
+ * - $bucket stage: Categorize prices into ranges
  * - Boundaries definition: Dynamic bucketing
  * - $push accumulator: Collect data into arrays
  * - $sum accumulator: Count in each bucket
@@ -167,7 +167,7 @@ exports.getPriceDistribution = asyncHandler(async (req, res, next) => {
     {
       $match: {
         active: true,
-        price: { $exists: true, $ne: null }  // Topic #11: $exists and $ne
+        price: { $exists: true, $ne: null }  // $exists and $ne
       }
     },
     // Topic #27: $bucket - Categorize prices into ranges
@@ -177,9 +177,9 @@ exports.getPriceDistribution = asyncHandler(async (req, res, next) => {
         boundaries: [0, 5000, 10000, 15000, 20000, 50000],  // Price ranges
         default: '50000+',                   // Category for values outside boundaries
         output: {
-          // Topic #28: Accumulators
+          // Accumulators
           count: { $sum: 1 },                // Count listings in this bucket
-          listings: { $push: {               // $push - Collect listing info
+            listings: { $push: {               // $push - Collect listing info
             title: '$title',
             price: '$price',
             city: '$location.city'
@@ -204,7 +204,7 @@ exports.getPriceDistribution = asyncHandler(async (req, res, next) => {
 
 // ============================================
 // Endpoint 4: Room Sharing Statistics
-// Topics: $unwind, $group (nested arrays), multiple accumulators
+//  $unwind, $group (nested arrays), multiple accumulators
 // ============================================
 /**
  * @desc    Get statistics on room sharing types with occupancy
@@ -212,38 +212,38 @@ exports.getPriceDistribution = asyncHandler(async (req, res, next) => {
  * @access  Private/Admin
  * 
  * Demonstrates:
- * - $unwind stage: Deconstruct arrays (Topic #27)
+ * - $unwind stage: Deconstruct arrays
  * - Double $unwind: For deeply nested arrays (floors → rooms)
- * - Topic #4: Array operations on nested documents
- * - $group with array counting: Topic #28
+ * - Array operations on nested documents
+ * - $group with array counting
  */
 exports.getRoomSharingStats = asyncHandler(async (req, res, next) => {
   const pipeline = [
-    // Topic #26: $match - Filter active listings
+    //  $match - Filter active listings
     {
       $match: {
         active: true
       }
     },
-    // Topic #27: $unwind - Expand floors array
+    // $unwind - Expand floors array
     // Input: listings with floors array
     // Output: One document per floor
     {
       $unwind: '$floors'
     },
-    // Topic #27: $unwind - Expand rooms array (nested within floors)
+    // $unwind - Expand rooms array (nested within floors)
     // Now each room becomes a separate document
     {
       $unwind: '$floors.rooms'
     },
-    // Topic #27: $group - Group by sharing options
+    // $group - Group by sharing options
     {
       $group: {
         _id: { $arrayElemAt: ['$floors.rooms.sharingOptions', 0] },  // First sharing option
-        totalRooms: { $sum: 1 },               // Topic #28: $sum
-        avgPrice: { $avg: '$floors.rooms.price' },  // Topic #28: $avg
+        totalRooms: { $sum: 1 },               // $sum
+        avgPrice: { $avg: '$floors.rooms.price' },  // $avg
         
-        // Topic #28: Count occupied rooms by summing tenant array sizes
+        // Count occupied rooms by summing tenant array sizes
         occupiedRooms: {
           $sum: {
             $cond: [
@@ -254,14 +254,14 @@ exports.getRoomSharingStats = asyncHandler(async (req, res, next) => {
           }
         },
         
-        // Topic #28: $push - Collect room details
+        // $push - Collect room details
         rooms: { $push: {
           price: '$floors.rooms.price',
           tenantCount: { $size: '$floors.rooms.tenants' }
         }}
       }
     },
-    // Topic #26: $sort - Sort by count descending
+    // $sort - Sort by count descending
     {
       $sort: { totalRooms: -1 }
     }
@@ -290,8 +290,8 @@ exports.getRoomSharingStats = asyncHandler(async (req, res, next) => {
  * 
  * Demonstrates:
  * - $group: Group by nested location
- * - Topic #26: $limit pagination
- * - Topic #28: Multiple accumulators
+ * - $limit pagination
+ * - Multiple accumulators
  */
 exports.getPopularLocations = asyncHandler(async (req, res, next) => {
   const pipeline = [
@@ -348,7 +348,7 @@ exports.getPopularLocations = asyncHandler(async (req, res, next) => {
  * 
  * Demonstrates:
  * - $lookup stage (if needed for user population)
- * - Topic #28: Multiple accumulators per group
+ * - Multiple accumulators per group
  * - Conditional aggregation with $cond
  */
 exports.getLandlordMetrics = asyncHandler(async (req, res, next) => {
@@ -361,9 +361,9 @@ exports.getLandlordMetrics = asyncHandler(async (req, res, next) => {
     {
       $group: {
         _id: '$owner',                       // Group by owner (landlord)
-        listingCount: { $sum: 1 },           // Topic #28: $sum
-        avgPrice: { $avg: '$price' },        // Topic #28: $avg
-        totalListings: { $push: '$title' },  // Topic #28: $push
+        listingCount: { $sum: 1 },           // $sum
+        avgPrice: { $avg: '$price' },        // $avg
+        totalListings: { $push: '$title' },  // $push
         
         // Count featured listings
         featuredCount: {

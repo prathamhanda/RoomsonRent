@@ -41,9 +41,9 @@ const SearchPage = () => {
   const [nearbyMode, setNearbyMode] = useState(false);
   const [maxDistance, setMaxDistance] = useState(5000);
 
-  const propertyTypes = ['PG', 'Boys PG', 'Girls PG', 'Flat', 'Other'];
+  const propertyTypes = ['Boys PG', 'Girls PG', 'Flat', 'Other', 'PG'];
   const sharingOptions = ['Single', 'Double', 'Triple', '4 Sharing'];
-  const cities = ['New Delhi', 'Ludhiana', 'Mumbai', 'Noida', 'Hyderabad', 'Ellenabad'];
+  const cities = ['New Delhi', 'Ludhiana', 'Mumbai', 'Noida', 'Hyderabad', 'Bangalore', 'Pune', 'Gurgaon', 'Delhi'];
 
   useEffect(() => {
     // Always search listings when component mounts so it shows all listings by default
@@ -126,64 +126,65 @@ const SearchPage = () => {
       // Build query parameters
       let params = new URLSearchParams();
 
-      // Add city filter if selected
-      if (filters.city) {
-        params.append('city', filters.city);
+      // Add all filters if they exist
+      if (filters.city && filters.city.trim()) {
+        params.append('city', filters.city.trim());
       }
 
-      // Add price range filters
-      if (filters.minPrice) {
-        params.append('minPrice', filters.minPrice);
-      }
-      if (filters.maxPrice) {
-        params.append('maxPrice', filters.maxPrice);
+      if (filters.propertyType && filters.propertyType.trim()) {
+        params.append('propertyType', filters.propertyType.trim());
       }
 
-      // Add property type filter
-      if (filters.propertyType) {
-        params.append('propertyType', filters.propertyType);
+      if (filters.sharing && filters.sharing.trim()) {
+        params.append('sharing', filters.sharing.trim());
       }
 
-      // Add sharing option filter
-      if (filters.sharing) {
-        params.append('sharing', filters.sharing);
+      if (filters.minPrice && filters.minPrice.trim()) {
+        params.append('minPrice', filters.minPrice.trim());
       }
 
-      // Add search text filter
-      if (filters.searchText) {
-        params.append('searchText', filters.searchText);
+      if (filters.maxPrice && filters.maxPrice.trim()) {
+        params.append('maxPrice', filters.maxPrice.trim());
       }
 
-      // Add limit and pagination
+      if (filters.searchText && filters.searchText.trim()) {
+        params.append('searchText', filters.searchText.trim());
+      }
+
+      // Add pagination parameters
       params.append('limit', '100');
       params.append('page', '1');
 
       // Call the advanced search endpoint
       const url = `${backendURL}/api/listings/search/advanced?${params.toString()}`;
-      console.log('Search URL:', url);
+      console.log('🔍 Search URL:', url);
+      console.log('🔍 Filters Applied:', {
+        city: filters.city,
+        propertyType: filters.propertyType,
+        sharing: filters.sharing,
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice,
+        searchText: filters.searchText
+      });
       
       const response = await axios.get(url);
       
-      console.log('API Response:', response.data);
+      console.log('✅ API Response:', response.data);
       
-      // If no filters applied, fetch all listings
-      if (params.toString() === 'limit=100&page=1') {
-        const allResponse = await axios.get(`${backendURL}/api/listings?limit=100`);
-        setListings(allResponse.data.data || []);
+      if (response.data.success) {
+        setListings(response.data.data || []);
+        console.log(`📦 Found ${response.data.data?.length || 0} listings`);
       } else {
-        setListings(response.data.data || []);
-      }
-    } catch (error) {
-      console.error('Error searching listings:', error);
-      
-      // Fallback: fetch all listings if advanced search fails
-      try {
-        const response = await axios.get(`${backendURL}/api/listings?limit=100`);
-        setListings(response.data.data || []);
-      } catch (fallbackError) {
-        console.error('Fallback search error:', fallbackError);
+        console.error('❌ API returned success:false', response.data);
         setListings([]);
       }
+    } catch (error) {
+      console.error('❌ Error searching listings:', error);
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
+      setListings([]);
     } finally {
       setLoading(false);
     }
