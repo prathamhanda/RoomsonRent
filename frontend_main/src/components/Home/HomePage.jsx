@@ -117,10 +117,8 @@ export default function HomePage() {
         params.lng = userLocation.longitude;
       }
       
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://backend.roomsonrent.in/api/listings' 
-        : 'http://localhost:5000/api/listings';
-      
+      const baseUrl = `${backendURL}/api/listings`;
+
       // Log the full request URL for debugging
       const queryString = new URLSearchParams(params).toString();
       const fullUrl = `${baseUrl}?${queryString}`;
@@ -2278,7 +2276,7 @@ export default function HomePage() {
       <div className="px-4 md:px-20 gap-8 md:gap-16 flex flex-col">
         <div className="flex flex-col md:flex-row w-full gap-6 md:gap-20">
           <motion.div 
-            onClick={() => window.location.href = 'https://landlord.roomsonrent.in'}
+            onClick={() => window.location.href = import.meta.env.VITE_LANDLORD_URL || 'https://landlord.ror.pratham.codes'}
             className="border-2 border-[#D8D8D8] rounded-2xl h-auto md:h-60 flex-1 flex flex-col md:flex-row gap-4 md:gap-10 cursor-pointer p-4 md:p-0"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
